@@ -1,0 +1,23 @@
+{
+  "name": "csgogsi",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "dependencies": {  },
+  "devDependencies": {  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "compile":"tsc tsc/index.ts --outDir compiled --lib es2017 -d && tsc -p tsconfig.browser.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/osztenkurden/csgogsi.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/osztenkurden/csgogsi/issues"
+  },
+  "homepage": "https://github.com/osztenkurden/csgogsi#readme"
+}
