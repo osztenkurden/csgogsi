@@ -162,4 +162,3 @@ var CSGOGSI = /** @class */ (function () {
     };
     return CSGOGSI;
 }());
-export default CSGOGSI;
