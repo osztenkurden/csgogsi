@@ -1,7 +1,7 @@
 import * as I from './interfaces';
 
 export interface Events {
-    data: (data: I.CSGORaw) => void,
+    data: (data: I.CSGO) => void,
     roundEnd: (team: I.Team) => void,
     /*timeoutStart: (team: any) => void,
     timeoutEnd: (team: any) => void,
