@@ -1,9 +1,11 @@
 import * as I from './interfaces';
-interface TeamExtension {
+export interface TeamExtension {
     id: string;
     name: string;
     country: string | null;
 }
+export * from './interfaces';
+export * from './parsed';
 export default class CSGOGSI {
     listeners: Map<string, Function[]>;
     teams: [TeamExtension?, TeamExtension?];
@@ -19,4 +21,3 @@ export default class CSGOGSI {
     removeListener<K extends keyof I.Events>(eventName: K, listener: Function): boolean;
     removeListeners<K extends keyof I.Events>(eventName: K): boolean;
 }
-export {};
