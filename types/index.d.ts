@@ -13,7 +13,7 @@ export default class CSGOGSI {
     constructor();
     setTeamOne(team: TeamExtension): void;
     setTeamTwo(team: TeamExtension): void;
-    digest(raw: I.CSGORaw): I.CSGO;
+    digest(raw: I.CSGORaw): I.CSGO | null;
     parsePlayers(players: I.PlayersRaw, teams: [I.Team, I.Team]): I.Player[];
     parsePlayer(oldPlayer: I.PlayerRaw, steamid: string, team: I.Team): I.Player;
     execute<K extends keyof I.Events>(eventName: K, argument?: any): boolean;

@@ -93,16 +93,16 @@ export interface PhaseRaw {
 }
 export interface CSGORaw {
     provider: Provider;
-    map: MapRaw;
-    round: RoundRaw;
+    map?: MapRaw;
+    round?: RoundRaw;
     player: PlayerRaw;
-    allplayers: PlayersRaw;
-    bomb: BombRaw;
-    grenades: {
+    allplayers?: PlayersRaw;
+    bomb?: BombRaw;
+    grenades?: {
         [key: string]: any;
     };
     previously?: any;
-    phase_countdowns: PhaseRaw;
+    phase_countdowns?: PhaseRaw;
     auth?: {
         token: string;
     };

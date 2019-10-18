@@ -71,11 +71,11 @@ export interface Round {
 export interface CSGO {
     provider: I.Provider;
     map: Map;
-    round: Round;
+    round: Round | null;
     player: Player | null;
     players: Player[];
-    bomb: Bomb;
-    grenades: {
+    bomb: Bomb | null;
+    grenades?: {
         [key: string]: any;
     };
     previously?: any;

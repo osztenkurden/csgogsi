@@ -28,7 +28,11 @@ export default class CSGOGSI {
         this.teams[1] = team;
     }
 
-    digest(raw: I.CSGORaw): I.CSGO{
+    digest(raw: I.CSGORaw): I.CSGO | null{
+        if(!raw.allplayers || !raw.map || !raw.phase_countdowns){
+            return null;
+        }
+        
         const ctOnLeft = Object.values(raw.allplayers).filter(({observer_slot, team}) => observer_slot !== undefined && observer_slot > 1 && observer_slot <=5 && team === "CT").length > 2;
         let ctExtension = null, tExtension = null;
         if(this.teams[0]){
@@ -39,6 +43,7 @@ export default class CSGOGSI {
             if(ctOnLeft) tExtension = this.teams[1];
             else ctExtension = this.teams[1];
         }
+        const bomb = raw.bomb;
         const teams = [raw.map.team_ct, raw.map.team_t];
         const teamCT: I.Team = {
             score: teams[0].score,
@@ -63,19 +68,19 @@ export default class CSGOGSI {
         const players = this.parsePlayers(raw.allplayers, [teamCT, teamT]);
         const data: I.CSGO = {
             provider: raw.provider,
-            round: {
+            round: raw.round ? {
                 phase: raw.round.phase,
                 bomb: raw.round.bomb,
                 win_team: raw.round.win_team
-            },
+            } : null,
             player: this.parsePlayer(raw.player, '', raw.player.team === "CT" ? teamCT : teamT),
             players: players,
-            bomb: {
+            bomb: raw.bomb ? {
                 state: raw.bomb.state,
                 countdown: raw.bomb.countdown,
                 position: raw.bomb.position,
-                player: raw.bomb.player ? players.filter(player => player.steamid === raw.bomb.player)[0] : undefined
-            },
+                player: bomb ? players.filter(player => player.steamid === bomb.player)[0] : undefined
+            } : null,
             grenades: raw.grenades,
             phase_countdowns: raw.phase_countdowns,
             auth: raw.auth,
@@ -105,13 +110,16 @@ export default class CSGOGSI {
                 this.execute('roundEnd', data.map.team_t);
             }
         }
-        if(last.bomb.state !== "planted" && data.bomb.state === "planted"){
-            this.execute('bombPlant')
-        } else if(last.bomb.state !== "exploded" && data.bomb.state === "exploded"){
-            this.execute('bombExplode')
-        }else if(last.bomb.state !== "defused" && data.bomb.state === "defused"){
-            this.execute('bombDefuse')
+        if(last.bomb && data.bomb){
+            if(last.bomb.state !== "planted" && data.bomb.state === "planted"){
+                this.execute('bombPlant', last.bomb.player)
+            } else if(last.bomb.state !== "exploded" && data.bomb.state === "exploded"){
+                this.execute('bombExplode')
+            }else if(last.bomb.state !== "defused" && data.bomb.state === "defused"){
+                this.execute('bombDefuse', last.bomb.player)
+            }
         }
+        this.last = data;
         this.execute('data', data);
         return data;
     }
