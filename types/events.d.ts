@@ -2,7 +2,7 @@ import * as I from './interfaces';
 export interface Events {
     data: (data: I.CSGO) => void;
     roundEnd: (team: I.Team) => void;
-    bombPlant: () => void;
+    bombPlant: (player: I.Player) => void;
     bombExplode: () => void;
-    bombDefuse: () => void;
+    bombDefuse: (player: I.Player) => void;
 }
