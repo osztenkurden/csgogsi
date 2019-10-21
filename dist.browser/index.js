@@ -43,6 +43,7 @@ var CSGOGSI = /** @class */ (function () {
             name: ctExtension && ctExtension.name || 'Counter-Terrorists',
             country: ctExtension && ctExtension.country || null,
             id: ctExtension && ctExtension.id || null,
+            orientation: ctOnLeft ? 'left' : 'right'
         };
         var teamT = {
             score: teams[1].score,
@@ -53,6 +54,7 @@ var CSGOGSI = /** @class */ (function () {
             name: tExtension && tExtension.name || 'Terrorists',
             country: tExtension && tExtension.country || null,
             id: tExtension && tExtension.id || null,
+            orientation: !ctOnLeft ? 'left' : 'right'
         };
         var players = this.parsePlayers(raw.allplayers, [teamCT, teamT]);
         var data = {

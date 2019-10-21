@@ -54,6 +54,7 @@ export default class CSGOGSI {
             name: ctExtension && ctExtension.name || 'Counter-Terrorists',
             country: ctExtension && ctExtension.country || null,
             id: ctExtension && ctExtension.id || null,
+            orientation: ctOnLeft ? 'left':'right'
         }
         const teamT: I.Team = {
             score: teams[1].score,
@@ -64,6 +65,7 @@ export default class CSGOGSI {
             name: tExtension && tExtension.name || 'Terrorists',
             country: tExtension && tExtension.country || null,
             id: tExtension && tExtension.id || null,
+            orientation: !ctOnLeft ? 'left':'right'
         }
         const players = this.parsePlayers(raw.allplayers, [teamCT, teamT]);
         const data: I.CSGO = {

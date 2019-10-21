@@ -8,6 +8,7 @@ export interface Team {
     name: string;
     country: string | null;
     id: string | null;
+    orientation: 'right' | 'left';
 }
 export interface Player {
     steamid: string;

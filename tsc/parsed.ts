@@ -8,7 +8,8 @@ export interface Team {
     side: I.Side,
     name: string,
     country: string | null,
-    id: string | null
+    id: string | null,
+    orientation: 'right'|'left'
 }
 
 export interface Player {
