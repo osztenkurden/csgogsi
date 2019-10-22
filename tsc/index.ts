@@ -3,7 +3,9 @@ import * as I from './interfaces';
 export interface TeamExtension {
     id: string,
     name: string,
-    country: string | null
+    country: string | null,
+    logo: string | null,
+    map_score: number
 }
 
 export * from './interfaces';
@@ -47,9 +49,10 @@ export default class CSGOGSI {
         const teams = [raw.map.team_ct, raw.map.team_t];
         const teamCT: I.Team = {
             score: teams[0].score,
+            logo: ctExtension && ctExtension.logo || null,
             consecutive_round_losses: teams[0].consecutive_round_losses,
             timeouts_remaining: teams[0].timeouts_remaining,
-            matches_won_this_series: teams[0].matches_won_this_series,
+            matches_won_this_series: ctExtension && ctExtension.map_score || teams[0].matches_won_this_series,
             side: "CT",
             name: ctExtension && ctExtension.name || 'Counter-Terrorists',
             country: ctExtension && ctExtension.country || null,
@@ -58,9 +61,10 @@ export default class CSGOGSI {
         }
         const teamT: I.Team = {
             score: teams[1].score,
+            logo: tExtension && tExtension.logo || null,
             consecutive_round_losses: teams[1].consecutive_round_losses,
             timeouts_remaining: teams[1].timeouts_remaining,
-            matches_won_this_series: teams[1].matches_won_this_series,
+            matches_won_this_series: tExtension && tExtension.map_score || teams[1].matches_won_this_series,
             side: "T",
             name: tExtension && tExtension.name || 'Terrorists',
             country: tExtension && tExtension.country || null,

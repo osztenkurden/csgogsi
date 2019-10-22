@@ -3,6 +3,8 @@ export interface TeamExtension {
     id: string;
     name: string;
     country: string | null;
+    logo: string | null;
+    map_score: number;
 }
 export * from './interfaces';
 export * from './parsed';

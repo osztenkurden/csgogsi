@@ -1,5 +1,6 @@
 import * as I from './interfaces';
 export interface Team {
+    logo: string | null;
     score: number;
     consecutive_round_losses: number;
     timeouts_remaining: number;
