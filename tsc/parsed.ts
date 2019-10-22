@@ -45,7 +45,10 @@ export interface Player {
     },
     spectarget?:string,
     position:number[],
-    forward:number
+    forward:number,
+    avatar: string | null,
+    country: string | null,
+    realName: string | null,
 }
 export interface Bomb {
     state:"carried"|"planted"|"dropped"|"defused"|"defusing"|"planting"|"exploded",

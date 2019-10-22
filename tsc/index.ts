@@ -8,6 +8,15 @@ export interface TeamExtension {
     map_score: number
 }
 
+export interface PlayerExtension {
+    id: string,
+    name: string,
+    steamid: string,
+    realName: string | null,
+    country: string | null,
+    avatar: string | null
+}
+
 export * from './interfaces';
 
 export * from './parsed';
@@ -15,10 +24,12 @@ export * from './parsed';
 export default class CSGOGSI {
     listeners: Map<string, Function[]>;
     teams: [TeamExtension?, TeamExtension?];
+    players: PlayerExtension[];
     last?: I.CSGO;
     constructor(){
         this.listeners = new Map();
         this.teams = [];
+        this.players = [];
         /*this.on('data', _data => {
         });*/
     }
@@ -28,6 +39,10 @@ export default class CSGOGSI {
     }
     setTeamTwo(team: TeamExtension){
         this.teams[1] = team;
+    }
+
+    loadPlayers(players: PlayerExtension[]){
+        this.players = players;
     }
 
     digest(raw: I.CSGORaw): I.CSGO | null{
@@ -140,6 +155,7 @@ export default class CSGOGSI {
     }
 
     parsePlayer(oldPlayer: I.PlayerRaw, steamid: string, team: I.Team){
+        const extension = this.players.filter(player => player.steamid === steamid)[0];
         const player: I.Player = {
             steamid,
             name: oldPlayer.name,
@@ -151,7 +167,10 @@ export default class CSGOGSI {
             spectarget: oldPlayer.spectarget,
             position: oldPlayer.position.split(", ").map(pos => Number(pos)),
             forward: oldPlayer.forward,
-            team
+            team,
+            avatar: extension && extension.avatar || null,
+            country: extension && extension.country || null,
+            realName: extension && extension.realName || null,
         };
 
         return player;

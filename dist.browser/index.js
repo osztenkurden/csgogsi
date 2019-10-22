@@ -2,6 +2,7 @@ var CSGOGSI = /** @class */ (function () {
     function CSGOGSI() {
         this.listeners = new Map();
         this.teams = [];
+        this.players = [];
         /*this.on('data', _data => {
         });*/
     }
@@ -10,6 +11,9 @@ var CSGOGSI = /** @class */ (function () {
     };
     CSGOGSI.prototype.setTeamTwo = function (team) {
         this.teams[1] = team;
+    };
+    CSGOGSI.prototype.loadPlayers = function (players) {
+        this.players = players;
     };
     CSGOGSI.prototype.digest = function (raw) {
         if (!raw.allplayers || !raw.map || !raw.phase_countdowns) {
@@ -129,6 +133,7 @@ var CSGOGSI = /** @class */ (function () {
         return parsed;
     };
     CSGOGSI.prototype.parsePlayer = function (oldPlayer, steamid, team) {
+        var extension = this.players.filter(function (player) { return player.steamid === steamid; })[0];
         var player = {
             steamid: steamid,
             name: oldPlayer.name,
@@ -140,7 +145,10 @@ var CSGOGSI = /** @class */ (function () {
             spectarget: oldPlayer.spectarget,
             position: oldPlayer.position.split(", ").map(function (pos) { return Number(pos); }),
             forward: oldPlayer.forward,
-            team: team
+            team: team,
+            avatar: extension && extension.avatar || null,
+            country: extension && extension.country || null,
+            realName: extension && extension.realName || null,
         };
         return player;
     };
