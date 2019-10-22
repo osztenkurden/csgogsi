@@ -136,7 +136,7 @@ var CSGOGSI = /** @class */ (function () {
         var extension = this.players.filter(function (player) { return player.steamid === steamid; })[0];
         var player = {
             steamid: steamid,
-            name: oldPlayer.name,
+            name: extension && extension.name || oldPlayer.name,
             observer_slot: oldPlayer.observer_slot,
             activity: oldPlayer.activity,
             stats: oldPlayer.match_stats,

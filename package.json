@@ -1,6 +1,6 @@
 {
     "name": "csgogsi",
-    "version": "1.0.10",
+    "version": "1.0.11",
     "description": "",
     "main": "./lib/index.js",
     "types": "./types/index.d.ts",

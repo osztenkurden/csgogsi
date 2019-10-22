@@ -158,7 +158,7 @@ export default class CSGOGSI {
         const extension = this.players.filter(player => player.steamid === steamid)[0];
         const player: I.Player = {
             steamid,
-            name: oldPlayer.name,
+            name: extension && extension.name ||oldPlayer.name,
             observer_slot: oldPlayer.observer_slot,
             activity: oldPlayer.activity,
             stats: oldPlayer.match_stats,
