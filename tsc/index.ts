@@ -87,6 +87,7 @@ export default class CSGOGSI {
             orientation: !ctOnLeft ? 'left':'right'
         }
         const players = this.parsePlayers(raw.allplayers, [teamCT, teamT]);
+        const observed = players.filter(player => player.steamid === raw.player.steamid)[0] || null;
         const data: I.CSGO = {
             provider: raw.provider,
             round: raw.round ? {
@@ -94,7 +95,7 @@ export default class CSGOGSI {
                 bomb: raw.round.bomb,
                 win_team: raw.round.win_team
             } : null,
-            player: this.parsePlayer(raw.player, '', raw.player.team === "CT" ? teamCT : teamT),
+            player: observed,
             players: players,
             bomb: raw.bomb ? {
                 state: raw.bomb.state,
