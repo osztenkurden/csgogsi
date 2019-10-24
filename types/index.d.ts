@@ -26,6 +26,7 @@ export default class CSGOGSI {
     setTeamTwo(team: TeamExtension): void;
     loadPlayers(players: PlayerExtension[]): void;
     digest(raw: I.CSGORaw): I.CSGO | null;
+    digestMIRV(raw: I.RawKill): I.KillEvent | null;
     parsePlayers(players: I.PlayersRaw, teams: [I.Team, I.Team]): I.Player[];
     parsePlayer(oldPlayer: I.PlayerRaw, steamid: string, team: I.Team): I.Player;
     execute<K extends keyof I.Events>(eventName: K, argument?: any): boolean;

@@ -100,3 +100,17 @@ export interface FinalScore {
     loser: I.Team,
     map: Map
 }
+
+export interface PlayerKillSummary {
+
+}
+
+export interface KillEvent {
+    killer: Player,
+    victim: Player,
+    assister: Player | null,
+    flashed: boolean,
+    headshot: boolean,
+    weapon: string,
+    wallbang: boolean
+}

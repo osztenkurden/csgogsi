@@ -4,6 +4,7 @@ export interface Events {
     data: (data: I.CSGO) => void,
     roundEnd: (team: I.Team) => void,
     matchEnd: (score: I.FinalScore) => void,
+    kill: (kill: I.KillEvent) => void,
     /*timeoutStart: (team: any) => void,
     timeoutEnd: (team: any) => void,
     roundStart: (round: number) => void,

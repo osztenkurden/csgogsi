@@ -163,6 +163,30 @@ export default class CSGOGSI {
         return data;
     }
 
+    digestMIRV(raw: I.RawKill): I.KillEvent | null{
+        if(!this.last){
+            return null;
+        }
+        const data = raw.keys;
+        const killer = this.last.players.filter(player => player.steamid === data.attacker.xuid)[0];
+        const victim = this.last.players.filter(player => player.steamid === data.userid.xuid)[0];
+        const assister = this.last.players.filter(player => player.steamid === data.assister.xuid && data.assister.xuid !== '0')[0];
+        if(!killer || !victim){
+            return null;
+        }
+        const kill: I.KillEvent = {
+            killer,
+            victim,
+            assister: assister || null,
+            flashed: data.assistedflash,
+            headshot: data.headshot,
+            weapon: data.weapon,
+            wallbang: data.penetrated > 0
+        }
+        this.execute("kill", kill);
+        return kill;
+    }
+
     parsePlayers(players: I.PlayersRaw, teams: [I.Team, I.Team]){
         const parsed: I.Player[] = [];
         Object.keys(players).forEach(steamid => {
