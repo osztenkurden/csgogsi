@@ -48,6 +48,7 @@ app.listen(3000);
 |`digest(GSIData)`|Gets raw GSI data from CSGO and does magic|`GSI.digest(req.body)`|CSGO Parsed|
 |`on('event', callback)`|Sets listener for given event (check them below)|`GSI.on('roundEnd', team => console.log(team.name));`||
 |`removeListeners('event')`|Remove all listeners for given event|`GSI.removeListeners('bombExplode')`||
+|`loadPlayers(players: PlayerExtension[])`|Loads custom data about players|||
 
 ## Events
 
@@ -58,6 +59,7 @@ app.listen(3000);
 |Bomb planted|`bombPlant`|(player: Player) => {}|
 |Bomb defused|`bombDefuse`|(player: Player) => {}|
 |Bomb exploded|`bombExplode`|() => {}|
+|End of the map|`matchEnd`|(score: FinalScore) => {}|
 
 ## Objects
 #### CSGO Parsed
@@ -79,6 +81,19 @@ app.listen(3000);
 |id|`string`|
 |name|`string`|
 |country|`string or null`|
+|logo|`string or null`|
+|map_score|`number`|
+
+#### Player Extension
+
+|Property|Type|
+|---|---|
+|id|`string`|
+|name|`string`|
+|steramid|`string`|
+|realName|`string or null`|
+|country|`string or null`|
+|avatar|`string or null`|
 
 
 #### Provider
@@ -128,6 +143,9 @@ app.listen(3000);
 |spectarget?|`string`|
 |position|`Array of numbers`|
 |forward|`number`|
+|avatar|`string or null`|
+|country|`string or null`|
+|realName|`string or null`|
 
 #### Bomb
 
@@ -150,6 +168,16 @@ app.listen(3000);
 |country|`string | null`|
 |id|`string | null`|
 |side|`Side Object`|
+|orientation|`left or right`|
+|logo|`string`|
+
+#### FinalScore
+
+|Property|Type|
+|---|---|
+|winner|`Team`|
+|loser|`Team`|
+|map|`Map`|
 
 #### Side
 `"CT" or "T"`

@@ -69,7 +69,8 @@ export interface Map {
     souvenirs_total:number,
     round_wins:{
         [key:string]:I.RoundOutcome
-    }
+    },
+    
 }
 
 export interface Round {
@@ -93,4 +94,9 @@ export interface CSGO {
     auth?: {
         token: string
     }
+}
+export interface FinalScore {
+    winner: I.Team,
+    loser: I.Team,
+    map: Map
 }

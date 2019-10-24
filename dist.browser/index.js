@@ -101,6 +101,7 @@ var CSGOGSI = /** @class */ (function () {
             return data;
         }
         var last = this.last;
+        // Round end
         if ((last.map.team_ct.score !== data.map.team_ct.score) !== (last.map.team_t.score !== data.map.team_t.score)) {
             if (last.map.team_ct.score !== data.map.team_ct.score) {
                 this.execute('roundEnd', data.map.team_ct);
@@ -109,6 +110,7 @@ var CSGOGSI = /** @class */ (function () {
                 this.execute('roundEnd', data.map.team_t);
             }
         }
+        //Bomb actions
         if (last.bomb && data.bomb) {
             if (last.bomb.state !== "planted" && data.bomb.state === "planted") {
                 this.execute('bombPlant', last.bomb.player);
@@ -119,6 +121,17 @@ var CSGOGSI = /** @class */ (function () {
             else if (last.bomb.state !== "defused" && data.bomb.state === "defused") {
                 this.execute('bombDefuse', last.bomb.player);
             }
+        }
+        // Match end
+        if (data.map.phase === "gameover" && last.map.phase !== "gameover") {
+            var winner = data.map.team_ct.score > data.map.team_t.score ? data.map.team_ct : data.map.team_t;
+            var loser = data.map.team_ct.score > data.map.team_t.score ? data.map.team_t : data.map.team_ct;
+            var final = {
+                winner: winner,
+                loser: loser,
+                map: data.map
+            };
+            this.execute('matchEnd', final);
         }
         this.last = data;
         this.execute('data', data);

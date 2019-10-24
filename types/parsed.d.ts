@@ -89,3 +89,8 @@ export interface CSGO {
         token: string;
     };
 }
+export interface FinalScore {
+    winner: I.Team;
+    loser: I.Team;
+    map: Map;
+}
