@@ -55,11 +55,11 @@ app.listen(3000);
 |Event|Name|Callback|
 |---|---|---|
 |Data incoming|`data`|(data: CSGO Parsed) => {}|
-|End of the round|`roundEnd`|(team: Team) => {}|
+|End of the round|`roundEnd`|(score: Score) => {}|
 |Bomb planted|`bombPlant`|(player: Player) => {}|
 |Bomb defused|`bombDefuse`|(player: Player) => {}|
 |Bomb exploded|`bombExplode`|() => {}|
-|End of the map|`matchEnd`|(score: FinalScore) => {}|
+|End of the map|`matchEnd`|(score: Score) => {}|
 
 ## Objects
 #### CSGO Parsed
@@ -171,13 +171,14 @@ app.listen(3000);
 |orientation|`left or right`|
 |logo|`string`|
 
-#### FinalScore
+#### Score
 
 |Property|Type|
 |---|---|
 |winner|`Team`|
 |loser|`Team`|
 |map|`Map`|
+|mapEnd|`boolean`|
 
 #### Side
 `"CT" or "T"`

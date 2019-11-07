@@ -129,9 +129,21 @@ export default class CSGOGSI {
         // Round end
         if((last.map.team_ct.score !== data.map.team_ct.score) !== (last.map.team_t.score !== data.map.team_t.score)){
             if(last.map.team_ct.score !== data.map.team_ct.score){
-                this.execute('roundEnd', data.map.team_ct);
+                const round: I.Score = {
+                    winner: data.map.team_ct,
+                    loser: data.map.team_t,
+                    map: data.map,
+                    mapEnd: false
+                }
+                this.execute('roundEnd', round);
             } else {
-                this.execute('roundEnd', data.map.team_t);
+                const round: I.Score = {
+                    winner: data.map.team_t,
+                    loser: data.map.team_ct,
+                    map: data.map,
+                    mapEnd: false
+                }
+                this.execute('roundEnd', round);
             }
         }
         //Bomb actions
@@ -150,10 +162,11 @@ export default class CSGOGSI {
             const winner = data.map.team_ct.score > data.map.team_t.score ? data.map.team_ct : data.map.team_t;
             const loser = data.map.team_ct.score > data.map.team_t.score ? data.map.team_t : data.map.team_ct;
 
-            const final: I.FinalScore = {
+            const final: I.Score = {
                 winner,
                 loser,
-                map: data.map
+                map: data.map,
+                mapEnd: true
             };
 
             this.execute('matchEnd', final);
