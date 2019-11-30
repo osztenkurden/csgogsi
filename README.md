@@ -59,6 +59,8 @@ app.listen(3000);
 |Bomb planted|`bombPlant`|(player: Player) => {}|
 |Bomb defused|`bombDefuse`|(player: Player) => {}|
 |Bomb exploded|`bombExplode`|() => {}|
+|Defuse started|`defuseStart`|(player: Player) => {}|
+|Defuse stopped (but not defused and not exploded)|`defuseStop`|(player: Player) => {}|
 |End of the map|`matchEnd`|(score: Score) => {}|
 
 ## Objects
