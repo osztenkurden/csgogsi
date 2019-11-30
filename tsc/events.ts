@@ -14,6 +14,8 @@ export interface Events {
     warmupEnd: () => void,
     freezetimeStart: () => void,
     freezetimeEnd: () => void,*/
+    defuseStart: (player: I.Player) => void,
+    defuseStop: (player: I.Player) => void,
     bombPlant: (player: I.Player) => void,
     bombExplode: () => void,
     bombDefuse: (player: I.Player) => void,
