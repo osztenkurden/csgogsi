@@ -14,7 +14,7 @@ There is index.js in dist.browser on github page that you just need to include i
 ## Example #1
 ```javascript
 import express from 'express';
-import CSOGSI from 'csgogsi';
+import CSGOGSI from 'csgogsi';
 
 const app = express();
 const GSI = new CSGOGSI();
