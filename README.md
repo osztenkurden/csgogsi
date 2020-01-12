@@ -25,7 +25,7 @@ app.use(express.raw({limit:'10Mb', type: 'application/json' }));
 app.use('/')
     .post((req, res) => {
         const text = req.body.toString().replace(/"(player|owner)":([ ]*)([0-9]+)/gm, '"$1": "$3"').replace(/(player|owner):([ ]*)([0-9]+)/gm, '"$1": "$3"');
-        const data = JSON.parse(data);
+        const data = JSON.parse(text);
         GSI.digest(data);
     });
 
@@ -114,7 +114,7 @@ app.listen(3000);
 |---|---|
 |mode|`string`|
 |name|`string`|
-|phase|`"warmup" | "live" | "intermission" | "gameover"`|
+|phase|`"warmup" or "live" or "intermission" or "gameover"`|
 |round|`number`|
 |team_ct|`Team Object`|
 |team_t|`Team Object`|
@@ -127,8 +127,8 @@ app.listen(3000);
 
 |Property|Type|
 |---|---|
-|phase|`"freezetime" | "live" | "over"`|
-|bomb?|`"planted"|"exploded"|"defused"`|
+|phase|`"freezetime" or "live" or "over"`|
+|bomb?|`"planted" or "exploded" or "defused"`|
 |win_team?|`Side Object`|
 
 #### Player
@@ -153,7 +153,7 @@ app.listen(3000);
 
 |Property|Type|
 |---|---|
-|state|`"carried" | "planted" | "dropped" | "defused" | "defusing" | "planting" | "exploded"`|
+|state|`"carried" or "planted" or "dropped" or "defused" or "defusing" or "planting" or "exploded"`|
 |countdown?|`string`|
 |player?|`Player Object`|
 |position|`string`|
@@ -167,8 +167,8 @@ app.listen(3000);
 |timeouts_remaining|`number`|
 |matches_won_this_series|`string`|
 |name|`string`|
-|country|`string | null`|
-|id|`string | null`|
+|country|`string or null`|
+|id|`string or null`|
 |side|`Side Object`|
 |orientation|`left or right`|
 |logo|`string`|
