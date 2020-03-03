@@ -158,6 +158,8 @@ export default class CSGOGSI {
                 this.execute('defuseStart', data.bomb.player);
             } else if(last.bomb.state === "defusing" && data.bomb.state !== "defusing"){
                 this.execute("defuseStop", last.bomb.player);
+            } else if(last.bomb.state !== "planting" && data.bomb.state === "planting"){
+                this.execute("bombPlantStart", last.bomb.player);
             }
         }
 

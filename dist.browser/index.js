@@ -139,6 +139,9 @@ var CSGOGSI = /** @class */ (function () {
             else if (last.bomb.state === "defusing" && data.bomb.state !== "defusing") {
                 this.execute("defuseStop", last.bomb.player);
             }
+            else if (last.bomb.state !== "planting" && data.bomb.state === "planting") {
+                this.execute("bombPlantStart", last.bomb.player);
+            }
         }
         // Match end
         if (data.map.phase === "gameover" && last.map.phase !== "gameover") {
