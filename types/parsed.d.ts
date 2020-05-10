@@ -105,4 +105,7 @@ export interface KillEvent {
     headshot: boolean;
     weapon: string;
     wallbang: boolean;
+    attackerblind: boolean;
+    thrusmoke: boolean;
+    noscope: boolean;
 }

@@ -200,7 +200,10 @@ export default class CSGOGSI {
             flashed: data.assistedflash,
             headshot: data.headshot,
             weapon: data.weapon,
-            wallbang: data.penetrated > 0
+            wallbang: data.penetrated > 0,
+            attackerblind: data.attackerblind,
+            thrusmoke: data.thrusmoke,
+            noscope: data.noscope
         }
         this.execute("kill", kill);
         return kill;

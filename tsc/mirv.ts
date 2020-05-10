@@ -23,6 +23,9 @@ export interface RawKill {
         dominated: number,
         revenge: number,
         wipe: number,
+        attackerblind: boolean,
+        thrusmoke: boolean,
+        noscope: boolean,
         penetrated: number,
         noreplay: boolean
     }

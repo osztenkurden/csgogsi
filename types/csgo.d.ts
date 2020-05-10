@@ -88,7 +88,7 @@ export interface BombRaw {
     position: string;
 }
 export interface PhaseRaw {
-    phase?: 'freezetime' | 'bomb' | 'warmup' | 'live' | 'over' | 'defuse' | 'paused' | 'timeout_ct' | 'timeout_t'
+    phase?: 'freezetime' | 'bomb' | 'warmup' | 'live' | 'over' | 'defuse' | 'paused' | 'timeout_ct' | 'timeout_t';
     phase_ends_in: string;
 }
 export interface CSGORaw {
