@@ -124,7 +124,7 @@ var CSGOGSI = /** @class */ (function () {
         }
         //Bomb actions
         if (last.bomb && data.bomb) {
-            if (last.bomb.state !== "planted" && data.bomb.state === "planted") {
+            if (last.bomb.state === "planting" && data.bomb.state === "planted") {
                 this.execute('bombPlant', last.bomb.player);
             }
             else if (last.bomb.state !== "exploded" && data.bomb.state === "exploded") {
