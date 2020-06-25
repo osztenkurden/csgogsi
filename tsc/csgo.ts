@@ -1,5 +1,5 @@
 export type Side = "CT" | "T";
-export type RoundOutcome = "ct_win_elimination" | "t_win_elimination" | "ct_win_time"|"ct_win_defuse"; // TODO uzupełnić
+export type RoundOutcome = "ct_win_elimination" | "t_win_elimination" | "ct_win_time"|"ct_win_defuse" | "t_win_bomb";
 
 export interface WeaponRaw {
     name:string,

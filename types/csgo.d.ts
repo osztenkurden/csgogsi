@@ -1,5 +1,5 @@
 export declare type Side = "CT" | "T";
-export declare type RoundOutcome = "ct_win_elimination" | "t_win_elimination" | "ct_win_time" | "ct_win_defuse";
+export declare type RoundOutcome = "ct_win_elimination" | "t_win_elimination" | "ct_win_time" | "ct_win_defuse" | "t_win_bomb";
 export interface WeaponRaw {
     name: string;
     paintkit: string;
