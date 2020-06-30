@@ -53,7 +53,7 @@ export interface PlayerRaw {
     },
     spectarget?:string,
     position:string,
-    forward:number
+    forward:string
 }
 
 export interface PlayersRaw {

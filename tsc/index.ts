@@ -230,7 +230,7 @@ export default class CSGOGSI {
             state: oldPlayer.state,
             spectarget: oldPlayer.spectarget,
             position: oldPlayer.position.split(", ").map(pos => Number(pos)),
-            forward: oldPlayer.forward,
+            forward: oldPlayer.forward.split(", ").map(pos => Number(pos)),
             team,
             avatar: extension && extension.avatar || null,
             country: extension && extension.country || null,

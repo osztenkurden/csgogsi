@@ -206,7 +206,7 @@ var CSGOGSI = /** @class */ (function () {
             state: oldPlayer.state,
             spectarget: oldPlayer.spectarget,
             position: oldPlayer.position.split(", ").map(function (pos) { return Number(pos); }),
-            forward: oldPlayer.forward,
+            forward: oldPlayer.forward.split(", ").map(function (pos) { return Number(pos); }),
             team: team,
             avatar: extension && extension.avatar || null,
             country: extension && extension.country || null,
