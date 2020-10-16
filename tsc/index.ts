@@ -26,7 +26,7 @@ export default class CSGOGSI {
     teams: [TeamExtension?, TeamExtension?];
     players: PlayerExtension[];
     last?: I.CSGO;
-    constructor(){
+    constructor() {
         this.listeners = new Map();
         this.teams = [];
         this.players = [];
@@ -34,30 +34,30 @@ export default class CSGOGSI {
         });*/
     }
 
-    setTeamOne(team: TeamExtension){
+    setTeamOne(team: TeamExtension) {
         this.teams[0] = team;
     }
-    setTeamTwo(team: TeamExtension){
+    setTeamTwo(team: TeamExtension) {
         this.teams[1] = team;
     }
 
-    loadPlayers(players: PlayerExtension[]){
+    loadPlayers(players: PlayerExtension[]) {
         this.players = players;
     }
 
-    digest(raw: I.CSGORaw): I.CSGO | null{
-        if(!raw.allplayers || !raw.map || !raw.phase_countdowns){
+    digest(raw: I.CSGORaw): I.CSGO | null {
+        if (!raw.allplayers || !raw.map || !raw.phase_countdowns) {
             return null;
         }
-        
-        const ctOnLeft = Object.values(raw.allplayers).filter(({observer_slot, team}) => observer_slot !== undefined && observer_slot > 1 && observer_slot <=5 && team === "CT").length > 2;
+
+        const ctOnLeft = Object.values(raw.allplayers).filter(({ observer_slot, team }) => observer_slot !== undefined && observer_slot > 1 && observer_slot <= 5 && team === "CT").length > 2;
         let ctExtension = null, tExtension = null;
-        if(this.teams[0]){
-            if(ctOnLeft) ctExtension = this.teams[0];
+        if (this.teams[0]) {
+            if (ctOnLeft) ctExtension = this.teams[0];
             else tExtension = this.teams[0];
         }
-        if(this.teams[1]){
-            if(ctOnLeft) tExtension = this.teams[1];
+        if (this.teams[1]) {
+            if (ctOnLeft) tExtension = this.teams[1];
             else ctExtension = this.teams[1];
         }
         const bomb = raw.bomb;
@@ -72,7 +72,7 @@ export default class CSGOGSI {
             name: ctExtension && ctExtension.name || 'Counter-Terrorists',
             country: ctExtension && ctExtension.country || null,
             id: ctExtension && ctExtension.id || null,
-            orientation: ctOnLeft ? 'left':'right'
+            orientation: ctOnLeft ? 'left' : 'right'
         }
         const teamT: I.Team = {
             score: teams[1].score,
@@ -84,7 +84,7 @@ export default class CSGOGSI {
             name: tExtension && tExtension.name || 'Terrorists',
             country: tExtension && tExtension.country || null,
             id: tExtension && tExtension.id || null,
-            orientation: !ctOnLeft ? 'left':'right'
+            orientation: !ctOnLeft ? 'left' : 'right'
         }
         const players = this.parsePlayers(raw.allplayers, [teamCT, teamT]);
         const observed = players.filter(player => player.steamid === raw.player.steamid)[0] || null;
@@ -97,11 +97,12 @@ export default class CSGOGSI {
             } : null,
             player: observed,
             players: players,
-            bomb: raw.bomb ? {
-                state: raw.bomb.state,
-                countdown: raw.bomb.countdown,
-                position: raw.bomb.position,
-                player: bomb ? players.filter(player => player.steamid === bomb.player)[0] : undefined
+            bomb: bomb ? {
+                state: bomb.state,
+                countdown: bomb.countdown,
+                position: bomb.position,
+                player: bomb ? players.filter(player => player.steamid === bomb.player)[0] : undefined,
+                site: bomb.state === "planted" || bomb.state === "defused" || bomb.state === "defusing" || bomb.state === "planting" ? this.findSite(raw.map.name, bomb.position.split(", ").map(Number)) : undefined
             } : null,
             grenades: raw.grenades,
             phase_countdowns: raw.phase_countdowns,
@@ -119,7 +120,7 @@ export default class CSGOGSI {
                 round_wins: raw.map.round_wins
             }
         }
-        if(!this.last){
+        if (!this.last) {
             this.last = data;
             this.execute('data', data);
             return data;
@@ -127,8 +128,8 @@ export default class CSGOGSI {
         const last = this.last;
 
         // Round end
-        if((last.map.team_ct.score !== data.map.team_ct.score) !== (last.map.team_t.score !== data.map.team_t.score)){
-            if(last.map.team_ct.score !== data.map.team_ct.score){
+        if ((last.map.team_ct.score !== data.map.team_ct.score) !== (last.map.team_t.score !== data.map.team_t.score)) {
+            if (last.map.team_ct.score !== data.map.team_ct.score) {
                 const round: I.Score = {
                     winner: data.map.team_ct,
                     loser: data.map.team_t,
@@ -147,24 +148,24 @@ export default class CSGOGSI {
             }
         }
         //Bomb actions
-        if(last.bomb && data.bomb){
-            if(last.bomb.state === "planting" && data.bomb.state === "planted"){
+        if (last.bomb && data.bomb) {
+            if (last.bomb.state === "planting" && data.bomb.state === "planted") {
                 this.execute('bombPlant', last.bomb.player)
-            } else if(last.bomb.state !== "exploded" && data.bomb.state === "exploded"){
+            } else if (last.bomb.state !== "exploded" && data.bomb.state === "exploded") {
                 this.execute('bombExplode')
-            }else if(last.bomb.state !== "defused" && data.bomb.state === "defused"){
+            } else if (last.bomb.state !== "defused" && data.bomb.state === "defused") {
                 this.execute('bombDefuse', last.bomb.player)
-            } else if(last.bomb.state !== "defusing" && data.bomb.state === "defusing"){
+            } else if (last.bomb.state !== "defusing" && data.bomb.state === "defusing") {
                 this.execute('defuseStart', data.bomb.player);
-            } else if(last.bomb.state === "defusing" && data.bomb.state !== "defusing"){
+            } else if (last.bomb.state === "defusing" && data.bomb.state !== "defusing") {
                 this.execute("defuseStop", last.bomb.player);
-            } else if(last.bomb.state !== "planting" && data.bomb.state === "planting"){
+            } else if (last.bomb.state !== "planting" && data.bomb.state === "planting") {
                 this.execute("bombPlantStart", last.bomb.player);
             }
         }
 
         // Match end
-        if(data.map.phase === "gameover" && last.map.phase !== "gameover"){
+        if (data.map.phase === "gameover" && last.map.phase !== "gameover") {
             const winner = data.map.team_ct.score > data.map.team_t.score ? data.map.team_ct : data.map.team_t;
             const loser = data.map.team_ct.score > data.map.team_t.score ? data.map.team_t : data.map.team_ct;
 
@@ -182,15 +183,15 @@ export default class CSGOGSI {
         return data;
     }
 
-    digestMIRV(raw: I.RawKill): I.KillEvent | null{
-        if(!this.last){
+    digestMIRV(raw: I.RawKill): I.KillEvent | null {
+        if (!this.last) {
             return null;
         }
         const data = raw.keys;
         const killer = this.last.players.filter(player => player.steamid === data.attacker.xuid)[0];
         const victim = this.last.players.filter(player => player.steamid === data.userid.xuid)[0];
         const assister = this.last.players.filter(player => player.steamid === data.assister.xuid && data.assister.xuid !== '0')[0];
-        if(!killer || !victim){
+        if (!killer || !victim) {
             return null;
         }
         const kill: I.KillEvent = {
@@ -209,7 +210,7 @@ export default class CSGOGSI {
         return kill;
     }
 
-    parsePlayers(players: I.PlayersRaw, teams: [I.Team, I.Team]){
+    parsePlayers(players: I.PlayersRaw, teams: [I.Team, I.Team]) {
         const parsed: I.Player[] = [];
         Object.keys(players).forEach(steamid => {
             //const team:
@@ -218,11 +219,11 @@ export default class CSGOGSI {
         return parsed;
     }
 
-    parsePlayer(oldPlayer: I.PlayerRaw, steamid: string, team: I.Team){
+    parsePlayer(oldPlayer: I.PlayerRaw, steamid: string, team: I.Team) {
         const extension = this.players.filter(player => player.steamid === steamid)[0];
         const player: I.Player = {
             steamid,
-            name: extension && extension.name ||oldPlayer.name,
+            name: extension && extension.name || oldPlayer.name,
             observer_slot: oldPlayer.observer_slot,
             activity: oldPlayer.activity,
             stats: oldPlayer.match_stats,
@@ -241,16 +242,16 @@ export default class CSGOGSI {
 
     }
 
-    execute<K extends keyof I.Events>(eventName: K, argument?: any){
+    execute<K extends keyof I.Events>(eventName: K, argument?: any) {
         const listeners = this.listeners.get(eventName);
-        if(!listeners) return false;
+        if (!listeners) return false;
         listeners.forEach(callback => {
-            if(callback) callback(argument);
+            if (callback) callback(argument);
         });
         return true;
     }
 
-    on<K extends keyof I.Events>(eventName: K, listener: I.Events[K]){
+    on<K extends keyof I.Events>(eventName: K, listener: I.Events[K]) {
         const listOfListeners = this.listeners.get(eventName) || [];
 
         listOfListeners.push(listener);
@@ -260,13 +261,29 @@ export default class CSGOGSI {
     }
     removeListener<K extends keyof I.Events>(eventName: K, listener: Function) {
         const listOfListeners = this.listeners.get(eventName);
-        if(!listOfListeners) return false;
+        if (!listOfListeners) return false;
         this.listeners.set(eventName, listOfListeners.filter(callback => callback !== listener));
         return true;
     }
-    removeListeners<K extends keyof I.Events>(eventName: K){
+    removeListeners<K extends keyof I.Events>(eventName: K) {
         this.listeners.set(eventName, []);
         return true;
+    }
+    findSite(mapName: string, position: number[]) {
+        const mapReference: { [mapName: string]: (position: number[]) => 'A' | 'B' } = {
+            de_mirage: position => position[1] < 1500 ? 'A' : 'B',
+            de_cache: position => position[1] > 0 ? 'A' : 'B',
+            de_overpass: position => position[2] > 400 ? 'A' : 'B',
+            de_nuke: position => position[2] > -500 ? 'A' : 'B',
+            de_dust2: position => position[0] > -500 ? 'A' : 'B',
+            de_inferno: position => position[0] > 1400 ? 'A' : 'B',
+            de_vertigo: position => position[1] < 1400 ? 'A' : 'B',
+            de_train: position => position[1] > -450 ? 'A' : 'B',
+        };
+        if(mapName in mapReference) {
+            return mapReference[mapName](position);
+        }
+        return;
     }
 
 }

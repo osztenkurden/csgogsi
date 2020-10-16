@@ -73,11 +73,12 @@ var CSGOGSI = /** @class */ (function () {
             } : null,
             player: observed,
             players: players,
-            bomb: raw.bomb ? {
-                state: raw.bomb.state,
-                countdown: raw.bomb.countdown,
-                position: raw.bomb.position,
-                player: bomb ? players.filter(function (player) { return player.steamid === bomb.player; })[0] : undefined
+            bomb: bomb ? {
+                state: bomb.state,
+                countdown: bomb.countdown,
+                position: bomb.position,
+                player: bomb ? players.filter(function (player) { return player.steamid === bomb.player; })[0] : undefined,
+                site: bomb.state === "planted" || bomb.state === "defused" || bomb.state === "defusing" || bomb.state === "planting" ? this.findSite(raw.map.name, bomb.position.split(", ").map(Number)) : undefined
             } : null,
             grenades: raw.grenades,
             phase_countdowns: raw.phase_countdowns,
@@ -240,6 +241,22 @@ var CSGOGSI = /** @class */ (function () {
     CSGOGSI.prototype.removeListeners = function (eventName) {
         this.listeners.set(eventName, []);
         return true;
+    };
+    CSGOGSI.prototype.findSite = function (mapName, position) {
+        var mapReference = {
+            de_mirage: function (position) { return position[1] < 1500 ? 'A' : 'B'; },
+            de_cache: function (position) { return position[1] > 0 ? 'A' : 'B'; },
+            de_overpass: function (position) { return position[2] > 400 ? 'A' : 'B'; },
+            de_nuke: function (position) { return position[2] > -500 ? 'A' : 'B'; },
+            de_dust2: function (position) { return position[0] > -500 ? 'A' : 'B'; },
+            de_inferno: function (position) { return position[0] > 1400 ? 'A' : 'B'; },
+            de_vertigo: function (position) { return position[1] < 1400 ? 'A' : 'B'; },
+            de_train: function (position) { return position[1] > -450 ? 'A' : 'B'; },
+        };
+        if (mapName in mapReference) {
+            return mapReference[mapName](position);
+        }
+        return;
     };
     return CSGOGSI;
 }());
