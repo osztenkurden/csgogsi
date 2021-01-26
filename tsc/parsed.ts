@@ -10,7 +10,8 @@ export interface Team {
     name: string,
     country: string | null,
     id: string | null,
-    orientation: 'right'|'left'
+    orientation: 'right'|'left',
+    extra: Record<string, string>,
 }
 
 export interface Player {

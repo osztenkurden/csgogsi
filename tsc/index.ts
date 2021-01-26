@@ -74,7 +74,8 @@ export default class CSGOGSI {
             name: ctExtension && ctExtension.name || 'Counter-Terrorists',
             country: ctExtension && ctExtension.country || null,
             id: ctExtension && ctExtension.id || null,
-            orientation: ctOnLeft ? 'left' : 'right'
+            orientation: ctOnLeft ? 'left' : 'right',
+            extra: ctExtension && ctExtension.extra || {}
         }
         const teamT: I.Team = {
             score: teams[1].score,
@@ -86,7 +87,8 @@ export default class CSGOGSI {
             name: tExtension && tExtension.name || 'Terrorists',
             country: tExtension && tExtension.country || null,
             id: tExtension && tExtension.id || null,
-            orientation: !ctOnLeft ? 'left' : 'right'
+            orientation: !ctOnLeft ? 'left' : 'right',
+            extra: tExtension && tExtension.extra || {}
         }
         const players = this.parsePlayers(raw.allplayers, [teamCT, teamT]);
         const observed = players.filter(player => player.steamid === raw.player.steamid)[0] || null;
