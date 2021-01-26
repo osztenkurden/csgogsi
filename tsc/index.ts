@@ -5,7 +5,8 @@ export interface TeamExtension {
     name: string,
     country: string | null,
     logo: string | null,
-    map_score: number
+    map_score: number,
+    extra: Record<string, string>,
 }
 
 export interface PlayerExtension {
@@ -14,7 +15,8 @@ export interface PlayerExtension {
     steamid: string,
     realName: string | null,
     country: string | null,
-    avatar: string | null
+    avatar: string | null,
+    extra: Record<string, string>,
 }
 
 export * from './interfaces';

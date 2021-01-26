@@ -5,6 +5,7 @@ export interface TeamExtension {
     country: string | null;
     logo: string | null;
     map_score: number;
+    extra: Record<string, string>;
 }
 export interface PlayerExtension {
     id: string;
@@ -13,6 +14,7 @@ export interface PlayerExtension {
     realName: string | null;
     country: string | null;
     avatar: string | null;
+    extra: Record<string, string>;
 }
 export * from './interfaces';
 export * from './parsed';
@@ -33,4 +35,5 @@ export default class CSGOGSI {
     on<K extends keyof I.Events>(eventName: K, listener: I.Events[K]): boolean;
     removeListener<K extends keyof I.Events>(eventName: K, listener: Function): boolean;
     removeListeners<K extends keyof I.Events>(eventName: K): boolean;
+    findSite(mapName: string, position: number[]): "A" | "B";
 }
