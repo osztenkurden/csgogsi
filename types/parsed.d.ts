@@ -10,6 +10,7 @@ export interface Team {
     country: string | null;
     id: string | null;
     orientation: 'right' | 'left';
+    extra: Record<string, string>;
 }
 export interface Player {
     steamid: string;
@@ -52,6 +53,7 @@ export interface Bomb {
     state: "carried" | "planted" | "dropped" | "defused" | "defusing" | "planting" | "exploded";
     countdown?: string;
     player?: Player;
+    site?: 'A' | 'B';
     position: string;
 }
 export interface Map {
