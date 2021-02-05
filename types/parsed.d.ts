@@ -48,6 +48,7 @@ export interface Player {
     avatar: string | null;
     country: string | null;
     realName: string | null;
+    extra: Record<string, string>;
 }
 export interface Bomb {
     state: "carried" | "planted" | "dropped" | "defused" | "defusing" | "planting" | "exploded";

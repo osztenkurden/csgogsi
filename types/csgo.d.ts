@@ -3,7 +3,7 @@ export declare type RoundOutcome = "ct_win_elimination" | "t_win_elimination" | 
 export interface WeaponRaw {
     name: string;
     paintkit: string;
-    type: "Knife" | "Pistol" | "Grenade" | "Rifle" | "SniperRifle" | "C4";
+    type: "Knife" | "Pistol" | "Grenade" | "Rifle" | "SniperRifle" | "C4" | "Submachine Gun";
     ammo_clip?: number;
     ammo_clip_max?: number;
     ammo_reserve?: number;
@@ -50,7 +50,7 @@ export interface PlayerRaw {
     };
     spectarget?: string;
     position: string;
-    forward: number;
+    forward: string;
 }
 export interface PlayersRaw {
     [key: string]: PlayerRaw;

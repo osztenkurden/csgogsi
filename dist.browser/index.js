@@ -214,6 +214,7 @@ var CSGOGSI = /** @class */ (function () {
             avatar: extension && extension.avatar || null,
             country: extension && extension.country || null,
             realName: extension && extension.realName || null,
+            extra: extension && extension.extra || null,
         };
         return player;
     };
