@@ -50,7 +50,7 @@ export interface PlayerRaw {
     };
     spectarget?: string;
     position: string;
-    forward: number;
+    forward: string;
 }
 export interface PlayersRaw {
     [key: string]: PlayerRaw;
@@ -63,7 +63,7 @@ export interface Provider {
     timestamp: number;
 }
 export interface MapRaw {
-    mode: "competetive";
+    mode: "competitive";
     name: string;
     phase: "warmup" | "live" | "intermission" | "gameover";
     round: number;

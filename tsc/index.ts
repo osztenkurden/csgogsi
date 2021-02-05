@@ -112,7 +112,7 @@ export default class CSGOGSI {
             phase_countdowns: raw.phase_countdowns,
             auth: raw.auth,
             map: {
-                mode: "competetive",
+                mode: "competitive",
                 name: raw.map.name,
                 phase: raw.map.phase,
                 round: raw.map.round,

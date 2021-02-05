@@ -69,7 +69,7 @@ export interface Provider {
 }
 
 export interface MapRaw {
-    mode: "competetive",
+    mode: "competitive",
     name:string,
     phase: "warmup" | "live" | "intermission" | "gameover",
     round:number,
