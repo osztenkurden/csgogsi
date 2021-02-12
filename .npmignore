@@ -1,0 +1,11 @@
+.git
+.github
+__tests__
+dist.browser
+tsc
+node_modules
+tsconfig.json
+jest.config.js
+README.md
+.gitignore
+tsconfig.browser.json
