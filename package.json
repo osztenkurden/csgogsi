@@ -16,7 +16,7 @@
   },
   "scripts": {
     "test": "jest",
-    "compile": "&& tsc tsc/index.ts --outDir compiled --lib es2017 -d && tsc -p tsconfig.browser.json && npm run post-compile",
+    "compile": "tsc tsc/index.ts --outDir compiled --lib es2017 -d && tsc -p tsconfig.browser.json && npm run post-compile",
     "lint": "eslint . --ext .ts",
     "prettier-format": "prettier --config .prettierrc --write '**/*.ts'",
     "post-compile": "npm run prettier-format && npm run lint"
