@@ -112,7 +112,7 @@ export default class CSGOGSI {
 							bomb.state === 'defusing' ||
 							bomb.state === 'planting'
 								? this.findSite(raw.map.name, bomb.position.split(', ').map(Number))
-								: undefined
+								: null
 				  }
 				: null,
 			grenades: raw.grenades,
@@ -139,24 +139,19 @@ export default class CSGOGSI {
 		const last = this.last;
 
 		// Round end
-		if ((last.map.team_ct.score !== data.map.team_ct.score) !== (last.map.team_t.score !== data.map.team_t.score)) {
-			if (last.map.team_ct.score !== data.map.team_ct.score) {
-				const round: I.Score = {
-					winner: data.map.team_ct,
-					loser: data.map.team_t,
-					map: data.map,
-					mapEnd: false
-				};
-				this.execute('roundEnd', round);
-			} else {
-				const round: I.Score = {
-					winner: data.map.team_t,
-					loser: data.map.team_ct,
-					map: data.map,
-					mapEnd: false
-				};
-				this.execute('roundEnd', round);
+		const didCTScoreChanged = last.map.team_ct.score !== data.map.team_ct.score;
+		const didTScoreChanged = last.map.team_t.score !== data.map.team_t.score;
+		if (didCTScoreChanged !== didTScoreChanged) {
+			const winner = didCTScoreChanged ? data.map.team_ct : data.map.team_t;
+			const loser = didCTScoreChanged ? data.map.team_t : data.map.team_ct;
+
+			const roundScore: I.Score = { 
+				winner,
+				loser,
+				map: data.map,
+				mapEnd: false
 			}
+			this.execute('roundEnd', roundScore);
 		}
 		//Bomb actions
 		if (last.bomb && data.bomb) {
@@ -300,6 +295,6 @@ export default class CSGOGSI {
 		if (mapName in mapReference) {
 			return mapReference[mapName](position);
 		}
-		return;
+		return null;
 	}
 }

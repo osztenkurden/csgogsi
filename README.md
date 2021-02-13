@@ -1,3 +1,5 @@
+![Statements](https://img.shields.io/badge/Coverage-82.84%25-yellow.svg)
+
 # CS:GO GSI Digest
 
 ## How does it work?

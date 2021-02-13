@@ -4,7 +4,7 @@ import merge from 'lodash.merge';
 
 type OptionalCSGO = O.Optional<CSGORaw, keyof CSGORaw, 'deep'>;
 
-export const createGSIPacket = (options: OptionalCSGO = {}) => {
+export const createGSIPacket = (options: OptionalCSGO = {}, mutate?: (CSGO: CSGORaw) => CSGORaw) => {
 	const base: CSGORaw = {
 		provider: {
 			name: 'Counter-Strike: Global Offensive',
@@ -516,6 +516,8 @@ export const createGSIPacket = (options: OptionalCSGO = {}) => {
 	};
 
 	const gsi: CSGORaw = merge(base, options);
-
+	if(typeof mutate === "function"){
+		return mutate(gsi);
+	}
 	return gsi;
 };
