@@ -1,4 +1,4 @@
-import { CSGORaw, KillEvent, RawKill } from '../../tsc';
+import { CSGORaw, RawKill } from '../../tsc';
 import { O } from 'ts-toolbelt';
 import merge from 'lodash.merge';
 
@@ -530,15 +530,15 @@ export const createKillPacket = (options: OptionalKillRaw = {}) => {
 		keys: {
 			userid: {
 				value: 0,
-				xuid: '76561198238326438',
+				xuid: '76561198238326438'
 			},
 			attacker: {
 				value: 0,
-				xuid: '76561199031036917',
+				xuid: '76561199031036917'
 			},
 			assister: {
 				value: 0,
-				xuid: 'string',
+				xuid: 'string'
 			},
 			assistedflash: false,
 			weapon: 'string',
@@ -553,10 +553,10 @@ export const createKillPacket = (options: OptionalKillRaw = {}) => {
 			thrusmoke: false,
 			noscope: false,
 			penetrated: false,
-			noreplay: false,
+			noreplay: false
 		}
-	}
+	};
 	const kill: RawKill = merge(base, options);
 
 	return kill;
-}
+};

@@ -56,7 +56,7 @@ var CSGOGSI = /** @class */ (function () {
             extra: (tExtension && tExtension.extra) || {}
         };
         var players = this.parsePlayers(raw.allplayers, [teamCT, teamT]);
-        var observed = players.filter(function (player) { return player.steamid === raw.player.steamid; })[0] || null;
+        var observed = players.find(function (player) { return player.steamid === raw.player.steamid; }) || null;
         var data = {
             provider: raw.provider,
             round: raw.round
@@ -73,7 +73,7 @@ var CSGOGSI = /** @class */ (function () {
                     state: bomb.state,
                     countdown: bomb.countdown,
                     position: bomb.position,
-                    player: bomb ? players.filter(function (player) { return player.steamid === bomb.player; })[0] : undefined,
+                    player: players.find(function (player) { return player.steamid === bomb.player; }) || undefined,
                     site: bomb.state === 'planted' ||
                         bomb.state === 'defused' ||
                         bomb.state === 'defusing' ||
@@ -207,7 +207,7 @@ var CSGOGSI = /** @class */ (function () {
             avatar: (extension && extension.avatar) || null,
             country: (extension && extension.country) || null,
             realName: (extension && extension.realName) || null,
-            extra: (extension && extension.extra) || null,
+            extra: extension && extension.extra || null
         };
         return player;
     };
@@ -240,13 +240,13 @@ var CSGOGSI = /** @class */ (function () {
     };
     CSGOGSI.prototype.findSite = function (mapName, position) {
         var mapReference = {
-            de_mirage: function (position) { return (position[1] < 1500 ? 'A' : 'B'); },
+            de_mirage: function (position) { return (position[1] < -600 ? 'A' : 'B'); },
             de_cache: function (position) { return (position[1] > 0 ? 'A' : 'B'); },
             de_overpass: function (position) { return (position[2] > 400 ? 'A' : 'B'); },
             de_nuke: function (position) { return (position[2] > -500 ? 'A' : 'B'); },
             de_dust2: function (position) { return (position[0] > -500 ? 'A' : 'B'); },
             de_inferno: function (position) { return (position[0] > 1400 ? 'A' : 'B'); },
-            de_vertigo: function (position) { return (position[1] < 1400 ? 'A' : 'B'); },
+            de_vertigo: function (position) { return (position[0] > -1400 ? 'A' : 'B'); },
             de_train: function (position) { return (position[1] > -450 ? 'A' : 'B'); }
         };
         if (mapName in mapReference) {

@@ -170,7 +170,7 @@ test('data > assign teams in the second half, left to T, right to CT', () => {
 test('data > player: dont assign observer if cant find', () => {
 	const GSI = new CSGOGSI();
 
-	const data = GSI.digest(createGSIPacket({ player: { steamid: "gotvorincorrect"}}));
+	const data = GSI.digest(createGSIPacket({ player: { steamid: 'gotvorincorrect' } }));
 
 	expect(data).toBeDefined();
 	expect(data).not.toBeNull();
@@ -178,7 +178,7 @@ test('data > player: dont assign observer if cant find', () => {
 });
 
 test('data > player: assign extension', () => {
-	const targetSteamID = '76561199031036917'
+	const targetSteamID = '76561199031036917';
 	const extension: PlayerExtension = {
 		id: 'randomId',
 		steamid: targetSteamID,
@@ -187,7 +187,7 @@ test('data > player: assign extension', () => {
 		country: 'PL',
 		avatar: 'avatarUrl',
 		extra: {}
-	}
+	};
 	const GSI = new CSGOGSI();
 
 	GSI.players.push(extension);
@@ -208,7 +208,7 @@ test('data > player: assign extension', () => {
 test('data > round: assign null if doesnt exist', () => {
 	const GSI = new CSGOGSI();
 
-	const data = GSI.digest({ ...createGSIPacket(), round: undefined })
+	const data = GSI.digest({ ...createGSIPacket(), round: undefined });
 
 	expect(data).toBeDefined();
 	expect(data?.round).toBeNull();
@@ -217,7 +217,7 @@ test('data > round: assign null if doesnt exist', () => {
 test('data > bomb: assign null if doesnt exist', () => {
 	const GSI = new CSGOGSI();
 
-	const data = GSI.digest({ ...createGSIPacket(), bomb: undefined })
+	const data = GSI.digest({ ...createGSIPacket(), bomb: undefined });
 
 	expect(data).toBeDefined();
 	expect(data?.bomb).toBeNull();
@@ -230,7 +230,7 @@ test('data > bomb: undefined player if doesnt exist or not specified', () => {
 	delete gsiPacket.bomb?.player;
 
 	const playerNotSpecified = GSI.digest(gsiPacket);
-	const playerDoesntExist = GSI.digest(createGSIPacket({ bomb: { player: "notExistingPlayerId"} }))
+	const playerDoesntExist = GSI.digest(createGSIPacket({ bomb: { player: 'notExistingPlayerId' } }));
 
 	expect(playerNotSpecified).toBeDefined();
 	expect(playerDoesntExist).toBeDefined();
@@ -361,22 +361,22 @@ test('event > match: ended listener, T wins', () => {
 
 test('event > kill: ignore for non-existing player #1', () => {
 	const { GSI, callback } = createGSIAndCallback('kill');
-	const kill = createKillPacket({ keys: { userid: { xuid: '' }}});
+	const kill = createKillPacket({ keys: { userid: { xuid: '' } } });
 
 	GSI.digest(createGSIPacket());
 	const response = GSI.digestMIRV(kill);
-	
+
 	expect(callback.mock.calls.length).toBe(0);
 	expect(response).toBeNull();
 });
 
 test('event > kill: ignore for non-existing player #2', () => {
 	const { GSI, callback } = createGSIAndCallback('kill');
-	const kill = createKillPacket({ keys: { attacker: { xuid: '' }}});
+	const kill = createKillPacket({ keys: { attacker: { xuid: '' } } });
 
 	GSI.digest(createGSIPacket());
 	const response = GSI.digestMIRV(kill);
-	
+
 	expect(callback.mock.calls.length).toBe(0);
 	expect(response).toBeNull();
 });
@@ -386,40 +386,40 @@ test('event > kill: ignore for lacking data', () => {
 	const kill = createKillPacket();
 
 	const response = GSI.digestMIRV(kill);
-	
+
 	expect(callback.mock.calls.length).toBe(0);
 	expect(response).toBeNull();
 });
 
 test('event > kill: get correct victim', () => {
 	const { GSI, callback } = createGSIAndCallback('kill');
-	const kill = createKillPacket({ keys: { userid: { xuid: '76561199031036917' }}});
-	
+	const kill = createKillPacket({ keys: { userid: { xuid: '76561199031036917' } } });
+
 	GSI.digest(createGSIPacket());
 	const response = GSI.digestMIRV(kill);
-	
+
 	expect(callback.mock.calls.length).toBe(1);
 	expect(response?.victim.steamid).toBe('76561199031036917');
 });
 
 test('event > kill: get correct killer', () => {
 	const { GSI, callback } = createGSIAndCallback('kill');
-	const kill = createKillPacket({ keys: { attacker: { xuid: '76561199031036917' }}});
-	
+	const kill = createKillPacket({ keys: { attacker: { xuid: '76561199031036917' } } });
+
 	GSI.digest(createGSIPacket());
 	const response = GSI.digestMIRV(kill);
-	
+
 	expect(callback.mock.calls.length).toBe(1);
 	expect(response?.killer.steamid).toBe('76561199031036917');
 });
 
 test('event > kill: get correct assister', () => {
 	const { GSI, callback } = createGSIAndCallback('kill');
-	const kill = createKillPacket({ keys: { assister: { xuid: '76561199031036917' }}});
-	
+	const kill = createKillPacket({ keys: { assister: { xuid: '76561199031036917' } } });
+
 	GSI.digest(createGSIPacket());
 	const response = GSI.digestMIRV(kill);
-	
+
 	expect(callback.mock.calls.length).toBe(1);
 	expect(response?.killer.steamid).toBe('76561199031036917');
 });
@@ -427,7 +427,7 @@ test('event > kill: get correct assister', () => {
 for (const testCase of testCases) {
 	test(`data > bomb: find the correct site (${testCase.map}, ${testCase.site})`, () => {
 		const GSI = new CSGOGSI();
-	
+
 		expect(
 			GSI.digest(
 				createGSIPacket({
@@ -438,7 +438,6 @@ for (const testCase of testCases) {
 		).toBe(testCase.site);
 	});
 }
-
 
 test('data > bomb: return null on unknown map', () => {
 	interface SiteTestCase {

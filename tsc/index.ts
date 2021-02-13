@@ -91,8 +91,6 @@ export default class CSGOGSI {
 		const players = this.parsePlayers(raw.allplayers, [teamCT, teamT]);
 		const observed = players.find(player => player.steamid === raw.player.steamid) || null;
 
-
-
 		const data: I.CSGO = {
 			provider: raw.provider,
 			round: raw.round
@@ -250,7 +248,7 @@ export default class CSGOGSI {
 			avatar: (extension && extension.avatar) || null,
 			country: (extension && extension.country) || null,
 			realName: (extension && extension.realName) || null,
-            extra: extension && extension.extra || null
+			extra: (extension && extension.extra) || null
 		};
 
 		return player;

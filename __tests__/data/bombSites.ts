@@ -5,7 +5,6 @@ interface SiteTestCase {
 }
 
 export const testCases: SiteTestCase[] = [
-
 	// de_mirage
 	{ map: 'de_mirage', site: 'A', position: '-273.56, -2156.22, -175.38' },
 	{ map: 'de_mirage', site: 'A', position: '-585.13, -2265.45, -200.00' },
@@ -100,5 +99,5 @@ export const testCases: SiteTestCase[] = [
 	{ map: 'de_vertigo', site: 'B', position: '-2354.56, 687.56, -200.00' },
 	{ map: 'de_vertigo', site: 'B', position: '-2155.04, 655.45, -200.00' },
 	{ map: 'de_vertigo', site: 'B', position: '-2155.04, 896.29, -200.00' },
-	{ map: 'de_vertigo', site: 'B', position: '-2258.79, 807.98, -200.00' },
+	{ map: 'de_vertigo', site: 'B', position: '-2258.79, 807.98, -200.00' }
 ];
