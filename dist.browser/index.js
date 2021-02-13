@@ -79,7 +79,7 @@ var CSGOGSI = /** @class */ (function () {
                         bomb.state === 'defusing' ||
                         bomb.state === 'planting'
                         ? this.findSite(raw.map.name, bomb.position.split(', ').map(Number))
-                        : undefined
+                        : null
                 }
                 : null,
             grenades: raw.grenades,
@@ -105,25 +105,18 @@ var CSGOGSI = /** @class */ (function () {
         }
         var last = this.last;
         // Round end
-        if ((last.map.team_ct.score !== data.map.team_ct.score) !== (last.map.team_t.score !== data.map.team_t.score)) {
-            if (last.map.team_ct.score !== data.map.team_ct.score) {
-                var round = {
-                    winner: data.map.team_ct,
-                    loser: data.map.team_t,
-                    map: data.map,
-                    mapEnd: false
-                };
-                this.execute('roundEnd', round);
-            }
-            else {
-                var round = {
-                    winner: data.map.team_t,
-                    loser: data.map.team_ct,
-                    map: data.map,
-                    mapEnd: false
-                };
-                this.execute('roundEnd', round);
-            }
+        var didCTScoreChanged = last.map.team_ct.score !== data.map.team_ct.score;
+        var didTScoreChanged = last.map.team_t.score !== data.map.team_t.score;
+        if (didCTScoreChanged !== didTScoreChanged) {
+            var winner = didCTScoreChanged ? data.map.team_ct : data.map.team_t;
+            var loser = didCTScoreChanged ? data.map.team_t : data.map.team_ct;
+            var roundScore = {
+                winner: winner,
+                loser: loser,
+                map: data.map,
+                mapEnd: false
+            };
+            this.execute('roundEnd', roundScore);
         }
         //Bomb actions
         if (last.bomb && data.bomb) {
@@ -258,7 +251,7 @@ var CSGOGSI = /** @class */ (function () {
         if (mapName in mapReference) {
             return mapReference[mapName](position);
         }
-        return;
+        return null;
     };
     return CSGOGSI;
 }());

@@ -516,7 +516,7 @@ export const createGSIPacket = (options: OptionalCSGO = {}, mutate?: (CSGO: CSGO
 	};
 
 	const gsi: CSGORaw = merge(base, options);
-	if(typeof mutate === "function"){
+	if (typeof mutate === 'function') {
 		return mutate(gsi);
 	}
 	return gsi;

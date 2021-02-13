@@ -2,7 +2,7 @@ import CSGOGSI, { CSGORaw, Events, PlayerRaw, TeamExtension } from '../tsc';
 import { createGSIPacket } from './data';
 
 const createGSIAndCallback = <K extends keyof Events>(eventName: K) => {
-	const callback = jest.fn(() => { });
+	const callback = jest.fn(() => {});
 
 	const GSI = new CSGOGSI();
 
@@ -149,7 +149,7 @@ test('data > assign teams in the second half, left to T, right to CT', () => {
 		if (player.observer_slot !== undefined) {
 			player.observer_slot = 9 - player.observer_slot;
 		}
-	}
+	};
 
 	const mapGSI = (gsi: CSGORaw) => {
 		const { allplayers } = gsi;
@@ -157,7 +157,7 @@ test('data > assign teams in the second half, left to T, right to CT', () => {
 			Object.values(allplayers).forEach(mutatePlayer);
 		}
 		return gsi;
-	}
+	};
 
 	expect(GSI.digest(createGSIPacket({}, mapGSI))?.map?.team_ct.name).toBe('Right Team');
 	expect(GSI.digest(createGSIPacket({}, mapGSI))?.map?.team_t.name).toBe('Left Team');
@@ -254,7 +254,7 @@ test('event > round: ended listener, CT wins', () => {
 	GSI.digest(createGSIPacket({ map: { team_ct: { score: 15 } } }));
 
 	expect(callback.mock.calls.length).toBe(1);
-	expect((callback.mock.calls[0] as any)[0].winner.side).toBe("CT");
+	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('CT');
 });
 
 test('event > round: ended listener, T wins', () => {
@@ -264,27 +264,27 @@ test('event > round: ended listener, T wins', () => {
 	GSI.digest(createGSIPacket({ map: { team_t: { score: 15 } } }));
 
 	expect(callback.mock.calls.length).toBe(1);
-	expect((callback.mock.calls[0] as any)[0].winner.side).toBe("T");
+	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('T');
 });
 
 test('event > match: ended listener, CT wins', () => {
 	const { GSI, callback } = createGSIAndCallback('matchEnd');
 
 	GSI.digest(createGSIPacket({ map: { team_ct: { score: 15 }, team_t: { score: 10 } } }));
-	GSI.digest(createGSIPacket({ map: { team_ct: { score: 16 }, team_t: { score: 10 }, phase: "gameover" } }));
+	GSI.digest(createGSIPacket({ map: { team_ct: { score: 16 }, team_t: { score: 10 }, phase: 'gameover' } }));
 
 	expect(callback.mock.calls.length).toBe(1);
-	expect((callback.mock.calls[0] as any)[0].winner.side).toBe("CT");
+	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('CT');
 });
 
 test('event > match: ended listener, T wins', () => {
 	const { GSI, callback } = createGSIAndCallback('matchEnd');
 
 	GSI.digest(createGSIPacket({ map: { team_t: { score: 15 }, team_ct: { score: 10 } } }));
-	GSI.digest(createGSIPacket({ map: { team_t: { score: 16 }, team_ct: { score: 10 }, phase: "gameover" } }));
+	GSI.digest(createGSIPacket({ map: { team_t: { score: 16 }, team_ct: { score: 10 }, phase: 'gameover' } }));
 
 	expect(callback.mock.calls.length).toBe(1);
-	expect((callback.mock.calls[0] as any)[0].winner.side).toBe("T");
+	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('T');
 });
 
 test('data > bomb: find the correct site', () => {
@@ -294,18 +294,21 @@ test('data > bomb: find the correct site', () => {
 		site: 'A' | 'B';
 	}
 
-	const testCases: SiteTestCase[] = [
-		{ map: "de_mirage", site: 'A', position: "-273.56, -2156.22, -175.38" }
-	]
-
+	const testCases: SiteTestCase[] = [{ map: 'de_mirage', site: 'A', position: '-273.56, -2156.22, -175.38' }];
 
 	for (const testCase of testCases) {
 		const GSI = new CSGOGSI();
 
-		expect(GSI.digest(createGSIPacket({ map: { name: testCase.map }, bomb: { state: "planted", position: testCase.position } }))?.bomb?.site).toBe(testCase.site);
+		expect(
+			GSI.digest(
+				createGSIPacket({
+					map: { name: testCase.map },
+					bomb: { state: 'planted', position: testCase.position }
+				})
+			)?.bomb?.site
+		).toBe(testCase.site);
 	}
 });
-
 
 test('data > bomb: return null on unknown map', () => {
 	interface SiteTestCase {
@@ -315,18 +318,24 @@ test('data > bomb: return null on unknown map', () => {
 	}
 
 	const testCases: SiteTestCase[] = [
-		{ map: "de_mirage2", site: 'A', position: "-273.56, -2156.22, -175.38" },
-		{ map: "de_dust22", site: 'A', position: "-273.56, -2156.22, -175.38" },
-		{ map: "de_forestation", site: 'A', position: "-273.56, -2156.22, -175.38" },
-		{ map: "de_office", site: 'A', position: "-273.56, -2156.22, -175.38" },
-		{ map: "de_vertiso", site: 'A', position: "-273.56, -2156.22, -175.38" },
-		{ map: "workshop/de_testing_3", site: 'A', position: "-273.56, -2156.22, -175.38" },
-	]
-
+		{ map: 'de_mirage2', site: 'A', position: '-273.56, -2156.22, -175.38' },
+		{ map: 'de_dust22', site: 'A', position: '-273.56, -2156.22, -175.38' },
+		{ map: 'de_forestation', site: 'A', position: '-273.56, -2156.22, -175.38' },
+		{ map: 'de_office', site: 'A', position: '-273.56, -2156.22, -175.38' },
+		{ map: 'de_vertiso', site: 'A', position: '-273.56, -2156.22, -175.38' },
+		{ map: 'workshop/de_testing_3', site: 'A', position: '-273.56, -2156.22, -175.38' }
+	];
 
 	for (const testCase of testCases) {
 		const GSI = new CSGOGSI();
 
-		expect(GSI.digest(createGSIPacket({ map: { name: testCase.map }, bomb: { state: "planted", position: testCase.position } }))?.bomb?.site).toBeNull();
+		expect(
+			GSI.digest(
+				createGSIPacket({
+					map: { name: testCase.map },
+					bomb: { state: 'planted', position: testCase.position }
+				})
+			)?.bomb?.site
+		).toBeNull();
 	}
 });

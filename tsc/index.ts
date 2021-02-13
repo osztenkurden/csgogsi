@@ -145,12 +145,12 @@ export default class CSGOGSI {
 			const winner = didCTScoreChanged ? data.map.team_ct : data.map.team_t;
 			const loser = didCTScoreChanged ? data.map.team_t : data.map.team_ct;
 
-			const roundScore: I.Score = { 
+			const roundScore: I.Score = {
 				winner,
 				loser,
 				map: data.map,
 				mapEnd: false
-			}
+			};
 			this.execute('roundEnd', roundScore);
 		}
 		//Bomb actions

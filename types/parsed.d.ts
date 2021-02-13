@@ -53,7 +53,7 @@ export interface Bomb {
 	state: 'carried' | 'planted' | 'dropped' | 'defused' | 'defusing' | 'planting' | 'exploded';
 	countdown?: string;
 	player?: Player;
-	site?: 'A' | 'B';
+	site: 'A' | 'B' | null;
 	position: string;
 }
 export interface Map {
