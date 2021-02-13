@@ -87,8 +87,12 @@ export default class CSGOGSI {
 			orientation: !ctOnLeft ? 'left' : 'right',
 			extra: (tExtension && tExtension.extra) || {}
 		};
+
 		const players = this.parsePlayers(raw.allplayers, [teamCT, teamT]);
-		const observed = players.filter(player => player.steamid === raw.player.steamid)[0] || null;
+		const observed = players.find(player => player.steamid === raw.player.steamid) || null;
+
+
+
 		const data: I.CSGO = {
 			provider: raw.provider,
 			round: raw.round
@@ -105,7 +109,7 @@ export default class CSGOGSI {
 						state: bomb.state,
 						countdown: bomb.countdown,
 						position: bomb.position,
-						player: bomb ? players.filter(player => player.steamid === bomb.player)[0] : undefined,
+						player: players.find(player => player.steamid === bomb.player) || undefined,
 						site:
 							bomb.state === 'planted' ||
 							bomb.state === 'defused' ||
@@ -283,13 +287,13 @@ export default class CSGOGSI {
 	}
 	findSite(mapName: string, position: number[]) {
 		const mapReference: { [mapName: string]: (position: number[]) => 'A' | 'B' } = {
-			de_mirage: position => (position[1] < 1500 ? 'A' : 'B'),
+			de_mirage: position => (position[1] < -600 ? 'A' : 'B'),
 			de_cache: position => (position[1] > 0 ? 'A' : 'B'),
 			de_overpass: position => (position[2] > 400 ? 'A' : 'B'),
 			de_nuke: position => (position[2] > -500 ? 'A' : 'B'),
 			de_dust2: position => (position[0] > -500 ? 'A' : 'B'),
 			de_inferno: position => (position[0] > 1400 ? 'A' : 'B'),
-			de_vertigo: position => (position[1] < 1400 ? 'A' : 'B'),
+			de_vertigo: position => (position[0] > -1400 ? 'A' : 'B'),
 			de_train: position => (position[1] > -450 ? 'A' : 'B')
 		};
 		if (mapName in mapReference) {

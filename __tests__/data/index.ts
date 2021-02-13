@@ -1,10 +1,11 @@
-import { CSGORaw } from '../../tsc';
+import { CSGORaw, KillEvent, RawKill } from '../../tsc';
 import { O } from 'ts-toolbelt';
 import merge from 'lodash.merge';
 
-type OptionalCSGO = O.Optional<CSGORaw, keyof CSGORaw, 'deep'>;
+type OptionalCSGORaw = O.Optional<CSGORaw, keyof CSGORaw, 'deep'>;
+type OptionalKillRaw = O.Optional<RawKill, keyof RawKill, 'deep'>;
 
-export const createGSIPacket = (options: OptionalCSGO = {}, mutate?: (CSGO: CSGORaw) => CSGORaw) => {
+export const createGSIPacket = (options: OptionalCSGORaw = {}, mutate?: (CSGO: CSGORaw) => CSGORaw) => {
 	const base: CSGORaw = {
 		provider: {
 			name: 'Counter-Strike: Global Offensive',
@@ -521,3 +522,41 @@ export const createGSIPacket = (options: OptionalCSGO = {}, mutate?: (CSGO: CSGO
 	}
 	return gsi;
 };
+
+export const createKillPacket = (options: OptionalKillRaw = {}) => {
+	const base = {
+		name: 'player_death',
+		clientTime: 123456,
+		keys: {
+			userid: {
+				value: 0,
+				xuid: '76561198238326438',
+			},
+			attacker: {
+				value: 0,
+				xuid: '76561199031036917',
+			},
+			assister: {
+				value: 0,
+				xuid: 'string',
+			},
+			assistedflash: false,
+			weapon: 'string',
+			weapon_itemid: 'string',
+			weapon_fauxitemid: 'string',
+			weapon_originalowner_xuid: 'string',
+			headshot: false,
+			dominated: 0,
+			revenge: 0,
+			wipe: 0,
+			attackerblind: false,
+			thrusmoke: false,
+			noscope: false,
+			penetrated: false,
+			noreplay: false,
+		}
+	}
+	const kill: RawKill = merge(base, options);
+
+	return kill;
+}
