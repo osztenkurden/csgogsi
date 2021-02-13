@@ -13,41 +13,42 @@ export interface Team {
 	extra: Record<string, string>;
 }
 export interface Player {
-	steamid: string;
-	name: string;
-	observer_slot?: number;
-	team: Team;
-	activity?: string;
-	stats: {
-		kills: number;
-		assists: number;
-		deaths: number;
-		mvps: number;
-		score: number;
-	};
-	weapons: {
-		[key: string]: I.WeaponRaw;
-	};
-	state: {
-		health: number;
-		armor: number;
-		helmet: boolean;
-		defusekit?: boolean;
-		flashed: number;
-		smoked: number;
-		burning: number;
-		money: number;
-		round_kills: number;
-		round_killhs: number;
-		round_totaldmg: number;
-		equip_value: number;
-	};
-	spectarget?: string;
-	position: number[];
-	forward: number[];
-	avatar: string | null;
-	country: string | null;
-	realName: string | null;
+    steamid: string;
+    name: string;
+    observer_slot?: number;
+    team: Team;
+    activity?: string;
+    stats: {
+        kills: number;
+        assists: number;
+        deaths: number;
+        mvps: number;
+        score: number;
+    };
+    weapons: {
+        [key: string]: I.WeaponRaw;
+    };
+    state: {
+        health: number;
+        armor: number;
+        helmet: boolean;
+        defusekit?: boolean;
+        flashed: number;
+        smoked: number;
+        burning: number;
+        money: number;
+        round_kills: number;
+        round_killhs: number;
+        round_totaldmg: number;
+        equip_value: number;
+    };
+    spectarget?: string;
+    position: number[];
+    forward: number[];
+    avatar: string | null;
+    country: string | null;
+    realName: string | null;
+    extra: Record<string, string>;
 }
 export interface Bomb {
 	state: 'carried' | 'planted' | 'dropped' | 'defused' | 'defusing' | 'planting' | 'exploded';
