@@ -25,26 +25,18 @@ export * from './parsed';
 
 export default class CSGOGSI {
 	listeners: Map<string, Function[]>;
-	teams: [TeamExtension?, TeamExtension?];
+	teams: {
+		left?: TeamExtension;
+		right?: TeamExtension;
+	};
 	players: PlayerExtension[];
 	last?: I.CSGO;
 	constructor() {
 		this.listeners = new Map();
-		this.teams = [];
+		this.teams = {};
 		this.players = [];
 		/*this.on('data', _data => {
         });*/
-	}
-
-	setTeamOne(team: TeamExtension) {
-		this.teams[0] = team;
-	}
-	setTeamTwo(team: TeamExtension) {
-		this.teams[1] = team;
-	}
-
-	loadPlayers(players: PlayerExtension[]) {
-		this.players = players;
 	}
 
 	digest(raw: I.CSGORaw): I.CSGO | null {
@@ -59,13 +51,13 @@ export default class CSGOGSI {
 			).length > 2;
 		let ctExtension = null,
 			tExtension = null;
-		if (this.teams[0]) {
-			if (ctOnLeft) ctExtension = this.teams[0];
-			else tExtension = this.teams[0];
+		if (this.teams.left) {
+			if (ctOnLeft) ctExtension = this.teams.left;
+			else tExtension = this.teams.left;
 		}
-		if (this.teams[1]) {
-			if (ctOnLeft) tExtension = this.teams[1];
-			else ctExtension = this.teams[1];
+		if (this.teams.right) {
+			if (ctOnLeft) tExtension = this.teams.right;
+			else ctExtension = this.teams.right;
 		}
 		const bomb = raw.bomb;
 		const teams = [raw.map.team_ct, raw.map.team_t];
@@ -251,7 +243,7 @@ export default class CSGOGSI {
 			activity: oldPlayer.activity,
 			stats: oldPlayer.match_stats,
 			weapons: oldPlayer.weapons,
-			state: oldPlayer.state,
+			state: { ...oldPlayer.state, smoked: oldPlayer.state.smoked || 0 },
 			spectarget: oldPlayer.spectarget,
 			position: oldPlayer.position.split(', ').map(pos => Number(pos)),
 			forward: oldPlayer.forward.split(', ').map(pos => Number(pos)),

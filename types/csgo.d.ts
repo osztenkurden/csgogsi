@@ -8,7 +8,7 @@ export declare type RoundOutcome =
 export interface WeaponRaw {
 	name: string;
 	paintkit: string;
-	type: 'Knife' | 'Pistol' | 'Grenade' | 'Rifle' | 'SniperRifle' | 'C4';
+	type?: 'Knife' | 'Pistol' | 'Grenade' | 'Rifle' | 'SniperRifle' | 'C4' | 'Submachine Gun';
 	ammo_clip?: number;
 	ammo_clip_max?: number;
 	ammo_reserve?: number;
@@ -45,7 +45,7 @@ export interface PlayerRaw {
 		helmet: boolean;
 		defusekit?: boolean;
 		flashed: number;
-		smoked: number;
+		smoked?: number;
 		burning: number;
 		money: number;
 		round_kills: number;
@@ -54,6 +54,30 @@ export interface PlayerRaw {
 		equip_value: number;
 	};
 	spectarget?: string;
+	position: string;
+	forward: string;
+}
+export interface PlayerObservedRaw {
+	steamid: string;
+	clan?: string;
+	name: string;
+	observer_slot: number;
+	team: string;
+	activity: string;
+	state: {
+		health: number;
+		armor: number;
+		helmet: boolean;
+		flashed: number;
+		smoked: number;
+		burning: number;
+		money: number;
+		round_kills: number;
+		round_killhs: number;
+		round_totaldmg: number;
+		equip_value: number;
+	};
+	spectarget: string;
 	position: string;
 	forward: string;
 }
@@ -87,7 +111,7 @@ export interface RoundRaw {
 	win_team?: Side;
 }
 export interface BombRaw {
-	state: 'carried' | 'planted' | 'dropped' | 'defused' | 'defusing' | 'planting';
+	state: 'carried' | 'planted' | 'dropped' | 'defused' | 'defusing' | 'planting' | 'exploded';
 	countdown?: string;
 	player?: string;
 	position: string;
@@ -100,7 +124,7 @@ export interface CSGORaw {
 	provider: Provider;
 	map?: MapRaw;
 	round?: RoundRaw;
-	player: PlayerRaw;
+	player: PlayerObservedRaw;
 	allplayers?: PlayersRaw;
 	bomb?: BombRaw;
 	grenades?: {

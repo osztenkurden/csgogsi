@@ -20,13 +20,13 @@ export * from './interfaces';
 export * from './parsed';
 export default class CSGOGSI {
 	listeners: Map<string, Function[]>;
-	teams: [TeamExtension?, TeamExtension?];
+	teams: {
+		left?: TeamExtension;
+		right?: TeamExtension;
+	};
 	players: PlayerExtension[];
 	last?: I.CSGO;
 	constructor();
-	setTeamOne(team: TeamExtension): void;
-	setTeamTwo(team: TeamExtension): void;
-	loadPlayers(players: PlayerExtension[]): void;
 	digest(raw: I.CSGORaw): I.CSGO | null;
 	digestMIRV(raw: I.RawKill): I.KillEvent | null;
 	parsePlayers(players: I.PlayersRaw, teams: [I.Team, I.Team]): I.Player[];
