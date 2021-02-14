@@ -39,6 +39,16 @@ test('parser > dont parse data in the menu', () => {
 	expect(result3).toBeNull();
 });
 
+test('parser > dont break with no bomb data', () => {
+	const GSI = new CSGOGSI();
+
+	GSI.digest({ ...createGSIPacket(), bomb: undefined });
+	const result = GSI.digest({ ...createGSIPacket(), bomb: undefined });
+
+	expect(result).toBeDefined();
+	expect(result?.bomb).toBeNull();
+});
+
 test('parser > remove all listeners from specific event', () => {
 	const { GSI, callback } = createGSIAndCallback('data');
 
@@ -81,17 +91,16 @@ test('parser > remove specific listeners from specific event #3', () => {
 	expect(callback.mock.calls.length).toBe(0);
 });
 
-/*
-test('data > find correct bomb site', () => {
-	const { GSI, callback } = createGSIAndCallback('data');
+test('parser > remove specific listeners fom specific event #4', () => {
+	const callback = jest.fn(() => {});
+	const GSI = new CSGOGSI();
 
-	GSI.removeListeners('data');
-	
+	GSI.removeListener('data', callback);
+
 	GSI.digest(createGSIPacket());
 
 	expect(callback.mock.calls.length).toBe(0);
-
-});*/
+});
 
 test('data > assign teams in the first half, left to CT, right to T', () => {
 	const left: TeamExtension = {

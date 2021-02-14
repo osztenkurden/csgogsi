@@ -1,4 +1,4 @@
-![Statements](https://img.shields.io/badge/Coverage-99.25%25-brightgreen.svg)
+![Statements](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)
 
 # CS:GO GSI Digest
 

@@ -24,7 +24,7 @@ export * from './interfaces';
 export * from './parsed';
 
 export default class CSGOGSI {
-	listeners: Map<string, Function[]>;
+	listeners: Map<keyof I.Events, I.Events[keyof I.Events][]>;
 	teams: {
 		left?: TeamExtension;
 		right?: TeamExtension;
@@ -258,7 +258,7 @@ export default class CSGOGSI {
 		const listeners = this.listeners.get(eventName);
 		if (!listeners) return false;
 		listeners.forEach(callback => {
-			if (callback) callback(argument);
+			callback(argument);
 		});
 		return true;
 	}
@@ -272,8 +272,7 @@ export default class CSGOGSI {
 		return true;
 	}
 	removeListener<K extends keyof I.Events>(eventName: K, listener: Function) {
-		const listOfListeners = this.listeners.get(eventName);
-		if (!listOfListeners) return false;
+		const listOfListeners = this.listeners.get(eventName) || [];
 		this.listeners.set(
 			eventName,
 			listOfListeners.filter(callback => callback !== listener)

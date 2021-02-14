@@ -19,7 +19,7 @@ export interface PlayerExtension {
 export * from './interfaces';
 export * from './parsed';
 export default class CSGOGSI {
-	listeners: Map<string, Function[]>;
+	listeners: Map<keyof I.Events, I.Events[keyof I.Events][]>;
 	teams: {
 		left?: TeamExtension;
 		right?: TeamExtension;
