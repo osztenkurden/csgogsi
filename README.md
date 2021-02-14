@@ -1,6 +1,8 @@
 ![Statements](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)
-![CI](https://github.com/osztenkurden/csgogsi/workflows/CI/badge.svg?branch=tests)
-
+![CI](https://img.shields.io/github/workflow/status/osztenkurden/csgogsi/CI)
+![Dependencies](https://img.shields.io/david/osztenkurden/csgogsi)
+![Downloads](https://img.shields.io/npm/dm/csgogsi)
+![Version](https://img.shields.io/npm/v/csgogsi)
 # CS:GO GSI Digest
 
 ## How does it work?

@@ -6,7 +6,7 @@ export declare const mapSteamIDToPlayer: (
 		T: Team;
 	},
 	extensions: PlayerExtension[]
-) => (steamid: string, _i: number, steamids: string[]) => Player;
+) => (steamid: string) => Player;
 export declare const parseTeam: (
 	team: TeamRaw,
 	orientation: Orientation,

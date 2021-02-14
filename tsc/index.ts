@@ -1,33 +1,21 @@
-import {
-	CSGO,
-	CSGORaw,
-	Events,
-	KillEvent,
-	Player,
-	PlayerExtension,
-	PlayerRaw,
-	PlayersRaw,
-	RawKill,
-	Score,
-	Team,
-	TeamExtension
-} from './interfaces';
+import { CSGO, CSGORaw, Events, KillEvent, PlayerExtension, RawKill, Score, TeamExtension } from './interfaces';
 import { mapSteamIDToPlayer, parseTeam } from './utils';
 
 export default class CSGOGSI {
 	listeners: Map<keyof Events, Events[keyof Events][]>;
 	teams: {
-		left?: TeamExtension;
-		right?: TeamExtension;
+		left: TeamExtension | null;
+		right: TeamExtension | null;
 	};
 	players: PlayerExtension[];
 	last?: CSGO;
 	constructor() {
 		this.listeners = new Map();
-		this.teams = {};
+		this.teams = {
+			left: null,
+			right: null
+		};
 		this.players = [];
-		/*this.on('data', _data => {
-		});*/
 	}
 
 	digest(raw: CSGORaw): CSGO | null {
@@ -35,29 +23,30 @@ export default class CSGOGSI {
 			return null;
 		}
 
-		const ctOnLeft =
+		const isCTLeft =
 			Object.values(raw.allplayers).filter(
 				({ observer_slot, team }) =>
 					observer_slot !== undefined && observer_slot > 1 && observer_slot <= 5 && team === 'CT'
 			).length > 2;
-		let ctExtension = null,
-			tExtension = null;
-		if (this.teams.left) {
-			if (ctOnLeft) ctExtension = this.teams.left;
-			else tExtension = this.teams.left;
-		}
-		if (this.teams.right) {
-			if (ctOnLeft) tExtension = this.teams.right;
-			else ctExtension = this.teams.right;
-		}
+
 		const bomb = raw.bomb;
 
-		const teamCT = parseTeam(raw.map.team_ct, ctOnLeft ? 'left' : 'right', 'CT', ctExtension);
-		const teamT = parseTeam(raw.map.team_t, ctOnLeft ? 'right' : 'left', 'T', tExtension);
-
-		const players = Object.keys(raw.allplayers).map(
-			mapSteamIDToPlayer(raw.allplayers, { CT: teamCT, T: teamT }, this.players)
+		const teamCT = parseTeam(
+			raw.map.team_ct,
+			isCTLeft ? 'left' : 'right',
+			'CT',
+			isCTLeft ? this.teams.left : this.teams.right
 		);
+		const teamT = parseTeam(
+			raw.map.team_t,
+			isCTLeft ? 'right' : 'left',
+			'T',
+			isCTLeft ? this.teams.right : this.teams.left
+		);
+
+		const playerMapper = mapSteamIDToPlayer(raw.allplayers, { CT: teamCT, T: teamT }, this.players);
+
+		const players = Object.keys(raw.allplayers).map(playerMapper);
 		const observed = players.find(player => player.steamid === raw.player.steamid) || null;
 
 		const data: CSGO = {
@@ -82,7 +71,7 @@ export default class CSGOGSI {
 							bomb.state === 'defused' ||
 							bomb.state === 'defusing' ||
 							bomb.state === 'planting'
-								? this.findSite(raw.map.name, bomb.position.split(', ').map(Number))
+								? CSGOGSI.findSite(raw.map.name, bomb.position.split(', ').map(Number))
 								: null
 				  }
 				: null,
@@ -160,7 +149,7 @@ export default class CSGOGSI {
 		return data;
 	}
 
-	digestMIRV(raw: RawKill): KillEvent | null {
+	digestMIRV(raw: RawKill) {
 		if (!this.last) {
 			return null;
 		}
@@ -189,15 +178,6 @@ export default class CSGOGSI {
 		return kill;
 	}
 
-	execute<K extends keyof Events>(eventName: K, argument?: any) {
-		const listeners = this.listeners.get(eventName);
-		if (!listeners) return false;
-		listeners.forEach(callback => {
-			callback(argument);
-		});
-		return true;
-	}
-
 	on<K extends keyof Events>(eventName: K, listener: Events[K]) {
 		const listOfListeners = this.listeners.get(eventName) || [];
 
@@ -206,7 +186,7 @@ export default class CSGOGSI {
 
 		return true;
 	}
-	removeListener<K extends keyof Events>(eventName: K, listener: Function) {
+	removeListener<K extends keyof Events>(eventName: K, listener: Events[K]) {
 		const listOfListeners = this.listeners.get(eventName) || [];
 		this.listeners.set(
 			eventName,
@@ -218,7 +198,17 @@ export default class CSGOGSI {
 		this.listeners.set(eventName, []);
 		return true;
 	}
-	findSite(mapName: string, position: number[]) {
+
+	private execute<K extends keyof Events>(eventName: K, argument?: any) {
+		const listeners = this.listeners.get(eventName);
+		if (!listeners) return false;
+		listeners.forEach(callback => {
+			callback(argument);
+		});
+		return true;
+	}
+
+	static findSite(mapName: string, position: number[]) {
 		const mapReference: { [mapName: string]: (position: number[]) => 'A' | 'B' } = {
 			de_mirage: position => (position[1] < -600 ? 'A' : 'B'),
 			de_cache: position => (position[1] > 0 ? 'A' : 'B'),

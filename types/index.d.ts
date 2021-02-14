@@ -2,19 +2,19 @@ import { CSGO, CSGORaw, Events, KillEvent, PlayerExtension, RawKill, TeamExtensi
 export default class CSGOGSI {
 	listeners: Map<keyof Events, Events[keyof Events][]>;
 	teams: {
-		left?: TeamExtension;
-		right?: TeamExtension;
+		left: TeamExtension | null;
+		right: TeamExtension | null;
 	};
 	players: PlayerExtension[];
 	last?: CSGO;
 	constructor();
 	digest(raw: CSGORaw): CSGO | null;
 	digestMIRV(raw: RawKill): KillEvent | null;
-	execute<K extends keyof Events>(eventName: K, argument?: any): boolean;
 	on<K extends keyof Events>(eventName: K, listener: Events[K]): boolean;
-	removeListener<K extends keyof Events>(eventName: K, listener: Function): boolean;
+	removeListener<K extends keyof Events>(eventName: K, listener: Events[K]): boolean;
 	removeListeners<K extends keyof Events>(eventName: K): boolean;
-	findSite(mapName: string, position: number[]): 'A' | 'B' | null;
+	private execute;
+	static findSite(mapName: string, position: number[]): 'A' | 'B' | null;
 }
 export {
 	CSGO,
