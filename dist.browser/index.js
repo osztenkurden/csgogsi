@@ -1,31 +1,19 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var CSGOGSI = /** @class */ (function () {
-    function CSGOGSI() {
+"use strict";
+
+class CSGOGSI {
+    constructor() {
         this.listeners = new Map();
         this.teams = {};
         this.players = [];
         /*this.on('data', _data => {
         });*/
     }
-    CSGOGSI.prototype.digest = function (raw) {
+    digest(raw) {
         if (!raw.allplayers || !raw.map || !raw.phase_countdowns) {
             return null;
         }
-        var ctOnLeft = Object.values(raw.allplayers).filter(function (_a) {
-            var observer_slot = _a.observer_slot, team = _a.team;
-            return observer_slot !== undefined && observer_slot > 1 && observer_slot <= 5 && team === 'CT';
-        }).length > 2;
-        var ctExtension = null, tExtension = null;
+        const ctOnLeft = Object.values(raw.allplayers).filter(({ observer_slot, team }) => observer_slot !== undefined && observer_slot > 1 && observer_slot <= 5 && team === 'CT').length > 2;
+        let ctExtension = null, tExtension = null;
         if (this.teams.left) {
             if (ctOnLeft)
                 ctExtension = this.teams.left;
@@ -38,9 +26,9 @@ var CSGOGSI = /** @class */ (function () {
             else
                 ctExtension = this.teams.right;
         }
-        var bomb = raw.bomb;
-        var teams = [raw.map.team_ct, raw.map.team_t];
-        var teamCT = {
+        const bomb = raw.bomb;
+        const teams = [raw.map.team_ct, raw.map.team_t];
+        const teamCT = {
             score: teams[0].score,
             logo: (ctExtension && ctExtension.logo) || null,
             consecutive_round_losses: teams[0].consecutive_round_losses,
@@ -53,7 +41,7 @@ var CSGOGSI = /** @class */ (function () {
             orientation: ctOnLeft ? 'left' : 'right',
             extra: (ctExtension && ctExtension.extra) || {}
         };
-        var teamT = {
+        const teamT = {
             score: teams[1].score,
             logo: (tExtension && tExtension.logo) || null,
             consecutive_round_losses: teams[1].consecutive_round_losses,
@@ -66,9 +54,9 @@ var CSGOGSI = /** @class */ (function () {
             orientation: !ctOnLeft ? 'left' : 'right',
             extra: (tExtension && tExtension.extra) || {}
         };
-        var players = this.parsePlayers(raw.allplayers, [teamCT, teamT]);
-        var observed = players.find(function (player) { return player.steamid === raw.player.steamid; }) || null;
-        var data = {
+        const players = this.parsePlayers(raw.allplayers, [teamCT, teamT]);
+        const observed = players.find(player => player.steamid === raw.player.steamid) || null;
+        const data = {
             provider: raw.provider,
             round: raw.round
                 ? {
@@ -84,7 +72,7 @@ var CSGOGSI = /** @class */ (function () {
                     state: bomb.state,
                     countdown: bomb.countdown,
                     position: bomb.position,
-                    player: players.find(function (player) { return player.steamid === bomb.player; }) || undefined,
+                    player: players.find(player => player.steamid === bomb.player) || undefined,
                     site: bomb.state === 'planted' ||
                         bomb.state === 'defused' ||
                         bomb.state === 'defusing' ||
@@ -114,16 +102,16 @@ var CSGOGSI = /** @class */ (function () {
             this.execute('data', data);
             return data;
         }
-        var last = this.last;
+        const last = this.last;
         // Round end
-        var didCTScoreChanged = last.map.team_ct.score !== data.map.team_ct.score;
-        var didTScoreChanged = last.map.team_t.score !== data.map.team_t.score;
+        const didCTScoreChanged = last.map.team_ct.score !== data.map.team_ct.score;
+        const didTScoreChanged = last.map.team_t.score !== data.map.team_t.score;
         if (didCTScoreChanged !== didTScoreChanged) {
-            var winner = didCTScoreChanged ? data.map.team_ct : data.map.team_t;
-            var loser = didCTScoreChanged ? data.map.team_t : data.map.team_ct;
-            var roundScore = {
-                winner: winner,
-                loser: loser,
+            const winner = didCTScoreChanged ? data.map.team_ct : data.map.team_t;
+            const loser = didCTScoreChanged ? data.map.team_t : data.map.team_ct;
+            const roundScore = {
+                winner,
+                loser,
                 map: data.map,
                 mapEnd: false
             };
@@ -152,11 +140,11 @@ var CSGOGSI = /** @class */ (function () {
         }
         // Match end
         if (data.map.phase === 'gameover' && last.map.phase !== 'gameover') {
-            var winner = data.map.team_ct.score > data.map.team_t.score ? data.map.team_ct : data.map.team_t;
-            var loser = data.map.team_ct.score > data.map.team_t.score ? data.map.team_t : data.map.team_ct;
-            var final = {
-                winner: winner,
-                loser: loser,
+            const winner = data.map.team_ct.score > data.map.team_t.score ? data.map.team_ct : data.map.team_t;
+            const loser = data.map.team_ct.score > data.map.team_t.score ? data.map.team_t : data.map.team_ct;
+            const final = {
+                winner,
+                loser,
                 map: data.map,
                 mapEnd: true
             };
@@ -165,21 +153,21 @@ var CSGOGSI = /** @class */ (function () {
         this.last = data;
         this.execute('data', data);
         return data;
-    };
-    CSGOGSI.prototype.digestMIRV = function (raw) {
+    }
+    digestMIRV(raw) {
         if (!this.last) {
             return null;
         }
-        var data = raw.keys;
-        var killer = this.last.players.filter(function (player) { return player.steamid === data.attacker.xuid; })[0];
-        var victim = this.last.players.filter(function (player) { return player.steamid === data.userid.xuid; })[0];
-        var assister = this.last.players.filter(function (player) { return player.steamid === data.assister.xuid && data.assister.xuid !== '0'; })[0];
+        const data = raw.keys;
+        const killer = this.last.players.filter(player => player.steamid === data.attacker.xuid)[0];
+        const victim = this.last.players.filter(player => player.steamid === data.userid.xuid)[0];
+        const assister = this.last.players.filter(player => player.steamid === data.assister.xuid && data.assister.xuid !== '0')[0];
         if (!killer || !victim) {
             return null;
         }
-        var kill = {
-            killer: killer,
-            victim: victim,
+        const kill = {
+            killer,
+            victim,
             assister: assister || null,
             flashed: data.assistedflash,
             headshot: data.headshot,
@@ -191,77 +179,74 @@ var CSGOGSI = /** @class */ (function () {
         };
         this.execute('kill', kill);
         return kill;
-    };
-    CSGOGSI.prototype.parsePlayers = function (players, teams) {
-        var _this = this;
-        var parsed = [];
-        Object.keys(players).forEach(function (steamid) {
+    }
+    parsePlayers(players, teams) {
+        const parsed = [];
+        Object.keys(players).forEach(steamid => {
             //const team:
-            parsed.push(_this.parsePlayer(players[steamid], steamid, players[steamid].team === 'CT' ? teams[0] : teams[1]));
+            parsed.push(this.parsePlayer(players[steamid], steamid, players[steamid].team === 'CT' ? teams[0] : teams[1]));
         });
         return parsed;
-    };
-    CSGOGSI.prototype.parsePlayer = function (oldPlayer, steamid, team) {
-        var extension = this.players.filter(function (player) { return player.steamid === steamid; })[0];
-        var player = {
-            steamid: steamid,
+    }
+    parsePlayer(oldPlayer, steamid, team) {
+        const extension = this.players.filter(player => player.steamid === steamid)[0];
+        const player = {
+            steamid,
             name: (extension && extension.name) || oldPlayer.name,
             observer_slot: oldPlayer.observer_slot,
             activity: oldPlayer.activity,
             stats: oldPlayer.match_stats,
             weapons: oldPlayer.weapons,
-            state: __assign(__assign({}, oldPlayer.state), { smoked: oldPlayer.state.smoked || 0 }),
+            state: { ...oldPlayer.state, smoked: oldPlayer.state.smoked || 0 },
             spectarget: oldPlayer.spectarget,
-            position: oldPlayer.position.split(', ').map(function (pos) { return Number(pos); }),
-            forward: oldPlayer.forward.split(', ').map(function (pos) { return Number(pos); }),
-            team: team,
+            position: oldPlayer.position.split(', ').map(pos => Number(pos)),
+            forward: oldPlayer.forward.split(', ').map(pos => Number(pos)),
+            team,
             avatar: (extension && extension.avatar) || null,
             country: (extension && extension.country) || null,
             realName: (extension && extension.realName) || null,
             extra: (extension && extension.extra) || null
         };
         return player;
-    };
-    CSGOGSI.prototype.execute = function (eventName, argument) {
-        var listeners = this.listeners.get(eventName);
+    }
+    execute(eventName, argument) {
+        const listeners = this.listeners.get(eventName);
         if (!listeners)
             return false;
-        listeners.forEach(function (callback) {
+        listeners.forEach(callback => {
             callback(argument);
         });
         return true;
-    };
-    CSGOGSI.prototype.on = function (eventName, listener) {
-        var listOfListeners = this.listeners.get(eventName) || [];
+    }
+    on(eventName, listener) {
+        const listOfListeners = this.listeners.get(eventName) || [];
         listOfListeners.push(listener);
         this.listeners.set(eventName, listOfListeners);
         return true;
-    };
-    CSGOGSI.prototype.removeListener = function (eventName, listener) {
-        var listOfListeners = this.listeners.get(eventName) || [];
-        this.listeners.set(eventName, listOfListeners.filter(function (callback) { return callback !== listener; }));
+    }
+    removeListener(eventName, listener) {
+        const listOfListeners = this.listeners.get(eventName) || [];
+        this.listeners.set(eventName, listOfListeners.filter(callback => callback !== listener));
         return true;
-    };
-    CSGOGSI.prototype.removeListeners = function (eventName) {
+    }
+    removeListeners(eventName) {
         this.listeners.set(eventName, []);
         return true;
-    };
-    CSGOGSI.prototype.findSite = function (mapName, position) {
-        var mapReference = {
-            de_mirage: function (position) { return (position[1] < -600 ? 'A' : 'B'); },
-            de_cache: function (position) { return (position[1] > 0 ? 'A' : 'B'); },
-            de_overpass: function (position) { return (position[2] > 400 ? 'A' : 'B'); },
-            de_nuke: function (position) { return (position[2] > -500 ? 'A' : 'B'); },
-            de_dust2: function (position) { return (position[0] > -500 ? 'A' : 'B'); },
-            de_inferno: function (position) { return (position[0] > 1400 ? 'A' : 'B'); },
-            de_vertigo: function (position) { return (position[0] > -1400 ? 'A' : 'B'); },
-            de_train: function (position) { return (position[1] > -450 ? 'A' : 'B'); }
+    }
+    findSite(mapName, position) {
+        const mapReference = {
+            de_mirage: position => (position[1] < -600 ? 'A' : 'B'),
+            de_cache: position => (position[1] > 0 ? 'A' : 'B'),
+            de_overpass: position => (position[2] > 400 ? 'A' : 'B'),
+            de_nuke: position => (position[2] > -500 ? 'A' : 'B'),
+            de_dust2: position => (position[0] > -500 ? 'A' : 'B'),
+            de_inferno: position => (position[0] > 1400 ? 'A' : 'B'),
+            de_vertigo: position => (position[0] > -1400 ? 'A' : 'B'),
+            de_train: position => (position[1] > -450 ? 'A' : 'B')
         };
         if (mapName in mapReference) {
             return mapReference[mapName](position);
         }
         return null;
-    };
-    return CSGOGSI;
-}());
-export default CSGOGSI;
+    }
+}

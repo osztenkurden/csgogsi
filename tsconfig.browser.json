@@ -2,10 +2,10 @@
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "./dist.browser",
-    "target": "es5",
-    "module": "es2015",
+    "target": "ESNext",
+    "module": "commonjs",
     "moduleResolution": "node",
-    "lib": ["es2017", "dom", "es5"]
+    "lib": []
   },
   "include": [
     "./tsc/**/*"
