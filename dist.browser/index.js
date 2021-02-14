@@ -1,5 +1,6 @@
 "use strict";
-
+Object.defineProperty(exports, "__esModule", { value: true });
+const utils_1 = require("./utils");
 class CSGOGSI {
     constructor() {
         this.listeners = new Map();
@@ -27,34 +28,9 @@ class CSGOGSI {
                 ctExtension = this.teams.right;
         }
         const bomb = raw.bomb;
-        const teams = [raw.map.team_ct, raw.map.team_t];
-        const teamCT = {
-            score: teams[0].score,
-            logo: (ctExtension && ctExtension.logo) || null,
-            consecutive_round_losses: teams[0].consecutive_round_losses,
-            timeouts_remaining: teams[0].timeouts_remaining,
-            matches_won_this_series: (ctExtension && ctExtension.map_score) || teams[0].matches_won_this_series,
-            side: 'CT',
-            name: (ctExtension && ctExtension.name) || 'Counter-Terrorists',
-            country: (ctExtension && ctExtension.country) || null,
-            id: (ctExtension && ctExtension.id) || null,
-            orientation: ctOnLeft ? 'left' : 'right',
-            extra: (ctExtension && ctExtension.extra) || {}
-        };
-        const teamT = {
-            score: teams[1].score,
-            logo: (tExtension && tExtension.logo) || null,
-            consecutive_round_losses: teams[1].consecutive_round_losses,
-            timeouts_remaining: teams[1].timeouts_remaining,
-            matches_won_this_series: (tExtension && tExtension.map_score) || teams[1].matches_won_this_series,
-            side: 'T',
-            name: (tExtension && tExtension.name) || 'Terrorists',
-            country: (tExtension && tExtension.country) || null,
-            id: (tExtension && tExtension.id) || null,
-            orientation: !ctOnLeft ? 'left' : 'right',
-            extra: (tExtension && tExtension.extra) || {}
-        };
-        const players = this.parsePlayers(raw.allplayers, [teamCT, teamT]);
+        const teamCT = utils_1.parseTeam(raw.map.team_ct, ctOnLeft ? 'left' : 'right', 'CT', ctExtension);
+        const teamT = utils_1.parseTeam(raw.map.team_t, ctOnLeft ? 'right' : 'left', 'T', tExtension);
+        const players = Object.keys(raw.allplayers).map(utils_1.mapSteamIDToPlayer(raw.allplayers, { CT: teamCT, T: teamT }, this.players));
         const observed = players.find(player => player.steamid === raw.player.steamid) || null;
         const data = {
             provider: raw.provider,
@@ -159,9 +135,9 @@ class CSGOGSI {
             return null;
         }
         const data = raw.keys;
-        const killer = this.last.players.filter(player => player.steamid === data.attacker.xuid)[0];
-        const victim = this.last.players.filter(player => player.steamid === data.userid.xuid)[0];
-        const assister = this.last.players.filter(player => player.steamid === data.assister.xuid && data.assister.xuid !== '0')[0];
+        const killer = this.last.players.find(player => player.steamid === data.attacker.xuid);
+        const victim = this.last.players.find(player => player.steamid === data.userid.xuid);
+        const assister = this.last.players.find(player => player.steamid === data.assister.xuid && data.assister.xuid !== '0');
         if (!killer || !victim) {
             return null;
         }
@@ -179,35 +155,6 @@ class CSGOGSI {
         };
         this.execute('kill', kill);
         return kill;
-    }
-    parsePlayers(players, teams) {
-        const parsed = [];
-        Object.keys(players).forEach(steamid => {
-            //const team:
-            parsed.push(this.parsePlayer(players[steamid], steamid, players[steamid].team === 'CT' ? teams[0] : teams[1]));
-        });
-        return parsed;
-    }
-    parsePlayer(oldPlayer, steamid, team) {
-        const extension = this.players.filter(player => player.steamid === steamid)[0];
-        const player = {
-            steamid,
-            name: (extension && extension.name) || oldPlayer.name,
-            observer_slot: oldPlayer.observer_slot,
-            activity: oldPlayer.activity,
-            stats: oldPlayer.match_stats,
-            weapons: oldPlayer.weapons,
-            state: { ...oldPlayer.state, smoked: oldPlayer.state.smoked || 0 },
-            spectarget: oldPlayer.spectarget,
-            position: oldPlayer.position.split(', ').map(pos => Number(pos)),
-            forward: oldPlayer.forward.split(', ').map(pos => Number(pos)),
-            team,
-            avatar: (extension && extension.avatar) || null,
-            country: (extension && extension.country) || null,
-            realName: (extension && extension.realName) || null,
-            extra: (extension && extension.extra) || null
-        };
-        return player;
     }
     execute(eventName, argument) {
         const listeners = this.listeners.get(eventName);
@@ -250,3 +197,4 @@ class CSGOGSI {
         return null;
     }
 }
+exports.default = CSGOGSI;

@@ -1,16 +1,4 @@
-import {
-	CSGO,
-	CSGORaw,
-	Events,
-	KillEvent,
-	Player,
-	PlayerExtension,
-	PlayerRaw,
-	PlayersRaw,
-	RawKill,
-	Team,
-	TeamExtension
-} from './interfaces';
+import { CSGO, CSGORaw, Events, KillEvent, PlayerExtension, RawKill, TeamExtension } from './interfaces';
 export default class CSGOGSI {
 	listeners: Map<keyof Events, Events[keyof Events][]>;
 	teams: {
@@ -22,8 +10,6 @@ export default class CSGOGSI {
 	constructor();
 	digest(raw: CSGORaw): CSGO | null;
 	digestMIRV(raw: RawKill): KillEvent | null;
-	parsePlayers(players: PlayersRaw, teams: [Team, Team]): Player[];
-	parsePlayer(oldPlayer: PlayerRaw, steamid: string, team: Team): Player;
 	execute<K extends keyof Events>(eventName: K, argument?: any): boolean;
 	on<K extends keyof Events>(eventName: K, listener: Events[K]): boolean;
 	removeListener<K extends keyof Events>(eventName: K, listener: Function): boolean;
@@ -56,5 +42,6 @@ export {
 	KillEvent,
 	RawKill,
 	TeamExtension,
-	PlayerExtension
+	PlayerExtension,
+	Orientation
 } from './interfaces';

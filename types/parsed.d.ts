@@ -1,5 +1,7 @@
 import * as I from './interfaces';
 
+export type Orientation = 'left' | 'right';
+
 export interface Team {
 	logo: string | null;
 	score: number;
@@ -10,7 +12,7 @@ export interface Team {
 	name: string;
 	country: string | null;
 	id: string | null;
-	orientation: 'right' | 'left';
+	orientation: Orientation;
 	extra: Record<string, string>;
 }
 

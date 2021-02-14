@@ -46,12 +46,9 @@ app.listen(3000);
 
 |Method|Description|Example|Returned objects|
 |---|---|---|---|
-|`setTeamOne(team: TeamExtension)`|Set additional info about team in memory|`GSI.setTeamOne({})`||
-|`setTeamTwo(team: TeamExtension)`|As above|As above||
 |`digest(GSIData)`|Gets raw GSI data from CSGO and does magic|`GSI.digest(req.body)`|CSGO Parsed|
 |`on('event', callback)`|Sets listener for given event (check them below)|`GSI.on('roundEnd', team => console.log(team.name));`||
 |`removeListeners('event')`|Remove all listeners for given event|`GSI.removeListeners('bombExplode')`||
-|`loadPlayers(players: PlayerExtension[])`|Loads custom data about players|||
 
 ## Events
 
