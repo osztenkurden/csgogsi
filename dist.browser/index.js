@@ -9,8 +9,6 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-export * from './interfaces';
-export * from './parsed';
 var CSGOGSI = /** @class */ (function () {
     function CSGOGSI() {
         this.listeners = new Map();

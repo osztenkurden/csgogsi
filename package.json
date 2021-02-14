@@ -21,7 +21,8 @@
   "scripts": {
     "test": "jest --coverage",
     "make-badges": "istanbul-badges-readme",
-    "compile": "tsc tsc/index.ts --outDir compiled --lib es2017 -d && tsc -p tsconfig.browser.json && npm run post-compile && mv compiled/*.d.ts types/",
+    "move-files": "mv tsc/*.d.ts compiled && mv compiled/*.d.ts types/",
+    "compile": "rm -rf ./compiled/ && tsc && tsc -p tsconfig.browser.json && npm run post-compile && npm run move-files",
     "lint": "eslint . --ext .ts",
     "prettier-format": "prettier --config .prettierrc --write '**/*.ts'",
     "post-compile": "npm run prettier-format && npm run lint && npm test && npm run make-badges"

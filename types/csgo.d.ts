@@ -1,19 +1,18 @@
-export declare type Side = 'CT' | 'T';
-export declare type RoundOutcome =
-	| 'ct_win_elimination'
-	| 't_win_elimination'
-	| 'ct_win_time'
-	| 'ct_win_defuse'
-	| 't_win_bomb';
+export type Side = 'CT' | 'T';
+export type RoundOutcome = 'ct_win_elimination' | 't_win_elimination' | 'ct_win_time' | 'ct_win_defuse' | 't_win_bomb';
+
+export type WeaponType = 'Knife' | 'Pistol' | 'Grenade' | 'Rifle' | 'SniperRifle' | 'C4' | 'Submachine Gun';
+
 export interface WeaponRaw {
 	name: string;
 	paintkit: string;
-	type?: 'Knife' | 'Pistol' | 'Grenade' | 'Rifle' | 'SniperRifle' | 'C4' | 'Submachine Gun';
+	type?: WeaponType;
 	ammo_clip?: number;
 	ammo_clip_max?: number;
 	ammo_reserve?: number;
 	state: 'active' | 'holstered';
 }
+
 export interface TeamRaw {
 	score: number;
 	consecutive_round_losses: number;
@@ -22,6 +21,7 @@ export interface TeamRaw {
 	name?: string;
 	flag?: string;
 }
+
 export interface PlayerRaw {
 	steamid?: string;
 	name: string;
@@ -57,6 +57,7 @@ export interface PlayerRaw {
 	position: string;
 	forward: string;
 }
+
 export interface PlayerObservedRaw {
 	steamid: string;
 	clan?: string;
@@ -81,9 +82,11 @@ export interface PlayerObservedRaw {
 	position: string;
 	forward: string;
 }
+
 export interface PlayersRaw {
 	[key: string]: PlayerRaw;
 }
+
 export interface Provider {
 	name: 'Counter-Strike: Global Offensive';
 	appid: 730;
@@ -91,6 +94,7 @@ export interface Provider {
 	steamid: string;
 	timestamp: number;
 }
+
 export interface MapRaw {
 	mode: 'competitive';
 	name: string;
@@ -105,11 +109,13 @@ export interface MapRaw {
 		[key: string]: RoundOutcome;
 	};
 }
+
 export interface RoundRaw {
 	phase: 'freezetime' | 'live' | 'over';
 	bomb?: 'planted' | 'exploded' | 'defused';
 	win_team?: Side;
 }
+
 export interface BombRaw {
 	state: 'carried' | 'planted' | 'dropped' | 'defused' | 'defusing' | 'planting' | 'exploded';
 	countdown?: string;
@@ -120,6 +126,7 @@ export interface PhaseRaw {
 	phase?: 'freezetime' | 'bomb' | 'warmup' | 'live' | 'over' | 'defuse' | 'paused' | 'timeout_ct' | 'timeout_t';
 	phase_ends_in: string;
 }
+
 export interface CSGORaw {
 	provider: Provider;
 	map?: MapRaw;
@@ -129,6 +136,14 @@ export interface CSGORaw {
 	bomb?: BombRaw;
 	grenades?: {
 		[key: string]: any;
+		/*{
+            owner:number,
+            position:string,
+            velocity:string,
+            lifetime:string,
+            type:string,
+            effecttime?:string
+        }*/
 	};
 	previously?: any;
 	phase_countdowns?: PhaseRaw;

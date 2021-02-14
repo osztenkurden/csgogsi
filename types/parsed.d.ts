@@ -1,4 +1,5 @@
 import * as I from './interfaces';
+
 export interface Team {
 	logo: string | null;
 	score: number;
@@ -12,6 +13,7 @@ export interface Team {
 	orientation: 'right' | 'left';
 	extra: Record<string, string>;
 }
+
 export interface Player {
 	steamid: string;
 	name: string;
@@ -57,6 +59,7 @@ export interface Bomb {
 	site: 'A' | 'B' | null;
 	position: string;
 }
+
 export interface Map {
 	mode: string;
 	name: string;
@@ -71,11 +74,13 @@ export interface Map {
 		[key: string]: I.RoundOutcome;
 	};
 }
+
 export interface Round {
 	phase: 'freezetime' | 'live' | 'over';
 	bomb?: 'planted' | 'exploded' | 'defused';
 	win_team?: I.Side;
 }
+
 export interface CSGO {
 	provider: I.Provider;
 	map: Map;
@@ -98,6 +103,7 @@ export interface Score {
 	map: Map;
 	mapEnd: boolean;
 }
+
 export interface KillEvent {
 	killer: Player;
 	victim: Player;

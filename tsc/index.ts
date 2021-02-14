@@ -1,45 +1,35 @@
-import * as I from './interfaces';
-
-export interface TeamExtension {
-	id: string;
-	name: string;
-	country: string | null;
-	logo: string | null;
-	map_score: number;
-	extra: Record<string, string>;
-}
-
-export interface PlayerExtension {
-	id: string;
-	name: string;
-	steamid: string;
-	realName: string | null;
-	country: string | null;
-	avatar: string | null;
-	extra: Record<string, string>;
-}
-
-export * from './interfaces';
-
-export * from './parsed';
+import {
+	CSGO,
+	CSGORaw,
+	Events,
+	KillEvent,
+	Player,
+	PlayerExtension,
+	PlayerRaw,
+	PlayersRaw,
+	RawKill,
+	Score,
+	Team,
+	TeamExtension
+} from './interfaces';
 
 export default class CSGOGSI {
-	listeners: Map<keyof I.Events, I.Events[keyof I.Events][]>;
+	listeners: Map<keyof Events, Events[keyof Events][]>;
 	teams: {
 		left?: TeamExtension;
 		right?: TeamExtension;
 	};
 	players: PlayerExtension[];
-	last?: I.CSGO;
+	last?: CSGO;
 	constructor() {
 		this.listeners = new Map();
 		this.teams = {};
 		this.players = [];
 		/*this.on('data', _data => {
-        });*/
+		});*/
 	}
 
-	digest(raw: I.CSGORaw): I.CSGO | null {
+	digest(raw: CSGORaw): CSGO | null {
 		if (!raw.allplayers || !raw.map || !raw.phase_countdowns) {
 			return null;
 		}
@@ -61,7 +51,7 @@ export default class CSGOGSI {
 		}
 		const bomb = raw.bomb;
 		const teams = [raw.map.team_ct, raw.map.team_t];
-		const teamCT: I.Team = {
+		const teamCT: Team = {
 			score: teams[0].score,
 			logo: (ctExtension && ctExtension.logo) || null,
 			consecutive_round_losses: teams[0].consecutive_round_losses,
@@ -74,7 +64,7 @@ export default class CSGOGSI {
 			orientation: ctOnLeft ? 'left' : 'right',
 			extra: (ctExtension && ctExtension.extra) || {}
 		};
-		const teamT: I.Team = {
+		const teamT: Team = {
 			score: teams[1].score,
 			logo: (tExtension && tExtension.logo) || null,
 			consecutive_round_losses: teams[1].consecutive_round_losses,
@@ -91,7 +81,7 @@ export default class CSGOGSI {
 		const players = this.parsePlayers(raw.allplayers, [teamCT, teamT]);
 		const observed = players.find(player => player.steamid === raw.player.steamid) || null;
 
-		const data: I.CSGO = {
+		const data: CSGO = {
 			provider: raw.provider,
 			round: raw.round
 				? {
@@ -147,7 +137,7 @@ export default class CSGOGSI {
 			const winner = didCTScoreChanged ? data.map.team_ct : data.map.team_t;
 			const loser = didCTScoreChanged ? data.map.team_t : data.map.team_ct;
 
-			const roundScore: I.Score = {
+			const roundScore: Score = {
 				winner,
 				loser,
 				map: data.map,
@@ -177,7 +167,7 @@ export default class CSGOGSI {
 			const winner = data.map.team_ct.score > data.map.team_t.score ? data.map.team_ct : data.map.team_t;
 			const loser = data.map.team_ct.score > data.map.team_t.score ? data.map.team_t : data.map.team_ct;
 
-			const final: I.Score = {
+			const final: Score = {
 				winner,
 				loser,
 				map: data.map,
@@ -191,7 +181,7 @@ export default class CSGOGSI {
 		return data;
 	}
 
-	digestMIRV(raw: I.RawKill): I.KillEvent | null {
+	digestMIRV(raw: RawKill): KillEvent | null {
 		if (!this.last) {
 			return null;
 		}
@@ -204,7 +194,7 @@ export default class CSGOGSI {
 		if (!killer || !victim) {
 			return null;
 		}
-		const kill: I.KillEvent = {
+		const kill: KillEvent = {
 			killer,
 			victim,
 			assister: assister || null,
@@ -220,8 +210,8 @@ export default class CSGOGSI {
 		return kill;
 	}
 
-	parsePlayers(players: I.PlayersRaw, teams: [I.Team, I.Team]) {
-		const parsed: I.Player[] = [];
+	parsePlayers(players: PlayersRaw, teams: [Team, Team]) {
+		const parsed: Player[] = [];
 		Object.keys(players).forEach(steamid => {
 			//const team:
 			parsed.push(
@@ -231,9 +221,9 @@ export default class CSGOGSI {
 		return parsed;
 	}
 
-	parsePlayer(oldPlayer: I.PlayerRaw, steamid: string, team: I.Team) {
+	parsePlayer(oldPlayer: PlayerRaw, steamid: string, team: Team) {
 		const extension = this.players.filter(player => player.steamid === steamid)[0];
-		const player: I.Player = {
+		const player: Player = {
 			steamid,
 			name: (extension && extension.name) || oldPlayer.name,
 			observer_slot: oldPlayer.observer_slot,
@@ -254,7 +244,7 @@ export default class CSGOGSI {
 		return player;
 	}
 
-	execute<K extends keyof I.Events>(eventName: K, argument?: any) {
+	execute<K extends keyof Events>(eventName: K, argument?: any) {
 		const listeners = this.listeners.get(eventName);
 		if (!listeners) return false;
 		listeners.forEach(callback => {
@@ -263,7 +253,7 @@ export default class CSGOGSI {
 		return true;
 	}
 
-	on<K extends keyof I.Events>(eventName: K, listener: I.Events[K]) {
+	on<K extends keyof Events>(eventName: K, listener: Events[K]) {
 		const listOfListeners = this.listeners.get(eventName) || [];
 
 		listOfListeners.push(listener);
@@ -271,7 +261,7 @@ export default class CSGOGSI {
 
 		return true;
 	}
-	removeListener<K extends keyof I.Events>(eventName: K, listener: Function) {
+	removeListener<K extends keyof Events>(eventName: K, listener: Function) {
 		const listOfListeners = this.listeners.get(eventName) || [];
 		this.listeners.set(
 			eventName,
@@ -279,7 +269,7 @@ export default class CSGOGSI {
 		);
 		return true;
 	}
-	removeListeners<K extends keyof I.Events>(eventName: K) {
+	removeListeners<K extends keyof Events>(eventName: K) {
 		this.listeners.set(eventName, []);
 		return true;
 	}
@@ -300,3 +290,32 @@ export default class CSGOGSI {
 		return null;
 	}
 }
+
+export {
+	CSGO,
+	CSGORaw,
+	Side,
+	RoundOutcome,
+	WeaponType,
+	WeaponRaw,
+	TeamRaw,
+	PlayerRaw,
+	PlayerObservedRaw,
+	PlayersRaw,
+	Provider,
+	MapRaw,
+	RoundRaw,
+	BombRaw,
+	PhaseRaw,
+	Events,
+	Team,
+	Player,
+	Bomb,
+	Map,
+	Round,
+	Score,
+	KillEvent,
+	RawKill,
+	TeamExtension,
+	PlayerExtension
+} from './interfaces';
