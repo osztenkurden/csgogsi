@@ -1,5 +1,4 @@
 ![Statements](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)
-
 ![CI](https://github.com/osztenkurden/csgogsi/workflows/CI/badge.svg?branch=tests)
 
 # CS:GO GSI Digest
