@@ -24,7 +24,7 @@
     "move-files": "cp tsc/*.d.ts compiled && mv compiled/*.d.ts types/ && mv compiled/index.js lib/",
     "compile": "rm -rf ./compiled/ && tsc && tsc -p tsconfig.browser.json && npm run post-compile && npm run move-files",
     "lint": "eslint . --ext .ts",
-    "prettier-format": "prettier --config .prettierrc --write \"**/*.ts\"",
+    "prettier-format": "prettier --config .prettierrc --write **/*.ts",
     "post-compile": "npm run prettier-format && npm run lint && npm test && npm run make-badges"
   },
   "repository": {
