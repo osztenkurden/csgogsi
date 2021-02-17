@@ -247,6 +247,98 @@ test('data > bomb: undefined player if doesnt exist or not specified', () => {
 	expect(playerNotSpecified?.bomb?.player).toBeUndefined();
 });
 
+test('data > timeout: doesnt crash on lack of phase', () => {
+	const GSI = new CSGOGSI();
+
+	const result = GSI.digest({ ...createGSIPacket(), phase_countdowns: { phase_ends_in: '120' } });
+	const result2 = GSI.digest({ ...createGSIPacket(), phase_countdowns: { phase_ends_in: '120' } });
+
+	expect(result2).toBeTruthy();
+});
+
+test('event > intermission: start', () => {
+	const { GSI, callback } = createGSIAndCallback('intermissionStart');
+
+	GSI.digest(createGSIPacket());
+	GSI.digest(createGSIPacket({ map: { phase: 'intermission' } }));
+
+	expect(callback.mock.calls.length).toBe(1);
+});
+
+test('event > intermission: end', () => {
+	const { GSI, callback } = createGSIAndCallback('intermissionEnd');
+
+	GSI.digest(createGSIPacket({ map: { phase: 'intermission' } }));
+	GSI.digest(createGSIPacket());
+
+	expect(callback.mock.calls.length).toBe(1);
+});
+
+test('event > freezetime: start', () => {
+	const { GSI, callback } = createGSIAndCallback('freezetimeStart');
+
+	GSI.digest(createGSIPacket());
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'freezetime' } }));
+
+	expect(callback.mock.calls.length).toBe(1);
+});
+
+test('event > freezetime: end', () => {
+	const { GSI, callback } = createGSIAndCallback('freezetimeEnd');
+
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'freezetime' } }));
+	GSI.digest(createGSIPacket());
+
+	expect(callback.mock.calls.length).toBe(1);
+});
+
+test('event > timeout: start (CT)', () => {
+	const { GSI, callback } = createGSIAndCallback('timeoutStart');
+
+	GSI.digest(createGSIPacket());
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'timeout_ct' } }));
+
+	expect(callback.mock.calls.length).toBe(1);
+	expect((callback.mock.calls[0] as any)[0].side).toBe('CT');
+});
+
+test('event > timeout: start (T)', () => {
+	const { GSI, callback } = createGSIAndCallback('timeoutStart');
+
+	GSI.digest(createGSIPacket());
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'timeout_t' } }));
+
+	expect(callback.mock.calls.length).toBe(1);
+	expect((callback.mock.calls[0] as any)[0].side).toBe('T');
+});
+
+test('event > timeout: end', () => {
+	const { GSI, callback } = createGSIAndCallback('timeoutEnd');
+
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'timeout_t' } }));
+	GSI.digest(createGSIPacket());
+
+	expect(callback.mock.calls.length).toBe(1);
+});
+
+test('event > timeout: end #2', () => {
+	const { GSI, callback } = createGSIAndCallback('timeoutEnd');
+
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'timeout_ct' } }));
+	GSI.digest(createGSIPacket());
+
+	expect(callback.mock.calls.length).toBe(1);
+});
+
+test('event > timeout: continue', () => {
+	const { GSI, callback } = createGSIAndCallback('timeoutStart');
+
+	GSI.digest({ ...createGSIPacket(), phase_countdowns: { phase_ends_in: '120' } });
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'timeout_ct' } }));
+
+	expect(callback.mock.calls.length).toBe(0);
+});
+
 test('event > bomb: plant started listener', () => {
 	const { GSI, callback } = createGSIAndCallback('bombPlantStart');
 

@@ -79,7 +79,7 @@ export default class CSGOGSI {
 			phase_countdowns: raw.phase_countdowns,
 			auth: raw.auth,
 			map: {
-				mode: 'competitive',
+				mode: raw.map.mode,
 				name: raw.map.name,
 				phase: raw.map.phase,
 				round: raw.map.round,
@@ -127,6 +127,30 @@ export default class CSGOGSI {
 				this.execute('defuseStop', last.bomb.player);
 			} else if (last.bomb.state !== 'planting' && data.bomb.state === 'planting') {
 				this.execute('bombPlantStart', last.bomb.player);
+			}
+		}
+
+		if (data.map.phase === 'intermission' && last.map.phase !== 'intermission') {
+			this.execute('intermissionStart');
+		} else if (data.map.phase !== 'intermission' && last.map.phase === 'intermission') {
+			this.execute('intermissionEnd');
+		}
+
+		const { phase } = data.phase_countdowns;
+
+		if (phase === 'freezetime' && last.phase_countdowns.phase !== 'freezetime') {
+			this.execute('freezetimeStart');
+		} else if (phase !== 'freezetime' && last.phase_countdowns.phase === 'freezetime') {
+			this.execute('freezetimeEnd');
+		}
+
+		if (phase && last.phase_countdowns.phase) {
+			if (phase.startsWith('timeout') && !last.phase_countdowns.phase.startsWith('timeout')) {
+				const team = phase === 'timeout_ct' ? teamCT : teamT;
+
+				this.execute('timeoutStart', team);
+			} else if (last.phase_countdowns.phase.startsWith('timeout') && !phase.startsWith('timeout')) {
+				this.execute('timeoutEnd');
 			}
 		}
 
