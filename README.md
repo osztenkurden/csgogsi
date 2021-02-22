@@ -12,10 +12,6 @@ The GSI object takes raw request from CS:GO GSI's system, parses this to more co
 ### For Node and React
 ```npm install csgogsi```
 
-### For Browser
-
-There is index.js in dist.browser on github page that you just need to include in your webpage.
-
 ## Example #1
 ```javascript
 import express from 'express';
