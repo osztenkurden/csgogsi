@@ -1,3 +1,8 @@
+![Statements](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)
+![CI](https://img.shields.io/github/workflow/status/osztenkurden/csgogsi/CI)
+![Dependencies](https://img.shields.io/david/osztenkurden/csgogsi)
+![Downloads](https://img.shields.io/npm/dm/csgogsi)
+![Version](https://img.shields.io/npm/v/csgogsi)
 # CS:GO GSI Digest
 
 ## How does it work?
@@ -7,14 +12,10 @@ The GSI object takes raw request from CS:GO GSI's system, parses this to more co
 ### For Node and React
 ```npm install csgogsi```
 
-### For Browser
-
-There is index.js in dist.browser on github page that you just need to include in your webpage.
-
 ## Example #1
 ```javascript
 import express from 'express';
-import CSGOGSI from 'csgogsi';
+import { CSGOGSI } from 'csgogsi';
 
 const app = express();
 const GSI = new CSGOGSI();
@@ -22,12 +23,12 @@ const GSI = new CSGOGSI();
 app.use(express.urlencoded({extended:true}));
 app.use(express.raw({limit:'10Mb', type: 'application/json' }));
 
-app.use('/')
-    .post((req, res) => {
-        const text = req.body.toString().replace(/"(player|owner)":([ ]*)([0-9]+)/gm, '"$1": "$3"').replace(/(player|owner):([ ]*)([0-9]+)/gm, '"$1": "$3"');
-        const data = JSON.parse(text);
-        GSI.digest(data);
-    });
+app.post('/', (req, res) => {
+    const text = req.body.toString().replace(/"(player|owner)":([ ]*)([0-9]+)/gm, '"$1": "$3"').replace(/(player|owner):([ ]*)([0-9]+)/gm, '"$1": "$3"');
+    const data = JSON.parse(text);
+    GSI.digest(data);
+    res.sendStatus(200);
+});
 
 GSI.on('roundEnd', team => {
     console.log(`Team  ${team.name} win!`);
@@ -43,12 +44,11 @@ app.listen(3000);
 
 |Method|Description|Example|Returned objects|
 |---|---|---|---|
-|`setTeamOne(team: TeamExtension)`|Set additional info about team in memory|`GSI.setTeamOne({})`||
-|`setTeamTwo(team: TeamExtension)`|As above|As above||
 |`digest(GSIData)`|Gets raw GSI data from CSGO and does magic|`GSI.digest(req.body)`|CSGO Parsed|
+|`digestMIRV(RawKill)`|Gets raw kill data from mirv pgl and does magic|`GSI.digestMIRV(mirv)`|KillEvent|
 |`on('event', callback)`|Sets listener for given event (check them below)|`GSI.on('roundEnd', team => console.log(team.name));`||
 |`removeListeners('event')`|Remove all listeners for given event|`GSI.removeListeners('bombExplode')`||
-|`loadPlayers(players: PlayerExtension[])`|Loads custom data about players|||
+|`static findSite(mapName, position)`|Tries to guess the bombsite of the position||`A, B, null`|
 
 ## Events
 
@@ -56,12 +56,21 @@ app.listen(3000);
 |---|---|---|
 |Data incoming|`data`|(data: CSGO Parsed) => {}|
 |End of the round|`roundEnd`|(score: Score) => {}|
-|Bomb planted|`bombPlant`|(player: Player) => {}|
-|Bomb defused|`bombDefuse`|(player: Player) => {}|
-|Bomb exploded|`bombExplode`|() => {}|
+|End of the map|`matchEnd`|(score: Score) => {}|
+|Kill|`kill`|(kill: KillEvent) => {}|
+|Timeout start|`timeoutStart`|(team: Team) => {}|
+|Timeout end|`timeoutEnd`|() => {}|
+|MVP of the round|`mvp`|(player: Player) => {}|
+|Freezetime start|`freezetimeStart`|() => {}|
+|Freezetime end|`freezetimeEnd`|() => {}|
+|Intermission start|`intermissionStart`|() => {}|
+|Intermission end|`intermissionEnd`|() => {}|
 |Defuse started|`defuseStart`|(player: Player) => {}|
 |Defuse stopped (but not defused and not exploded)|`defuseStop`|(player: Player) => {}|
-|End of the map|`matchEnd`|(score: Score) => {}|
+|Bomb plant started|`bombPlantStart`|(player: Player) => {}|
+|Bomb planted|`bombPlant`|(player: Player) => {}|
+|Bomb exploded|`bombExplode`|() => {}|
+|Bomb defused|`bombDefuse`|(player: Player) => {}|
 
 ## Objects
 #### CSGO Parsed

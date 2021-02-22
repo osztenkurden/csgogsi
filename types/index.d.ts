@@ -1,39 +1,48 @@
-import * as I from './interfaces';
-export interface TeamExtension {
-    id: string;
-    name: string;
-    country: string | null;
-    logo: string | null;
-    map_score: number;
-    extra: Record<string, string>;
+import { CSGO, CSGORaw, Events, KillEvent, PlayerExtension, RawKill, TeamExtension } from './interfaces';
+declare class CSGOGSI {
+	listeners: Map<keyof Events, Events[keyof Events][]>;
+	teams: {
+		left: TeamExtension | null;
+		right: TeamExtension | null;
+	};
+	players: PlayerExtension[];
+	last?: CSGO;
+	constructor();
+	digest(raw: CSGORaw): CSGO | null;
+	digestMIRV(raw: RawKill): KillEvent | null;
+	on<K extends keyof Events>(eventName: K, listener: Events[K]): boolean;
+	removeListener<K extends keyof Events>(eventName: K, listener: Events[K]): boolean;
+	removeListeners<K extends keyof Events>(eventName: K): boolean;
+	private execute;
+	static findSite(mapName: string, position: number[]): 'A' | 'B' | null;
 }
-export interface PlayerExtension {
-    id: string;
-    name: string;
-    steamid: string;
-    realName: string | null;
-    country: string | null;
-    avatar: string | null;
-    extra: Record<string, string>;
-}
-export * from './interfaces';
-export * from './parsed';
-export default class CSGOGSI {
-    listeners: Map<string, Function[]>;
-    teams: [TeamExtension?, TeamExtension?];
-    players: PlayerExtension[];
-    last?: I.CSGO;
-    constructor();
-    setTeamOne(team: TeamExtension): void;
-    setTeamTwo(team: TeamExtension): void;
-    loadPlayers(players: PlayerExtension[]): void;
-    digest(raw: I.CSGORaw): I.CSGO | null;
-    digestMIRV(raw: I.RawKill): I.KillEvent | null;
-    parsePlayers(players: I.PlayersRaw, teams: [I.Team, I.Team]): I.Player[];
-    parsePlayer(oldPlayer: I.PlayerRaw, steamid: string, team: I.Team): I.Player;
-    execute<K extends keyof I.Events>(eventName: K, argument?: any): boolean;
-    on<K extends keyof I.Events>(eventName: K, listener: I.Events[K]): boolean;
-    removeListener<K extends keyof I.Events>(eventName: K, listener: Function): boolean;
-    removeListeners<K extends keyof I.Events>(eventName: K): boolean;
-    findSite(mapName: string, position: number[]): "A" | "B";
-}
+export { CSGOGSI };
+export {
+	CSGO,
+	CSGORaw,
+	Side,
+	RoundOutcome,
+	WeaponType,
+	WeaponRaw,
+	TeamRaw,
+	PlayerRaw,
+	PlayerObservedRaw,
+	PlayersRaw,
+	Provider,
+	MapRaw,
+	RoundRaw,
+	BombRaw,
+	PhaseRaw,
+	Events,
+	Team,
+	Player,
+	Bomb,
+	Map,
+	Round,
+	Score,
+	KillEvent,
+	RawKill,
+	TeamExtension,
+	PlayerExtension,
+	Orientation
+} from './interfaces';
