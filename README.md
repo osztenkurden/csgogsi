@@ -45,8 +45,10 @@ app.listen(3000);
 |Method|Description|Example|Returned objects|
 |---|---|---|---|
 |`digest(GSIData)`|Gets raw GSI data from CSGO and does magic|`GSI.digest(req.body)`|CSGO Parsed|
+|`digestMIRV(RawKill)`|Gets raw kill data from mirv pgl and does magic|`GSI.digestMIRV(mirv)`|KillEvent|
 |`on('event', callback)`|Sets listener for given event (check them below)|`GSI.on('roundEnd', team => console.log(team.name));`||
 |`removeListeners('event')`|Remove all listeners for given event|`GSI.removeListeners('bombExplode')`||
+|`static findSite(mapName, position)`|Tries to guess the bombsite of the position||`A, B, null`|
 
 ## Events
 
