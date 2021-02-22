@@ -1,5 +1,5 @@
 import { CSGO, CSGORaw, Events, KillEvent, PlayerExtension, RawKill, TeamExtension } from './interfaces';
-export default class CSGOGSI {
+declare class CSGOGSI {
 	listeners: Map<keyof Events, Events[keyof Events][]>;
 	teams: {
 		left: TeamExtension | null;
@@ -16,6 +16,7 @@ export default class CSGOGSI {
 	private execute;
 	static findSite(mapName: string, position: number[]): 'A' | 'B' | null;
 }
+export { CSGOGSI };
 export {
 	CSGO,
 	CSGORaw,

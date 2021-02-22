@@ -1,7 +1,7 @@
 import { CSGO, CSGORaw, Events, KillEvent, PlayerExtension, RawKill, Score, TeamExtension } from './interfaces';
 import { mapSteamIDToPlayer, parseTeam } from './utils';
 
-export default class CSGOGSI {
+class CSGOGSI {
 	listeners: Map<keyof Events, Events[keyof Events][]>;
 	teams: {
 		left: TeamExtension | null;
@@ -99,11 +99,15 @@ export default class CSGOGSI {
 		const last = this.last;
 
 		// Round end
-		const didCTScoreChanged = last.map.team_ct.score !== data.map.team_ct.score;
-		const didTScoreChanged = last.map.team_t.score !== data.map.team_t.score;
-		if (didCTScoreChanged !== didTScoreChanged) {
-			const winner = didCTScoreChanged ? data.map.team_ct : data.map.team_t;
-			const loser = didCTScoreChanged ? data.map.team_t : data.map.team_ct;
+		if (last.round && data.round && data.round.win_team && !last.round.win_team) {
+			const winner = data.round.win_team === 'CT' ? data.map.team_ct : data.map.team_t;
+			const loser = data.round.win_team === 'CT' ? data.map.team_t : data.map.team_ct;
+
+			const oldWinner = data.round.win_team === 'CT' ? last.map.team_ct : last.map.team_t;
+
+			if (winner.score === oldWinner.score) {
+				winner.score += 1;
+			}
 
 			const roundScore: Score = {
 				winner,
@@ -113,6 +117,7 @@ export default class CSGOGSI {
 			};
 			this.execute('roundEnd', roundScore);
 		}
+
 		//Bomb actions
 		if (last.bomb && data.bomb) {
 			if (last.bomb.state === 'planting' && data.bomb.state === 'planted') {
@@ -130,6 +135,7 @@ export default class CSGOGSI {
 			}
 		}
 
+		// Intermission (between halfs)
 		if (data.map.phase === 'intermission' && last.map.phase !== 'intermission') {
 			this.execute('intermissionStart');
 		} else if (data.map.phase !== 'intermission' && last.map.phase === 'intermission') {
@@ -138,12 +144,14 @@ export default class CSGOGSI {
 
 		const { phase } = data.phase_countdowns;
 
+		// Freezetime (between round end & start)
 		if (phase === 'freezetime' && last.phase_countdowns.phase !== 'freezetime') {
 			this.execute('freezetimeStart');
 		} else if (phase !== 'freezetime' && last.phase_countdowns.phase === 'freezetime') {
 			this.execute('freezetimeEnd');
 		}
 
+		// Timeouts
 		if (phase && last.phase_countdowns.phase) {
 			if (phase.startsWith('timeout') && !last.phase_countdowns.phase.startsWith('timeout')) {
 				const team = phase === 'timeout_ct' ? teamCT : teamT;
@@ -167,6 +175,18 @@ export default class CSGOGSI {
 			};
 
 			this.execute('matchEnd', final);
+		}
+
+		const mvp =
+			data.players.find(player => {
+				const previousData = last.players.find(previousPlayer => previousPlayer.steamid === player.steamid);
+				if (!previousData) return false;
+				if (player.stats.mvps > previousData.stats.mvps) return true;
+				return false;
+			}) || null;
+
+		if (mvp) {
+			this.execute('mvp', mvp);
 		}
 		this.last = data;
 		this.execute('data', data);
@@ -249,6 +269,8 @@ export default class CSGOGSI {
 		return null;
 	}
 }
+
+export { CSGOGSI };
 
 export {
 	CSGO,

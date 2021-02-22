@@ -1,4 +1,4 @@
-import CSGOGSI, { CSGORaw, Events, PlayerExtension, PlayerRaw, TeamExtension } from '../tsc';
+import { CSGOGSI, CSGORaw, Events, PlayerExtension, PlayerRaw, TeamExtension } from '../tsc';
 import { createGSIPacket, createKillPacket } from './data';
 import { testCases } from './data/bombSites';
 
@@ -250,7 +250,7 @@ test('data > bomb: undefined player if doesnt exist or not specified', () => {
 test('data > timeout: doesnt crash on lack of phase', () => {
 	const GSI = new CSGOGSI();
 
-	const result = GSI.digest({ ...createGSIPacket(), phase_countdowns: { phase_ends_in: '120' } });
+	GSI.digest({ ...createGSIPacket(), phase_countdowns: { phase_ends_in: '120' } });
 	const result2 = GSI.digest({ ...createGSIPacket(), phase_countdowns: { phase_ends_in: '120' } });
 
 	expect(result2).toBeTruthy();
@@ -423,8 +423,8 @@ test('event > bomb: defused listener', () => {
 test('event > round: ended listener, CT wins', () => {
 	const { GSI, callback } = createGSIAndCallback('roundEnd');
 
-	GSI.digest(createGSIPacket({ map: { team_ct: { score: 14 } } }));
-	GSI.digest(createGSIPacket({ map: { team_ct: { score: 15 } } }));
+	GSI.digest(createGSIPacket());
+	GSI.digest(createGSIPacket({ round: { win_team: 'CT' } }));
 
 	expect(callback.mock.calls.length).toBe(1);
 	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('CT');
@@ -433,11 +433,57 @@ test('event > round: ended listener, CT wins', () => {
 test('event > round: ended listener, T wins', () => {
 	const { GSI, callback } = createGSIAndCallback('roundEnd');
 
-	GSI.digest(createGSIPacket({ map: { team_t: { score: 14 } } }));
-	GSI.digest(createGSIPacket({ map: { team_t: { score: 15 } } }));
+	GSI.digest(createGSIPacket());
+	GSI.digest(createGSIPacket({ round: { win_team: 'T' } }));
 
 	expect(callback.mock.calls.length).toBe(1);
 	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('T');
+});
+
+test('event > round: ended listener, score validness', () => {
+	const { GSI, callback } = createGSIAndCallback('roundEnd');
+
+	GSI.digest(createGSIPacket({ map: { team_t: { score: 14 } } }));
+	GSI.digest(createGSIPacket({ round: { win_team: 'T' }, map: { team_t: { score: 14 } } }));
+
+	expect(callback.mock.calls.length).toBe(1);
+	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('T');
+	expect((callback.mock.calls[0] as any)[0].winner.score).toBe(15);
+});
+
+test('event > round: ended listener, score validness #2', () => {
+	const { GSI, callback } = createGSIAndCallback('roundEnd');
+
+	GSI.digest(createGSIPacket({ map: { team_t: { score: 14 } } }));
+	GSI.digest(createGSIPacket({ round: { win_team: 'T' }, map: { team_t: { score: 15 } } }));
+
+	expect(callback.mock.calls.length).toBe(1);
+	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('T');
+	expect((callback.mock.calls[0] as any)[0].winner.score).toBe(15);
+});
+
+test('event > round: mvp listener', () => {
+	const { GSI, callback } = createGSIAndCallback('mvp');
+
+	GSI.digest(createGSIPacket({ allplayers: { '76561199031036917': { match_stats: { mvps: 5 } } } }));
+	GSI.digest(createGSIPacket({ allplayers: { '76561199031036917': { match_stats: { mvps: 6 } } } }));
+
+	expect(callback.mock.calls.length).toBe(1);
+});
+
+test('event > round: mvp listener #2', () => {
+	const { GSI, callback } = createGSIAndCallback('mvp');
+
+	const packet = createGSIPacket({ allplayers: { '76561198238326438': { match_stats: { mvps: 5 } } } });
+
+	if (packet.allplayers) {
+		delete packet.allplayers['76561199031036917'];
+	}
+
+	GSI.digest(packet);
+	GSI.digest(createGSIPacket({ allplayers: { '76561198238326438': { match_stats: { mvps: 6 } } } }));
+
+	expect(callback.mock.calls.length).toBe(1);
 });
 
 test('event > match: ended listener, CT wins', () => {

@@ -10,6 +10,7 @@ export interface Events {
 	/*roundStart: (round: number) => void,
     warmupStart: () => void,
     warmupEnd: () => void,*/
+	mvp: (player: I.Player) => void;
 	freezetimeStart: () => void;
 	freezetimeEnd: () => void;
 	intermissionStart: () => void;
