@@ -1,5 +1,5 @@
 import { CSGO, CSGORaw, Events, KillEvent, PlayerExtension, RawKill, Score, TeamExtension } from './interfaces';
-import { mapSteamIDToPlayer, parseTeam } from './utils';
+import { mapSteamIDToPlayer, parseTeam } from './utils.js';
 
 class CSGOGSI {
 	listeners: Map<keyof Events, Events[keyof Events][]>;
