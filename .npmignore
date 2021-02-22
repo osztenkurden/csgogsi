@@ -10,8 +10,7 @@ dist.browser
 tsc
 node_modules
 tsconfig.json
-jest.config.js
-README.md
-tsconfig.browser.json
+tsconfig.esm.json
+jest.config.ts
 coverage
 compiled
