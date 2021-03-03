@@ -113,9 +113,14 @@ class CSGOGSI {
 				winner,
 				loser,
 				map: data.map,
-				mapEnd: false
+				mapEnd: data.map.phase === 'gameover'
 			};
 			this.execute('roundEnd', roundScore);
+
+			// Match end
+			if (roundScore.mapEnd && last.map.phase !== 'gameover') {
+				this.execute('matchEnd', roundScore);
+			}
 		}
 
 		//Bomb actions
@@ -160,21 +165,6 @@ class CSGOGSI {
 			} else if (last.phase_countdowns.phase.startsWith('timeout') && !phase.startsWith('timeout')) {
 				this.execute('timeoutEnd');
 			}
-		}
-
-		// Match end
-		if (data.map.phase === 'gameover' && last.map.phase !== 'gameover') {
-			const winner = data.map.team_ct.score > data.map.team_t.score ? data.map.team_ct : data.map.team_t;
-			const loser = data.map.team_ct.score > data.map.team_t.score ? data.map.team_t : data.map.team_ct;
-
-			const final: Score = {
-				winner,
-				loser,
-				map: data.map,
-				mapEnd: true
-			};
-
-			this.execute('matchEnd', final);
 		}
 
 		const mvp =

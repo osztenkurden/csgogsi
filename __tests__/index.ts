@@ -489,8 +489,13 @@ test('event > round: mvp listener #2', () => {
 test('event > match: ended listener, CT wins', () => {
 	const { GSI, callback } = createGSIAndCallback('matchEnd');
 
-	GSI.digest(createGSIPacket({ map: { team_ct: { score: 15 }, team_t: { score: 10 } } }));
-	GSI.digest(createGSIPacket({ map: { team_ct: { score: 16 }, team_t: { score: 10 }, phase: 'gameover' } }));
+	GSI.digest(createGSIPacket({ map: { team_ct: { score: 15 }, team_t: { score: 10 }, phase: 'live' } }));
+	GSI.digest(
+		createGSIPacket({
+			map: { team_ct: { score: 16 }, team_t: { score: 10 }, phase: 'gameover' },
+			round: { win_team: 'CT' }
+		})
+	);
 
 	expect(callback.mock.calls.length).toBe(1);
 	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('CT');
@@ -499,8 +504,13 @@ test('event > match: ended listener, CT wins', () => {
 test('event > match: ended listener, T wins', () => {
 	const { GSI, callback } = createGSIAndCallback('matchEnd');
 
-	GSI.digest(createGSIPacket({ map: { team_t: { score: 15 }, team_ct: { score: 10 } } }));
-	GSI.digest(createGSIPacket({ map: { team_t: { score: 16 }, team_ct: { score: 10 }, phase: 'gameover' } }));
+	GSI.digest(createGSIPacket({ map: { team_t: { score: 15 }, team_ct: { score: 10 }, phase: 'live' } }));
+	GSI.digest(
+		createGSIPacket({
+			map: { team_t: { score: 16 }, team_ct: { score: 10 }, phase: 'gameover' },
+			round: { win_team: 'T' }
+		})
+	);
 
 	expect(callback.mock.calls.length).toBe(1);
 	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('T');
