@@ -49,6 +49,10 @@ class CSGOGSI {
 		const players = Object.keys(raw.allplayers).map(playerMapper);
 		const observed = players.find(player => player.steamid === raw.player.steamid) || null;
 
+		if (observed) {
+			observed.activity = raw.player.activity;
+		}
+
 		const data: CSGO = {
 			provider: raw.provider,
 			round: raw.round
