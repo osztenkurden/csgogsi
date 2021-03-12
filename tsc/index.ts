@@ -1,4 +1,4 @@
-import { CSGO, CSGORaw, Events, KillEvent, PlayerExtension, RawKill, Score, TeamExtension } from './interfaces';
+import { CSGO, CSGORaw, Events, KillEvent, Observer, PlayerExtension, RawKill, Score, TeamExtension } from './interfaces';
 import { mapSteamIDToPlayer, parseTeam } from './utils.js';
 
 class CSGOGSI {
@@ -49,8 +49,16 @@ class CSGOGSI {
 		const players = Object.keys(raw.allplayers).map(playerMapper);
 		const observed = players.find(player => player.steamid === raw.player.steamid) || null;
 
+		const observer: Observer = {
+			activity: raw.player.activity,
+			spectarget: raw.player.spectarget,
+			position: raw.player.position.split(', ').map(n => Number(n)),
+			forward: raw.player.forward.split(', ').map(n => Number(n)),
+		}
+
 		const data: CSGO = {
 			provider: raw.provider,
+			observer,
 			round: raw.round
 				? {
 						phase: raw.round.phase,
@@ -71,7 +79,7 @@ class CSGOGSI {
 							bomb.state === 'defused' ||
 							bomb.state === 'defusing' ||
 							bomb.state === 'planting'
-								? CSGOGSI.findSite(raw.map.name, bomb.position.split(', ').map(Number))
+								? CSGOGSI.findSite(raw.map.name, bomb.position.split(', ').map(n => Number(n)))
 								: null
 				  }
 				: null,
@@ -268,6 +276,7 @@ export {
 	Side,
 	RoundOutcome,
 	WeaponType,
+	Observer,
 	WeaponRaw,
 	TeamRaw,
 	PlayerRaw,

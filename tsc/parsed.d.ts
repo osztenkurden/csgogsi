@@ -21,7 +21,6 @@ export interface Player {
 	name: string;
 	observer_slot?: number;
 	team: Team;
-	activity?: string;
 	stats: {
 		kills: number;
 		assists: number;
@@ -46,7 +45,6 @@ export interface Player {
 		round_totaldmg: number;
 		equip_value: number;
 	};
-	spectarget?: string;
 	position: number[];
 	forward: number[];
 	avatar: string | null;
@@ -83,10 +81,18 @@ export interface Round {
 	win_team?: I.Side;
 }
 
+export interface Observer {
+	activity: "playing" | "textinput" | "menu";
+	spectarget: "free" | string;
+	position: number[];
+	forward: number[];
+}
+
 export interface CSGO {
 	provider: I.Provider;
 	map: Map;
 	round: Round | null;
+	observer: Observer;
 	player: Player | null;
 	players: Player[];
 	bomb: Bomb | null;
