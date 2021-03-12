@@ -82,8 +82,8 @@ export interface Round {
 }
 
 export interface Observer {
-	activity: "playing" | "textinput" | "menu";
-	spectarget: "free" | string;
+	activity: 'playing' | 'textinput' | 'menu';
+	spectarget: 'free' | string;
 	position: number[];
 	forward: number[];
 }

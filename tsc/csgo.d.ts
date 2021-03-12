@@ -62,7 +62,7 @@ export interface PlayerObservedRaw {
 	name: string;
 	observer_slot?: number;
 	team?: Side;
-	activity: "playing" | "textinput" | "menu";
+	activity: 'playing' | 'textinput' | 'menu';
 	state: {
 		health: number;
 		armor: number;
@@ -76,7 +76,7 @@ export interface PlayerObservedRaw {
 		round_totaldmg: number;
 		equip_value: number;
 	};
-	spectarget: "free" | string;
+	spectarget: 'free' | string;
 	position: string;
 	forward: string;
 }

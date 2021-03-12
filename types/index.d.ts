@@ -23,6 +23,7 @@ export {
 	Side,
 	RoundOutcome,
 	WeaponType,
+	Observer,
 	WeaponRaw,
 	TeamRaw,
 	PlayerRaw,
