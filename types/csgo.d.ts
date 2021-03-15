@@ -28,7 +28,6 @@ export interface PlayerRaw {
 	clan?: string;
 	observer_slot?: number;
 	team: Side;
-	activity?: string;
 	match_stats: {
 		kills: number;
 		assists: number;
@@ -53,7 +52,6 @@ export interface PlayerRaw {
 		round_totaldmg: number;
 		equip_value: number;
 	};
-	spectarget?: string;
 	position: string;
 	forward: string;
 }
@@ -62,9 +60,9 @@ export interface PlayerObservedRaw {
 	steamid: string;
 	clan?: string;
 	name: string;
-	observer_slot: number;
-	team: string;
-	activity: string;
+	observer_slot?: number;
+	team?: Side;
+	activity: 'playing' | 'textinput' | 'menu';
 	state: {
 		health: number;
 		armor: number;
@@ -78,7 +76,7 @@ export interface PlayerObservedRaw {
 		round_totaldmg: number;
 		equip_value: number;
 	};
-	spectarget: string;
+	spectarget: 'free' | string;
 	position: string;
 	forward: string;
 }
