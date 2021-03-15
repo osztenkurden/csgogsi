@@ -82,8 +82,19 @@ app.listen(3000);
 |round|`Round Object or null`|
 |player|`Player Object or null`|
 |players|`Array of Player's Object`|
+|observer|`Observer Object`|
 |bomb|`Bomb Object`|
 |phase_countdowns|`The same as in raw GSI`|
+
+
+### Observer
+
+|Property|Type|
+|---|---|
+|activity|`'playing', 'textinput'  or 'menu'`|
+|spectarget|`'free' or SteamID64`|
+|position|`number[]`|
+|forward|`number[]`|
 
 #### Team Extension
 
@@ -148,10 +159,8 @@ app.listen(3000);
 |name|`string`|
 |observer_slot|`number`|
 |team|`Team Object`|
-|activity|`string`|
 |stats|`{kills, assists, deaths, mvps, score} all numbers`|
 |state|`{health, armor, helmet, defusekit?, flashed, smoked, burning, money, round_kills, round_killshs, round_totaldmg, equip_value}`|
-|spectarget?|`string`|
 |position|`Array of numbers`|
 |forward|`number`|
 |avatar|`string or null`|
