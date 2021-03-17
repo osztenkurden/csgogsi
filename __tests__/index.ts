@@ -7,7 +7,7 @@ const createGSIAndCallback = <K extends keyof Events>(eventName: K) => {
 
 	const GSI = new CSGOGSI();
 
-	GSI.on(eventName, callback);
+	GSI.addListener(eventName, callback);
 
 	return { GSI, callback };
 };
@@ -100,6 +100,128 @@ test('parser > remove specific listeners fom specific event #4', () => {
 	GSI.digest(createGSIPacket());
 
 	expect(callback.mock.calls.length).toBe(0);
+});
+
+test('event listener > gets event names', () => {
+	const callback = jest.fn(() => {});
+	const GSI = new CSGOGSI();
+
+	GSI.on("mvp", callback);
+	
+	GSI.on("matchEnd", callback);
+	
+	GSI.on("roundEnd", callback);
+
+	GSI.on("kill", callback);
+
+	GSI.off("kill", callback);
+	
+	const eventNames = GSI.eventNames();
+
+	expect(eventNames.includes("mvp")).toBe(true);
+	expect(eventNames.includes("matchEnd")).toBe(true);
+	expect(eventNames.includes("roundEnd")).toBe(true);
+	expect(eventNames.length).toBe(3);
+});
+
+test('event listener > gets max listeners', () => {
+	const getRandomArbitrary = (min: number, max: number) => {
+		return Math.random() * (max - min) + min;
+	}
+	
+	const newMax = getRandomArbitrary(1, 10000);
+
+	const GSI = new CSGOGSI();
+
+	GSI.setMaxListeners(newMax);	
+
+	expect(GSI.getMaxListeners()).toBe(newMax);
+});
+
+test('event listener > gets listener count', () => {
+	const { GSI, callback } = createGSIAndCallback('defuseStart');
+
+	GSI.on('defuseStart', callback);
+
+
+	expect(GSI.listenerCount('defuseStart')).toBe(2);
+	expect(GSI.listenerCount('mvp')).toBe(0);
+});
+
+test('event listener > gets descriptors', () => {
+	const { GSI, callback } = createGSIAndCallback('defuseStart');
+
+	GSI.on('defuseStart', callback);
+
+
+	expect(GSI.rawListeners('defuseStart').length).toBe(2);
+	expect(GSI.rawListeners('mvp').length).toBe(0);
+});
+
+test('event listener > calls once listeners only once', () => {
+	const callback = jest.fn(() => {});
+	const GSI = new CSGOGSI();
+	
+	GSI.once('defuseStart', callback);
+
+	GSI.emit('defuseStart');
+	GSI.emit('defuseStart');
+	GSI.emit('defuseStart');
+
+	expect(callback.mock.calls.length).toBe(1);
+});
+
+test('event listener > prepend listener', () => {
+	let i = 0;
+	const callbackOne = () => {
+		if(i === 0) {
+			i = 1;
+		}
+	}
+	const callbackPrepended = () => {
+		if(i === 0){
+			i = 2;
+		}
+	}
+	const callback = jest.fn(() => {});
+	const GSI = new CSGOGSI();
+	
+	GSI.on('defuseStart', callbackOne);
+
+	GSI.prependListener('defuseStart', callbackPrepended);
+	GSI.prependListener('defuseStop', callback);
+
+	GSI.emit('defuseStart');
+	GSI.emit('defuseStop');
+
+	expect(i).toBe(2);
+	expect(callback.mock.calls.length).toBe(1);
+});
+test('event listener > prepend once listener', () => {
+	let i = 0;
+	const callbackOne = () => {
+		if(i === 0) {
+			i = 1;
+		}
+	}
+	const callbackPrepended = () => {
+		if(i === 0){
+			i = 2;
+		}
+	}
+	const callback = jest.fn(() => {});
+	const GSI = new CSGOGSI();
+	
+	GSI.once('defuseStart', callbackOne);
+
+	GSI.prependOnceListener('defuseStart', callbackPrepended);
+	GSI.prependOnceListener('defuseStop', callback);
+
+	GSI.emit('defuseStart');
+	GSI.emit('defuseStop');
+
+	expect(i).toBe(2);
+	expect(callback.mock.calls.length).toBe(1);
 });
 
 test('data > assign teams in the first half, left to CT, right to T', () => {

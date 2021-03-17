@@ -49,8 +49,8 @@ class CSGOGSI {
 	getMaxListeners = () => this.maxListeners;
 
 	listenerCount = (eventName: EventNames) => {
-		const listeners = this.descriptors.get(eventName);
-		return listeners?.length || 0;
+		const listeners = this.listeners(eventName);
+		return listeners.length;
 	};
 
 	listeners = (eventName: EventNames) => {
