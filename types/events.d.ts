@@ -21,4 +21,6 @@ export interface Events {
 	bombPlant: (player: I.Player) => void;
 	bombExplode: () => void;
 	bombDefuse: (player: I.Player) => void;
+	newListener: <K extends keyof Events>(eventName: K, listener: Events[K]) => void;
+	removeListener: <K extends keyof Events>(eventName: K, listener: Events[K]) => void;
 }

@@ -52,7 +52,7 @@ test('parser > dont break with no bomb data', () => {
 test('parser > remove all listeners from specific event', () => {
 	const { GSI, callback } = createGSIAndCallback('data');
 
-	GSI.removeListeners('data');
+	GSI.removeAllListeners('data');
 
 	GSI.digest(createGSIPacket());
 
@@ -83,7 +83,7 @@ test('parser > remove specific listeners from specific event #2', () => {
 test('parser > remove specific listeners from specific event #3', () => {
 	const { GSI, callback } = createGSIAndCallback('defuseStart');
 
-	GSI.removeListeners('defuseStart');
+	GSI.removeAllListeners('defuseStart');
 
 	GSI.digest(createGSIPacket({ bomb: { state: 'planted' } }));
 	GSI.digest(createGSIPacket({ bomb: { state: 'defusing' } }));

@@ -11,8 +11,14 @@ import {
 } from './interfaces';
 import { mapSteamIDToPlayer, parseTeam } from './utils.js';
 
+type EventNames = keyof Events;
+interface EventDescriptor {
+	listener: Events[EventNames];
+	once: boolean;
+}
 class CSGOGSI {
-	listeners: Map<keyof Events, Events[keyof Events][]>;
+	private descriptors: Map<EventNames, EventDescriptor[]>;
+	private maxListeners: number;
 	teams: {
 		left: TeamExtension | null;
 		right: TeamExtension | null;
@@ -20,13 +26,123 @@ class CSGOGSI {
 	players: PlayerExtension[];
 	last?: CSGO;
 	constructor() {
-		this.listeners = new Map();
+		this.descriptors = new Map();
 		this.teams = {
 			left: null,
 			right: null
 		};
+		this.maxListeners = 10;
 		this.players = [];
 	}
+	eventNames = () => {
+		const listeners = this.descriptors.entries();
+		const nonEmptyEvents: EventNames[] = [];
+
+		for (const entry of listeners) {
+			if (entry[1] && entry[1].length > 0) {
+				nonEmptyEvents.push(entry[0]);
+			}
+		}
+
+		return nonEmptyEvents;
+	};
+	getMaxListeners = () => this.maxListeners;
+
+	listenerCount = (eventName: EventNames) => {
+		const listeners = this.descriptors.get(eventName);
+		return listeners?.length || 0;
+	};
+
+	listeners = (eventName: EventNames) => {
+		const descriptors = this.descriptors.get(eventName) || [];
+		return descriptors.map(descriptor => descriptor.listener);
+	};
+
+	removeListener = <K extends EventNames>(eventName: K, listener: Events[K]) => {
+		return this.off(eventName, listener);
+	};
+
+	off = <K extends EventNames>(eventName: K, listener: Events[K]) => {
+		const descriptors = this.descriptors.get(eventName) || [];
+
+		this.descriptors.set(
+			eventName,
+			descriptors.filter(descriptor => descriptor.listener !== listener)
+		);
+		this.emit('removeListener', eventName, listener);
+		return this;
+	};
+
+	addListener = <K extends EventNames>(eventName: K, listener: Events[K]) => {
+		return this.on(eventName, listener);
+	};
+
+	on = <K extends EventNames>(eventName: K, listener: Events[K]) => {
+		this.emit('newListener', eventName, listener);
+		const listOfListeners = [...(this.descriptors.get(eventName) || [])];
+
+		listOfListeners.push({ listener, once: false });
+		this.descriptors.set(eventName, listOfListeners);
+
+		return this;
+	};
+
+	once = <K extends EventNames>(eventName: K, listener: Events[K]) => {
+		const listOfListeners = [...(this.descriptors.get(eventName) || [])];
+
+		listOfListeners.push({ listener, once: true });
+		this.descriptors.set(eventName, listOfListeners);
+
+		return this;
+	};
+
+	prependListener = <K extends EventNames>(eventName: K, listener: Events[K]) => {
+		const listOfListeners = [...(this.descriptors.get(eventName) || [])];
+
+		listOfListeners.unshift({ listener, once: false });
+		this.descriptors.set(eventName, listOfListeners);
+
+		return this;
+	};
+
+	emit = (eventName: EventNames, arg?: any, arg2?: any) => {
+		const listeners = this.descriptors.get(eventName);
+		if (!listeners || listeners.length === 0) return false;
+
+		listeners.forEach(listener => {
+			if (listener.once) {
+				this.descriptors.set(
+					eventName,
+					listeners.filter(listenerInArray => listenerInArray !== listener)
+				);
+			}
+			listener.listener(arg, arg2);
+		});
+		return true;
+	};
+
+	prependOnceListener = <K extends EventNames>(eventName: K, listener: Events[K]) => {
+		const listOfListeners = [...(this.descriptors.get(eventName) || [])];
+
+		listOfListeners.unshift({ listener, once: true });
+		this.descriptors.set(eventName, listOfListeners);
+
+		return this;
+	};
+
+	removeAllListeners = (eventName: EventNames) => {
+		this.descriptors.set(eventName, []);
+		return this;
+	};
+
+	setMaxListeners = (n: number) => {
+		this.maxListeners = n;
+		return this;
+	};
+
+	rawListeners = (eventName: EventNames) => {
+		return this.descriptors.get(eventName) || [];
+	};
 
 	digest(raw: CSGORaw): CSGO | null {
 		if (!raw.allplayers || !raw.map || !raw.phase_countdowns) {
@@ -114,7 +230,7 @@ class CSGOGSI {
 		};
 		if (!this.last) {
 			this.last = data;
-			this.execute('data', data);
+			this.emit('data', data);
 			return data;
 		}
 		const last = this.last;
@@ -136,45 +252,45 @@ class CSGOGSI {
 				map: data.map,
 				mapEnd: data.map.phase === 'gameover'
 			};
-			this.execute('roundEnd', roundScore);
+			this.emit('roundEnd', roundScore);
 
 			// Match end
 			if (roundScore.mapEnd && last.map.phase !== 'gameover') {
-				this.execute('matchEnd', roundScore);
+				this.emit('matchEnd', roundScore);
 			}
 		}
 
 		//Bomb actions
 		if (last.bomb && data.bomb) {
 			if (last.bomb.state === 'planting' && data.bomb.state === 'planted') {
-				this.execute('bombPlant', last.bomb.player);
+				this.emit('bombPlant', last.bomb.player);
 			} else if (last.bomb.state !== 'exploded' && data.bomb.state === 'exploded') {
-				this.execute('bombExplode');
+				this.emit('bombExplode');
 			} else if (last.bomb.state !== 'defused' && data.bomb.state === 'defused') {
-				this.execute('bombDefuse', last.bomb.player);
+				this.emit('bombDefuse', last.bomb.player);
 			} else if (last.bomb.state !== 'defusing' && data.bomb.state === 'defusing') {
-				this.execute('defuseStart', data.bomb.player);
+				this.emit('defuseStart', data.bomb.player);
 			} else if (last.bomb.state === 'defusing' && data.bomb.state !== 'defusing') {
-				this.execute('defuseStop', last.bomb.player);
+				this.emit('defuseStop', last.bomb.player);
 			} else if (last.bomb.state !== 'planting' && data.bomb.state === 'planting') {
-				this.execute('bombPlantStart', last.bomb.player);
+				this.emit('bombPlantStart', last.bomb.player);
 			}
 		}
 
 		// Intermission (between halfs)
 		if (data.map.phase === 'intermission' && last.map.phase !== 'intermission') {
-			this.execute('intermissionStart');
+			this.emit('intermissionStart');
 		} else if (data.map.phase !== 'intermission' && last.map.phase === 'intermission') {
-			this.execute('intermissionEnd');
+			this.emit('intermissionEnd');
 		}
 
 		const { phase } = data.phase_countdowns;
 
 		// Freezetime (between round end & start)
 		if (phase === 'freezetime' && last.phase_countdowns.phase !== 'freezetime') {
-			this.execute('freezetimeStart');
+			this.emit('freezetimeStart');
 		} else if (phase !== 'freezetime' && last.phase_countdowns.phase === 'freezetime') {
-			this.execute('freezetimeEnd');
+			this.emit('freezetimeEnd');
 		}
 
 		// Timeouts
@@ -182,9 +298,9 @@ class CSGOGSI {
 			if (phase.startsWith('timeout') && !last.phase_countdowns.phase.startsWith('timeout')) {
 				const team = phase === 'timeout_ct' ? teamCT : teamT;
 
-				this.execute('timeoutStart', team);
+				this.emit('timeoutStart', team);
 			} else if (last.phase_countdowns.phase.startsWith('timeout') && !phase.startsWith('timeout')) {
-				this.execute('timeoutEnd');
+				this.emit('timeoutEnd');
 			}
 		}
 
@@ -197,10 +313,10 @@ class CSGOGSI {
 			}) || null;
 
 		if (mvp) {
-			this.execute('mvp', mvp);
+			this.emit('mvp', mvp);
 		}
 		this.last = data;
-		this.execute('data', data);
+		this.emit('data', data);
 		return data;
 	}
 
@@ -229,38 +345,8 @@ class CSGOGSI {
 			thrusmoke: data.thrusmoke,
 			noscope: data.noscope
 		};
-		this.execute('kill', kill);
+		this.emit('kill', kill);
 		return kill;
-	}
-
-	on<K extends keyof Events>(eventName: K, listener: Events[K]) {
-		const listOfListeners = this.listeners.get(eventName) || [];
-
-		listOfListeners.push(listener);
-		this.listeners.set(eventName, listOfListeners);
-
-		return true;
-	}
-	removeListener<K extends keyof Events>(eventName: K, listener: Events[K]) {
-		const listOfListeners = this.listeners.get(eventName) || [];
-		this.listeners.set(
-			eventName,
-			listOfListeners.filter(callback => callback !== listener)
-		);
-		return true;
-	}
-	removeListeners<K extends keyof Events>(eventName: K) {
-		this.listeners.set(eventName, []);
-		return true;
-	}
-
-	private execute<K extends keyof Events>(eventName: K, argument?: any) {
-		const listeners = this.listeners.get(eventName);
-		if (!listeners) return false;
-		listeners.forEach(callback => {
-			callback(argument);
-		});
-		return true;
 	}
 
 	static findSite(mapName: string, position: number[]) {
