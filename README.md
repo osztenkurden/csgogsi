@@ -1,4 +1,4 @@
-![Statements](https://img.shields.io/badge/Coverage-83.7%25-yellow.svg)
+![Statements](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)
 ![CI](https://img.shields.io/github/workflow/status/osztenkurden/csgogsi/CI)
 ![Dependencies](https://img.shields.io/david/osztenkurden/csgogsi)
 ![Downloads](https://img.shields.io/npm/dm/csgogsi)
@@ -47,8 +47,9 @@ app.listen(3000);
 |`digest(GSIData)`|Gets raw GSI data from CSGO and does magic|`GSI.digest(req.body)`|CSGO Parsed|
 |`digestMIRV(RawKill)`|Gets raw kill data from mirv pgl and does magic|`GSI.digestMIRV(mirv)`|KillEvent|
 |`on('event', callback)`|Sets listener for given event (check them below)|`GSI.on('roundEnd', team => console.log(team.name));`||
-|`removeListeners('event')`|Remove all listeners for given event|`GSI.removeListeners('bombExplode')`||
 |`static findSite(mapName, position)`|Tries to guess the bombsite of the position||`A, B, null`|
+
+Beside that, CSGOGSI implements standard Event Emitter interfaces.
 
 ## Events
 
