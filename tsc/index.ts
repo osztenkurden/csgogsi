@@ -177,9 +177,7 @@ class CSGOGSI {
 
 		const observer: Observer = {
 			activity: raw.player.activity,
-			spectarget: raw.player.spectarget,
-			position: raw.player.position.split(', ').map(n => Number(n)),
-			forward: raw.player.forward.split(', ').map(n => Number(n))
+			spectarget: raw.player.spectarget
 		};
 
 		const data: CSGO = {
