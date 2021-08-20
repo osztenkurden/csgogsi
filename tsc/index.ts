@@ -315,8 +315,8 @@ class CSGOGSI {
 		if (mvp) {
 			this.emit('mvp', mvp);
 		}
-		this.last = data;
 		this.emit('data', data);
+		this.last = data;
 		return data;
 	}
 

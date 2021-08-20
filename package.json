@@ -1,6 +1,6 @@
 {
   "name": "csgogsi",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "",
   "type": "module",
   "main": "./lib/cjs/index.js",
@@ -28,7 +28,7 @@
     "ts-jest": "^26.5.4",
     "ts-node": "^9.1.1",
     "ts-toolbelt": "^9.6.0",
-    "typescript": "^4.2.3"
+    "typescript": "^4.3.5"
   },
   "scripts": {
     "test": "jest --coverage",
