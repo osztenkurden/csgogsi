@@ -367,7 +367,7 @@ class CSGOGSI {
 	}
 }
 
-export { CSGOGSI };
+export { CSGOGSI, mapSteamIDToPlayer, parseTeam };
 
 export {
 	CSGO,

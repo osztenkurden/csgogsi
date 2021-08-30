@@ -1,4 +1,5 @@
 import { CSGO, CSGORaw, Events, KillEvent, PlayerExtension, RawKill, Score, TeamExtension } from './interfaces';
+import { mapSteamIDToPlayer, parseTeam } from './utils.js';
 declare type EventNames = keyof Events;
 interface EventDescriptor {
 	listener: Events[EventNames];
@@ -55,7 +56,7 @@ declare class CSGOGSI {
 	digestMIRV(raw: RawKill): KillEvent | null;
 	static findSite(mapName: string, position: number[]): 'A' | 'B' | null;
 }
-export { CSGOGSI };
+export { CSGOGSI, mapSteamIDToPlayer, parseTeam };
 export {
 	CSGO,
 	CSGORaw,
