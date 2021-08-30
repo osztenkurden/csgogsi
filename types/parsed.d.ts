@@ -19,6 +19,8 @@ export interface Team {
 export interface Player {
 	steamid: string;
 	name: string;
+	defaultName: string;
+	clan?: string;
 	observer_slot?: number;
 	team: Team;
 	stats: {

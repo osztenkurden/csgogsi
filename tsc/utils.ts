@@ -5,6 +5,8 @@ const parsePlayer = (basePlayer: PlayerRaw, steamid: string, team: Team, extensi
 	const player: Player = {
 		steamid,
 		name: (extension && extension.name) || basePlayer.name,
+		defaultName: basePlayer.name,
+		clan: basePlayer.clan,
 		observer_slot: basePlayer.observer_slot,
 		stats: basePlayer.match_stats,
 		weapons: basePlayer.weapons,
