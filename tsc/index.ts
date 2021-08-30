@@ -25,6 +25,7 @@ class CSGOGSI {
 	};
 	players: PlayerExtension[];
 	last?: CSGO;
+	current?: CSGO;
 	constructor() {
 		this.descriptors = new Map();
 		this.teams = {
@@ -228,6 +229,7 @@ class CSGOGSI {
 				round_wins: raw.map.round_wins
 			}
 		};
+		this.current = data;
 		if (!this.last) {
 			this.last = data;
 			this.emit('data', data);

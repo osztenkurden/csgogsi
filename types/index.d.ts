@@ -14,6 +14,7 @@ declare class CSGOGSI {
 	};
 	players: PlayerExtension[];
 	last?: CSGO;
+	current?: CSGO;
 	constructor();
 	eventNames: () => (keyof Events)[];
 	getMaxListeners: () => number;
