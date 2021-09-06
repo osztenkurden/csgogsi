@@ -352,6 +352,7 @@ class CSGOGSI {
 	}
 
 	static findSite(mapName: string, position: number[]) {
+		const realMapName = mapName.substr(mapName.lastIndexOf('/') + 1);
 		const mapReference: { [mapName: string]: (position: number[]) => 'A' | 'B' } = {
 			de_mirage: position => (position[1] < -600 ? 'A' : 'B'),
 			de_cache: position => (position[1] > 0 ? 'A' : 'B'),
@@ -362,8 +363,8 @@ class CSGOGSI {
 			de_vertigo: position => (position[0] > -1400 ? 'A' : 'B'),
 			de_train: position => (position[1] > -450 ? 'A' : 'B')
 		};
-		if (mapName in mapReference) {
-			return mapReference[mapName](position);
+		if (realMapName in mapReference) {
+			return mapReference[realMapName](position);
 		}
 		return null;
 	}
