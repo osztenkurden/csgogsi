@@ -149,12 +149,25 @@ class CSGOGSI {
 		if (!raw.allplayers || !raw.map || !raw.phase_countdowns) {
 			return null;
 		}
+		let isCTLeft = true;
 
-		const isCTLeft =
-			Object.values(raw.allplayers).filter(
-				({ observer_slot, team }) =>
-					observer_slot !== undefined && observer_slot > 1 && observer_slot <= 5 && team === 'CT'
-			).length > 2;
+		const examplePlayerT = Object.values(raw.allplayers).find(
+			({ observer_slot, team }) => observer_slot !== undefined && team === 'T'
+		);
+		const examplePlayerCT = Object.values(raw.allplayers).find(
+			({ observer_slot, team }) => observer_slot !== undefined && team === 'CT'
+		);
+
+		if (
+			examplePlayerCT &&
+			examplePlayerCT.observer_slot !== undefined &&
+			examplePlayerT &&
+			examplePlayerT.observer_slot !== undefined
+		) {
+			if ((examplePlayerCT.observer_slot || 10) > (examplePlayerT.observer_slot || 10)) {
+				isCTLeft = false;
+			}
+		}
 
 		const bomb = raw.bomb;
 
