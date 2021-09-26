@@ -5,6 +5,7 @@ export interface Events {
 	roundEnd: (team: I.Score) => void;
 	matchEnd: (score: I.Score) => void;
 	kill: (kill: I.KillEvent) => void;
+	hurt: (kill: I.HurtEvent) => void;
 	timeoutStart: (team: any) => void;
 	timeoutEnd: () => void;
 	/*roundStart: (round: number) => void,

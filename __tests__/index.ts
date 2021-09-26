@@ -687,7 +687,7 @@ test('event > kill: get correct killer', () => {
 	const response = GSI.digestMIRV(kill);
 
 	expect(callback.mock.calls.length).toBe(1);
-	expect(response?.killer.steamid).toBe('76561199031036917');
+	expect(response && 'killer' in response && response?.killer.steamid).toBe('76561199031036917');
 });
 
 test('event > kill: get correct assister', () => {
@@ -698,7 +698,7 @@ test('event > kill: get correct assister', () => {
 	const response = GSI.digestMIRV(kill);
 
 	expect(callback.mock.calls.length).toBe(1);
-	expect(response?.killer.steamid).toBe('76561199031036917');
+	expect(response && 'killer' in response && response?.killer.steamid).toBe('76561199031036917');
 });
 
 for (const testCase of testCases) {

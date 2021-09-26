@@ -30,3 +30,24 @@ export interface RawKill {
 		noreplay: boolean;
 	};
 }
+
+export interface RawHurt {
+	name: 'player_hurt';
+	clientTime: number;
+	keys: {
+		userid: {
+			value: number;
+			xuid: string;
+		};
+		attacker: {
+			value: number;
+			xuid: string;
+		};
+		health: number;
+		armor: number;
+		weapon: string;
+		dmg_health: number;
+		dmg_armor: number;
+		hitgroup: number;
+	};
+}

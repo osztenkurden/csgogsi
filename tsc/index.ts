@@ -9,6 +9,8 @@ import {
 	Score,
 	TeamExtension
 } from './interfaces';
+import { RawHurt } from './mirv';
+import { DigestMirvType, HurtEvent } from './parsed';
 import { mapSteamIDToPlayer, parseTeam } from './utils.js';
 
 type EventNames = keyof Events;
@@ -335,32 +337,60 @@ class CSGOGSI {
 		return data;
 	}
 
-	digestMIRV(raw: RawKill) {
+	digestMIRV(raw: RawKill | RawHurt, eventType = 'player_death'): DigestMirvType {
+		if (eventType === 'player_death') {
+			const rawKill = raw as RawKill;
+
+			if (!this.last) {
+				return null;
+			}
+			const data = rawKill.keys;
+			const killer = this.last.players.find(player => player.steamid === data.attacker.xuid);
+			const victim = this.last.players.find(player => player.steamid === data.userid.xuid);
+			const assister = this.last.players.find(
+				player => player.steamid === data.assister.xuid && data.assister.xuid !== '0'
+			);
+			if (!killer || !victim) {
+				return null;
+			}
+			const kill: KillEvent = {
+				killer,
+				victim,
+				assister: assister || null,
+				flashed: data.assistedflash,
+				headshot: data.headshot,
+				weapon: data.weapon,
+				wallbang: data.penetrated > 0,
+				attackerblind: data.attackerblind,
+				thrusmoke: data.thrusmoke,
+				noscope: data.noscope
+			};
+			this.emit('kill', kill);
+			return kill;
+		}
+		const rawHurt = raw as RawHurt;
+
 		if (!this.last) {
 			return null;
 		}
-		const data = raw.keys;
-		const killer = this.last.players.find(player => player.steamid === data.attacker.xuid);
+		const data = rawHurt.keys;
+		const attacker = this.last.players.find(player => player.steamid === data.attacker.xuid);
 		const victim = this.last.players.find(player => player.steamid === data.userid.xuid);
-		const assister = this.last.players.find(
-			player => player.steamid === data.assister.xuid && data.assister.xuid !== '0'
-		);
-		if (!killer || !victim) {
+
+		if (!attacker || !victim) {
 			return null;
 		}
-		const kill: KillEvent = {
-			killer,
+		const kill: HurtEvent = {
+			attacker,
 			victim,
-			assister: assister || null,
-			flashed: data.assistedflash,
-			headshot: data.headshot,
+			health: data.health,
+			armor: data.armor,
 			weapon: data.weapon,
-			wallbang: data.penetrated > 0,
-			attackerblind: data.attackerblind,
-			thrusmoke: data.thrusmoke,
-			noscope: data.noscope
+			dmg_health: data.dmg_health,
+			dmg_armor: data.dmg_armor,
+			hitgroup: data.hitgroup
 		};
-		this.emit('kill', kill);
+		this.emit('hurt', kill);
 		return kill;
 	}
 

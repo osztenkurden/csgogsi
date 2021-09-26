@@ -126,3 +126,17 @@ export interface KillEvent {
 	thrusmoke: boolean;
 	noscope: boolean;
 }
+
+export interface HurtEvent {
+	attacker: Player;
+	victim: Player;
+	health: number;
+	armor: number;
+	weapon: string;
+	dmg_health: number;
+	dmg_armor: number;
+	hitgroup: number;
+}
+
+//export type DigestMirvType = ((kill: RawKill, eventType: 'player_death') => KillEvent | null) | ((hurt: RawHurt, eventType: 'player_hurt') => HurtEvent | null)
+export type DigestMirvType = KillEvent | HurtEvent | null;
