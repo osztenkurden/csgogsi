@@ -1,4 +1,4 @@
-import { CSGOGSI, CSGORaw, Events, PlayerExtension, PlayerRaw, TeamExtension } from '../tsc';
+import { CSGOGSI, CSGORaw, Events, KillEvent, PlayerExtension, PlayerRaw, TeamExtension } from '../tsc';
 import { createGSIPacket, createKillPacket } from './data';
 import { testCases } from './data/bombSites';
 
@@ -654,8 +654,8 @@ test('event > kill: ignore for non-existing player #2', () => {
 	GSI.digest(createGSIPacket());
 	const response = GSI.digestMIRV(kill);
 
-	expect(callback.mock.calls.length).toBe(0);
-	expect(response).toBeNull();
+	expect(callback.mock.calls.length).toBe(1);
+	expect((response as KillEvent).killer).toBeNull();
 });
 
 test('event > kill: ignore for lacking data', () => {
@@ -687,7 +687,7 @@ test('event > kill: get correct killer', () => {
 	const response = GSI.digestMIRV(kill);
 
 	expect(callback.mock.calls.length).toBe(1);
-	expect(response && 'killer' in response && response?.killer.steamid).toBe('76561199031036917');
+	expect(response && 'killer' in response && response?.killer && response?.killer.steamid).toBe('76561199031036917');
 });
 
 test('event > kill: get correct assister', () => {
@@ -698,7 +698,7 @@ test('event > kill: get correct assister', () => {
 	const response = GSI.digestMIRV(kill);
 
 	expect(callback.mock.calls.length).toBe(1);
-	expect(response && 'killer' in response && response?.killer.steamid).toBe('76561199031036917');
+	expect(response && 'killer' in response && response?.killer && response?.killer.steamid).toBe('76561199031036917');
 });
 
 for (const testCase of testCases) {

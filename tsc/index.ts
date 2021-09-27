@@ -350,11 +350,11 @@ class CSGOGSI {
 			const assister = this.last.players.find(
 				player => player.steamid === data.assister.xuid && data.assister.xuid !== '0'
 			);
-			if (!killer || !victim) {
+			if (!victim) {
 				return null;
 			}
 			const kill: KillEvent = {
-				killer,
+				killer: killer || null,
 				victim,
 				assister: assister || null,
 				flashed: data.assistedflash,

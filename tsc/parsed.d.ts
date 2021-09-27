@@ -115,7 +115,7 @@ export interface Score {
 }
 
 export interface KillEvent {
-	killer: Player;
+	killer: Player | null;
 	victim: Player;
 	assister: Player | null;
 	flashed: boolean;
