@@ -16,6 +16,12 @@ export interface Team {
 	extra: Record<string, string>;
 }
 
+export interface RoundInfo {
+	team: Team;
+	round: number;
+	side: I.Side;
+	outcome: I.RoundOutcome;
+}
 export interface Player {
 	steamid: string;
 	name: string;
@@ -54,6 +60,10 @@ export interface Player {
 	realName: string | null;
 	extra: Record<string, string>;
 }
+
+export type RoundWins = {
+	[key: string]: I.RoundOutcome;
+};
 export interface Bomb {
 	state: 'carried' | 'planted' | 'dropped' | 'defused' | 'defusing' | 'planting' | 'exploded';
 	countdown?: string;
@@ -72,9 +82,8 @@ export interface Map {
 	num_matches_to_win_series: number;
 	current_spectators: number;
 	souvenirs_total: number;
-	round_wins: {
-		[key: string]: I.RoundOutcome;
-	};
+	round_wins: RoundWins;
+	rounds: I.RoundInfo[];
 }
 
 export interface Round {

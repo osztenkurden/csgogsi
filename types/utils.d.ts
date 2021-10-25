@@ -1,4 +1,15 @@
-import { Team, PlayerExtension, Player, PlayersRaw, Side, Orientation, TeamExtension, TeamRaw } from '.';
+import {
+	Team,
+	PlayerExtension,
+	Player,
+	PlayersRaw,
+	Side,
+	Orientation,
+	TeamExtension,
+	TeamRaw,
+	RoundInfo,
+	RoundWins
+} from '.';
 export declare const mapSteamIDToPlayer: (
 	players: PlayersRaw,
 	teams: {
@@ -13,3 +24,13 @@ export declare const parseTeam: (
 	side: Side,
 	extension: TeamExtension | null
 ) => Team;
+export declare const getRoundWin: (
+	mapRound: number,
+	teams: {
+		ct: Team;
+		t: Team;
+	},
+	roundWins: RoundWins,
+	round: number,
+	mr: number
+) => RoundInfo | null;

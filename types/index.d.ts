@@ -15,6 +15,7 @@ declare class CSGOGSI {
 		right: TeamExtension | null;
 	};
 	players: PlayerExtension[];
+	MR: number;
 	last?: CSGO;
 	current?: CSGO;
 	constructor();
@@ -74,6 +75,7 @@ export {
 	PlayerObservedRaw,
 	PlayersRaw,
 	Provider,
+	RoundWins,
 	MapRaw,
 	RoundRaw,
 	BombRaw,
@@ -88,6 +90,7 @@ export {
 	KillEvent,
 	RawKill,
 	TeamExtension,
+	RoundInfo,
 	PlayerExtension,
 	Orientation
 } from './interfaces';

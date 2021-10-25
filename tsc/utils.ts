@@ -1,4 +1,16 @@
-import { PlayerRaw, Team, PlayerExtension, Player, PlayersRaw, Side, Orientation, TeamExtension, TeamRaw } from '.';
+import {
+	PlayerRaw,
+	Team,
+	PlayerExtension,
+	Player,
+	PlayersRaw,
+	Side,
+	Orientation,
+	TeamExtension,
+	TeamRaw,
+	RoundInfo,
+	RoundWins
+} from '.';
 
 const parsePlayer = (basePlayer: PlayerRaw, steamid: string, team: Team, extensions: PlayerExtension[]) => {
 	const extension = extensions.find(player => player.steamid === steamid);
@@ -47,3 +59,55 @@ export const parseTeam = (
 	orientation,
 	extra: (extension && extension.extra) || {}
 });
+
+const getHalfFromRound = (round: number, mr: number) => {
+	let currentRoundHalf = 1;
+	if (round <= 30) {
+		currentRoundHalf = round <= 15 ? 1 : 2;
+	} else {
+		const roundInOT = ((round - 31) % (mr * 2)) + 1;
+		currentRoundHalf = roundInOT <= mr ? 1 : 2;
+	}
+	return currentRoundHalf;
+};
+
+const didTeamWinThatRound = (team: Team, round: number, wonBy: Side, currentRound: number, mr: number) => {
+	// czy round i currentRound są w tej samej połowie === (czy team jest === wonBy)
+	const currentRoundHalf = getHalfFromRound(currentRound, mr);
+	const roundToCheckHalf = getHalfFromRound(round, mr);
+
+	return (team.side === wonBy) === (currentRoundHalf === roundToCheckHalf);
+};
+
+export const getRoundWin = (
+	mapRound: number,
+	teams: { ct: Team; t: Team },
+	roundWins: RoundWins,
+	round: number,
+	mr: number
+) => {
+	let indexRound = round;
+	if (mapRound > 30) {
+		const roundInOT = ((round - 31) % (mr * 2)) + 1;
+		indexRound = roundInOT;
+	}
+	const roundOutcome = roundWins[indexRound];
+	if (!roundOutcome) return null;
+
+	const winSide = roundOutcome.substr(0, roundOutcome.indexOf('_')) as Side;
+
+	const result: RoundInfo = {
+		team: teams.ct,
+		round,
+		side: winSide,
+		outcome: roundOutcome
+	};
+
+	if (didTeamWinThatRound(teams.ct, round, winSide, mapRound, mr)) {
+		return result;
+	}
+
+	result.team = teams.t;
+
+	return result;
+};

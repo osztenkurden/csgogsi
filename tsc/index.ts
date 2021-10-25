@@ -7,11 +7,12 @@ import {
 	PlayerExtension,
 	RawKill,
 	Score,
-	TeamExtension
+	TeamExtension,
+	RoundInfo
 } from './interfaces';
 import { RawHurt } from './mirv';
 import { DigestMirvType, HurtEvent } from './parsed';
-import { mapSteamIDToPlayer, parseTeam } from './utils.js';
+import { getRoundWin, mapSteamIDToPlayer, parseTeam } from './utils.js';
 
 type EventNames = keyof Events;
 interface EventDescriptor {
@@ -26,8 +27,10 @@ class CSGOGSI {
 		right: TeamExtension | null;
 	};
 	players: PlayerExtension[];
+	MR: number;
 	last?: CSGO;
 	current?: CSGO;
+
 	constructor() {
 		this.descriptors = new Map();
 		this.teams = {
@@ -36,6 +39,7 @@ class CSGOGSI {
 		};
 		this.maxListeners = 10;
 		this.players = [];
+		this.MR = 3;
 	}
 	eventNames = () => {
 		const listeners = this.descriptors.entries();
@@ -198,6 +202,22 @@ class CSGOGSI {
 			forward: raw.player.forward.split(', ').map(n => Number(n))
 		};
 
+		const rounds: RoundInfo[] = [];
+
+		if (raw.round && raw.map?.round_wins) {
+			let currentRound = raw.map.round + 1;
+
+			if (raw.round && raw.round.phase === 'over') {
+				currentRound = raw.map.round;
+			}
+			for (let i = 1; i < currentRound; i++) {
+				const result = getRoundWin(currentRound, { ct: teamCT, t: teamT }, raw.map.round_wins, i, this.MR);
+				if (!result) continue;
+
+				rounds.push(result);
+			}
+		}
+
 		const data: CSGO = {
 			provider: raw.provider,
 			observer,
@@ -241,7 +261,8 @@ class CSGOGSI {
 				num_matches_to_win_series: raw.map.num_matches_to_win_series,
 				current_spectators: raw.map.current_spectators,
 				souvenirs_total: raw.map.souvenirs_total,
-				round_wins: raw.map.round_wins
+				round_wins: raw.map.round_wins,
+				rounds
 			}
 		};
 		this.current = data;
@@ -428,6 +449,7 @@ export {
 	PlayerObservedRaw,
 	PlayersRaw,
 	Provider,
+	RoundWins,
 	MapRaw,
 	RoundRaw,
 	BombRaw,
@@ -442,6 +464,7 @@ export {
 	KillEvent,
 	RawKill,
 	TeamExtension,
+	RoundInfo,
 	PlayerExtension,
 	Orientation
 } from './interfaces';
