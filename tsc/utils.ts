@@ -88,13 +88,16 @@ export const getRoundWin = (
 ) => {
 	let indexRound = round;
 	if (mapRound > 30) {
+		if (round <= 30) {
+			return null;
+		}
 		const roundInOT = ((round - 31) % (mr * 2)) + 1;
 		indexRound = roundInOT;
 	}
 	const roundOutcome = roundWins[indexRound];
 	if (!roundOutcome) return null;
 
-	const winSide = roundOutcome.substr(0, roundOutcome.indexOf('_')) as Side;
+	const winSide = roundOutcome.substr(0, roundOutcome.indexOf('_')).toUpperCase() as Side;
 
 	const result: RoundInfo = {
 		team: teams.ct,

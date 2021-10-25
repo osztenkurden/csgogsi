@@ -204,7 +204,7 @@ class CSGOGSI {
 
 		const rounds: RoundInfo[] = [];
 
-		if (raw.round && raw.map?.round_wins) {
+		if (raw.round && raw.map && raw.map.round_wins) {
 			let currentRound = raw.map.round + 1;
 
 			if (raw.round && raw.round.phase === 'over') {
