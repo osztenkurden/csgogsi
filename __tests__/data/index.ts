@@ -1,9 +1,10 @@
-import { CSGORaw, RawKill } from '../../tsc';
+import { CSGORaw, RawKill, RawHurt } from '../../tsc';
 import { O } from 'ts-toolbelt';
 import merge from 'lodash.merge';
 
 type OptionalCSGORaw = O.Optional<CSGORaw, keyof CSGORaw, 'deep'>;
 type OptionalKillRaw = O.Optional<RawKill, keyof RawKill, 'deep'>;
+type OptionalHurtRaw = O.Optional<RawHurt, keyof RawHurt, 'deep'>;
 
 export const createGSIPacket = (options: OptionalCSGORaw = {}, mutate?: (CSGO: CSGORaw) => CSGORaw) => {
 	const base: CSGORaw = {
@@ -18,15 +19,15 @@ export const createGSIPacket = (options: OptionalCSGORaw = {}, mutate?: (CSGO: C
 			mode: 'competitive',
 			name: 'workshop/2126169449/de_mirage',
 			phase: 'live',
-			round: 9,
+			round: 33,
 			team_ct: {
-				score: 4,
+				score: 17,
 				consecutive_round_losses: 2,
 				timeouts_remaining: 1,
 				matches_won_this_series: 0
 			},
 			team_t: {
-				score: 5,
+				score: 16,
 				consecutive_round_losses: 2,
 				timeouts_remaining: 1,
 				matches_won_this_series: 0
@@ -37,13 +38,7 @@ export const createGSIPacket = (options: OptionalCSGORaw = {}, mutate?: (CSGO: C
 			round_wins: {
 				'1': 'ct_win_elimination',
 				'2': 'ct_win_elimination',
-				'3': 't_win_bomb',
-				'4': 't_win_elimination',
-				'5': 't_win_bomb',
-				'6': 't_win_elimination',
-				'7': 't_win_bomb',
-				'8': 'ct_win_elimination',
-				'9': 'ct_win_elimination'
+				'3': 't_win_bomb'
 			}
 		},
 		round: {
@@ -556,7 +551,32 @@ export const createKillPacket = (options: OptionalKillRaw = {}) => {
 			noreplay: false
 		}
 	};
-	const kill: RawKill = merge(base, options);
+	const kill = (merge(base, options) as unknown) as RawKill;
 
 	return kill;
+};
+export const createHurtPacket = (options: OptionalHurtRaw = {}) => {
+	const base = {
+		name: 'player_hurt',
+		clientTime: 123456,
+		keys: {
+			userid: {
+				value: 0,
+				xuid: '76561198238326438'
+			},
+			attacker: {
+				value: 0,
+				xuid: '76561199031036917'
+			},
+			health: 0,
+			armor: 0,
+			weapon: 'string',
+			dmg_health: 0,
+			dmg_armor: 0,
+			hitgroup: 0
+		}
+	};
+	const hurt = (merge(base, options) as unknown) as RawHurt;
+
+	return hurt;
 };

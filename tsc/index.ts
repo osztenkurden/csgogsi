@@ -210,7 +210,7 @@ class CSGOGSI {
 			if (raw.round && raw.round.phase === 'over') {
 				currentRound = raw.map.round;
 			}
-			for (let i = 1; i < currentRound; i++) {
+			for (let i = 1; i <= currentRound; i++) {
 				const result = getRoundWin(currentRound, { ct: teamCT, t: teamT }, raw.map.round_wins, i, this.MR);
 				if (!result) continue;
 
@@ -443,12 +443,14 @@ export {
 	RoundOutcome,
 	WeaponType,
 	Observer,
+	RawHurt,
 	WeaponRaw,
 	TeamRaw,
 	PlayerRaw,
 	PlayerObservedRaw,
 	PlayersRaw,
 	Provider,
+	HurtEvent,
 	RoundWins,
 	MapRaw,
 	RoundRaw,

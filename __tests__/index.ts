@@ -1,5 +1,5 @@
 import { CSGOGSI, CSGORaw, Events, KillEvent, PlayerExtension, PlayerRaw, TeamExtension } from '../tsc';
-import { createGSIPacket, createKillPacket } from './data';
+import { createGSIPacket, createHurtPacket, createKillPacket } from './data';
 import { testCases } from './data/bombSites';
 
 const createGSIAndCallback = <K extends keyof Events>(eventName: K) => {
@@ -294,6 +294,119 @@ test('data > assign teams in the second half, left to T, right to CT', () => {
 
 	expect(GSI.digest(createGSIPacket({}, mapGSI))?.map?.team_ct.orientation).toBe('right');
 	expect(GSI.digest(createGSIPacket({}, mapGSI))?.map?.team_t.orientation).toBe('left');
+});
+
+test('data > rounds: proper parser in 1st half', () => {
+	const GSI = new CSGOGSI();
+
+	const data = GSI.digest(createGSIPacket({ map: { round: 3, team_ct: { score: 2 }, team_t: { score: 1 } } }));
+
+	expect(data).toBeDefined();
+	expect(data).not.toBeNull();
+
+	expect(data?.map.rounds.length).toBe(3);
+	expect(data?.map.rounds[0].round).toBe(1);
+	expect(data?.map.rounds[1].side).toBe('CT');
+	expect(data?.map.rounds[2].team.side).toBe('T');
+});
+
+test('data > rounds: proper parser in 2nd half', () => {
+	const GSI = new CSGOGSI();
+
+	const data = GSI.digest(
+		createGSIPacket({
+			map: {
+				round: 23,
+				team_ct: { score: 12 },
+				team_t: { score: 11 },
+				round_wins: {
+					'1': 't_win_elimination',
+					'2': 't_win_bomb',
+					'3': 't_win_elimination',
+					'4': 't_win_elimination',
+					'5': 't_win_bomb',
+					'6': 'ct_win_elimination',
+					'7': 'ct_win_elimination',
+					'8': 't_win_elimination',
+					'9': 't_win_bomb',
+					'10': 'ct_win_elimination',
+					'11': 'ct_win_elimination',
+					'12': 't_win_elimination',
+					'13': 'ct_win_elimination',
+					'14': 'ct_win_elimination',
+					'15': 't_win_elimination',
+					'16': 'ct_win_elimination',
+					'17': 't_win_bomb',
+					'18': 'ct_win_defuse',
+					'19': 't_win_bomb',
+					'20': 't_win_elimination',
+					'21': 't_win_elimination',
+					'22': 't_win_bomb',
+					'23': 't_win_elimination'
+				}
+			}
+		})
+	);
+
+	expect(data).toBeDefined();
+	expect(data).not.toBeNull();
+
+	expect(data?.map.rounds.length).toBe(23);
+	expect(data?.map.rounds[0].side).not.toBe(data?.map.rounds[0].team.side);
+	expect(data?.map.rounds[5].side).not.toBe(data?.map.rounds[5].team.side);
+	expect(data?.map.rounds[10].side).not.toBe(data?.map.rounds[10].team.side);
+	expect(data?.map.rounds[18].side).toBe(data?.map.rounds[18].team.side);
+	expect(data?.map.rounds[20].side).toBe(data?.map.rounds[20].team.side);
+	expect(data?.map.rounds[21].side).toBe(data?.map.rounds[21].team.side);
+});
+
+test('data > rounds: parser doesnt throw on wrong round wins list', () => {
+	const GSI = new CSGOGSI();
+
+	const dataPacker = createGSIPacket({
+		map: {
+			round: 23,
+			team_ct: { score: 12 },
+			team_t: { score: 11 },
+			round_wins: {
+				'1': 't_win_elimination',
+				'2': 't_win_bomb',
+				'3': 't_win_elimination',
+				'4': 't_win_elimination',
+				'5': 't_win_bomb'
+			}
+		}
+	});
+
+	expect(() => {
+		GSI.digest(dataPacker);
+	}).not.toThrow();
+});
+
+test('data > rounds: parser correctly gets just ended round', () => {
+	const GSI = new CSGOGSI();
+
+	const data = GSI.digest(
+		createGSIPacket({
+			map: {
+				round: 4,
+				team_ct: { score: 2 },
+				team_t: { score: 2 },
+				round_wins: {
+					'1': 't_win_elimination',
+					'2': 't_win_bomb',
+					'3': 't_win_elimination',
+					'4': 't_win_elimination'
+				}
+			},
+			round: { phase: 'over' }
+		})
+	);
+
+	expect(data?.map.rounds.length).toBe(4);
+	expect(data?.map.rounds[3].side).toBe('T');
+	expect(data?.map.rounds[3].round).toBe(4);
+	expect(data?.map.rounds[3].outcome).toBe('t_win_elimination');
 });
 
 test('data > player: dont assign observer if cant find', () => {
@@ -634,6 +747,60 @@ test('event > match: ended listener, T wins', () => {
 
 	expect(callback.mock.calls.length).toBe(1);
 	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('T');
+});
+
+test('event > hurt: ignore for non-existing player #1', () => {
+	const { GSI, callback } = createGSIAndCallback('hurt');
+	const hurt = createHurtPacket({ keys: { userid: { xuid: '' } } });
+
+	GSI.digest(createGSIPacket());
+	GSI.digestMIRV(hurt, 'player_hurt');
+
+	expect(callback.mock.calls.length).toBe(0);
+});
+
+test('event > hurt: ignore for non-existing player #2', () => {
+	const { GSI, callback } = createGSIAndCallback('hurt');
+	const hurt = createHurtPacket({ keys: { attacker: { xuid: '' } } });
+
+	GSI.digest(createGSIPacket());
+	GSI.digestMIRV(hurt, 'player_hurt');
+
+	expect(callback.mock.calls.length).toBe(0);
+});
+
+test('event > hurt: ignore for lacking data', () => {
+	const { GSI, callback } = createGSIAndCallback('hurt');
+	const hurt = createHurtPacket();
+
+	const response = GSI.digestMIRV(hurt, 'player_hurt');
+
+	expect(callback.mock.calls.length).toBe(0);
+	expect(response).toBeNull();
+});
+
+test('event > hurt: get correct victim', () => {
+	const { GSI, callback } = createGSIAndCallback('hurt');
+	const hurt = createHurtPacket({ keys: { userid: { xuid: '76561199031036917' } } });
+
+	GSI.digest(createGSIPacket());
+	const response = GSI.digestMIRV(hurt, 'player_hurt');
+
+	expect(callback.mock.calls.length).toBe(1);
+	expect(response?.victim.steamid).toBe('76561199031036917');
+});
+
+test('event > kill: get correct attacker', () => {
+	const { GSI, callback } = createGSIAndCallback('hurt');
+	const hurt = createHurtPacket({ keys: { attacker: { xuid: '76561199031036917' } } });
+
+	GSI.digest(createGSIPacket());
+	const response = GSI.digestMIRV(hurt, 'player_hurt');
+
+	expect(callback.mock.calls.length).toBe(1);
+	expect(response && 'attacker' in response && response?.attacker && response?.attacker.steamid).toBe(
+		'76561199031036917'
+	);
 });
 
 test('event > kill: ignore for non-existing player #1', () => {
