@@ -45,9 +45,11 @@ app.listen(3000);
 |Method|Description|Example|Returned objects|
 |---|---|---|---|
 |`digest(GSIData)`|Gets raw GSI data from CSGO and does magic|`GSI.digest(req.body)`|CSGO Parsed|
-|`digestMIRV(RawKill)`|Gets raw kill data from mirv pgl and does magic|`GSI.digestMIRV(mirv)`|KillEvent|
+|`digestMIRV(event: RawKill or RawHurt, eventType: "player_death" (default) or "player_hurt)`|Gets raw kill data from mirv pgl and does magic|`GSI.digestMIRV(mirv)`|KillEvent or HurtEvent|
 |`on('event', callback)`|Sets listener for given event (check them below)|`GSI.on('roundEnd', team => console.log(team.name));`||
 |`static findSite(mapName, position)`|Tries to guess the bombsite of the position||`A, B, null`|
+
+CSGOGSI also has MR property, which specifies the MR system for overtimes (used in map.rounds). Default value is 3.
 
 Beside that, CSGOGSI implements standard Event Emitter interfaces.
 
@@ -59,6 +61,7 @@ Beside that, CSGOGSI implements standard Event Emitter interfaces.
 |End of the round|`roundEnd`|(score: Score) => {}|
 |End of the map|`matchEnd`|(score: Score) => {}|
 |Kill|`kill`|(kill: KillEvent) => {}|
+|Hurt|`hurt`|(hurt: HurtEvent) => {}|
 |Timeout start|`timeoutStart`|(team: Team) => {}|
 |Timeout end|`timeoutEnd`|() => {}|
 |MVP of the round|`mvp`|(player: Player) => {}|
