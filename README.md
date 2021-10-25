@@ -143,6 +143,17 @@ Beside that, CSGOGSI implements standard Event Emitter interfaces.
 |current_spectators|`number`|
 |souvenirs_total|`number`|
 |round_wins|`Object with Round Outcome Object as values`|
+|rounds|`Array of RoundInfo objects`|
+
+
+#### RoundInfo
+
+|Property|Type|
+|---|---|
+|team|`Team`|
+|round|`number`|
+|side|`Side`|
+|outcome|`'ct_win_elimination', 't_win_elimination', 'ct_win_time', 'ct_win_defuse', 't_win_bomb'`|
 
 #### Round
 
