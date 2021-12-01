@@ -88,7 +88,8 @@ export const getRoundWin = (
 ) => {
 	let indexRound = round;
 	if (mapRound > 30) {
-		if (round <= 30) {
+		const maxOvertimeRounds = 6 * Math.floor((mapRound - 31) / 6) + 30;
+		if (round <= maxOvertimeRounds) {
 			return null;
 		}
 		const roundInOT = ((round - 31) % (mr * 2)) + 1;
