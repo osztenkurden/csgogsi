@@ -231,7 +231,7 @@ class CSGOGSI {
 			}
 		}
 
-		if (this.last?.map.name !== raw.map?.name) {
+		if (this.last && this.last.map.name !== raw.map.name) {
 			this.damage = [];
 		}
 
@@ -262,9 +262,12 @@ class CSGOGSI {
 
 			if (damageForRound.length === 0) continue;
 			//damagex.players.find(player => player.steamid === steamid).damage
-			const damageEntries = damageForRound.map(
-				damagex => damagex.players.find(playerDamage => playerDamage.steamid === player.steamid)?.damage || 0
-			);
+			const damageEntries = damageForRound.map(damageEntry => {
+				const playerDamageEntry = damageEntry.players.find(
+					playerDamage => playerDamage.steamid === player.steamid
+				);
+				return playerDamageEntry ? playerDamageEntry.damage : 0;
+			});
 			const adr = damageEntries.reduce((a, b) => a + b, 0) / (current.map.round || 1);
 			player.state.adr = Math.floor(adr);
 		}
