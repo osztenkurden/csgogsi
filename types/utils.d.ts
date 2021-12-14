@@ -24,6 +24,14 @@ export declare const parseTeam: (
 	side: Side,
 	extension: TeamExtension | null
 ) => Team;
+export declare const getHalfFromRound: (round: number, mr: number) => number;
+export declare const didTeamWinThatRound: (
+	team: Team,
+	round: number,
+	wonBy: Side,
+	currentRound: number,
+	mr: number
+) => boolean;
 export declare const getRoundWin: (
 	mapRound: number,
 	teams: {

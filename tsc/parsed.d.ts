@@ -52,6 +52,7 @@ export interface Player {
 		round_killhs: number;
 		round_totaldmg: number;
 		equip_value: number;
+		adr: number;
 	};
 	position: number[];
 	forward: number[];

@@ -1,12 +1,20 @@
 import { CSGO, CSGORaw, Events, KillEvent, PlayerExtension, RawKill, Score, TeamExtension } from './interfaces';
 import { RawHurt } from './mirv';
 import { DigestMirvType, HurtEvent } from './parsed';
-import { mapSteamIDToPlayer, parseTeam } from './utils.js';
+import { mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound } from './utils.js';
 declare type EventNames = keyof Events;
 interface EventDescriptor {
 	listener: Events[EventNames];
 	once: boolean;
 }
+declare type RoundPlayerDamage = {
+	steamid: string;
+	damage: number;
+};
+declare type RoundDamage = {
+	round: number;
+	players: RoundPlayerDamage[];
+};
 declare class CSGOGSI {
 	private descriptors;
 	private maxListeners;
@@ -14,6 +22,7 @@ declare class CSGOGSI {
 		left: TeamExtension | null;
 		right: TeamExtension | null;
 	};
+	damage: RoundDamage[];
 	players: PlayerExtension[];
 	MR: number;
 	last?: CSGO;
@@ -61,7 +70,7 @@ declare class CSGOGSI {
 	digestMIRV(raw: RawKill | RawHurt, eventType?: string): DigestMirvType;
 	static findSite(mapName: string, position: number[]): 'A' | 'B' | null;
 }
-export { CSGOGSI, mapSteamIDToPlayer, parseTeam };
+export { CSGOGSI, mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound };
 export {
 	CSGO,
 	CSGORaw,

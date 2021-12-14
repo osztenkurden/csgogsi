@@ -12,13 +12,24 @@ import {
 } from './interfaces';
 import { RawHurt } from './mirv';
 import { DigestMirvType, HurtEvent } from './parsed';
-import { getRoundWin, mapSteamIDToPlayer, parseTeam } from './utils.js';
+import { getRoundWin, mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound } from './utils.js';
 
 type EventNames = keyof Events;
 interface EventDescriptor {
 	listener: Events[EventNames];
 	once: boolean;
 }
+
+type RoundPlayerDamage = {
+	steamid: string;
+	damage: number;
+};
+
+type RoundDamage = {
+	round: number;
+	players: RoundPlayerDamage[];
+};
+
 class CSGOGSI {
 	private descriptors: Map<EventNames, EventDescriptor[]>;
 	private maxListeners: number;
@@ -26,6 +37,7 @@ class CSGOGSI {
 		left: TeamExtension | null;
 		right: TeamExtension | null;
 	};
+	damage: RoundDamage[];
 	players: PlayerExtension[];
 	MR: number;
 	last?: CSGO;
@@ -40,6 +52,7 @@ class CSGOGSI {
 		this.maxListeners = 10;
 		this.players = [];
 		this.MR = 3;
+		this.damage = [];
 	}
 	eventNames = () => {
 		const listeners = this.descriptors.entries();
@@ -218,6 +231,44 @@ class CSGOGSI {
 			}
 		}
 
+		if (this.last?.map.name !== raw.map?.name) {
+			this.damage = [];
+		}
+
+		let currentRoundForDamage = raw.map.round + 1;
+		if (raw.round && raw.round.phase === 'over') {
+			currentRoundForDamage = raw.map.round;
+		}
+		let currentRoundDamage = this.damage.find(damage => damage.round === currentRoundForDamage);
+
+		if (!currentRoundDamage) {
+			currentRoundDamage = {
+				round: currentRoundForDamage,
+				players: []
+			};
+
+			this.damage.push(currentRoundDamage);
+		}
+		currentRoundDamage.players = players.map(player => ({
+			steamid: player.steamid,
+			damage: player.state.round_totaldmg
+		}));
+
+		for (const player of players) {
+			const { current, damage } = this;
+			if (!current) continue;
+
+			const damageForRound = damage.filter(damageEntry => damageEntry.round <= current.map.round);
+
+			if (damageForRound.length === 0) continue;
+			//damagex.players.find(player => player.steamid === steamid).damage
+			const damageEntries = damageForRound.map(
+				damagex => damagex.players.find(playerDamage => playerDamage.steamid === player.steamid)?.damage || 0
+			);
+			const adr = damageEntries.reduce((a, b) => a + b, 0) / (current.map.round || 1);
+			player.state.adr = Math.floor(adr);
+		}
+
 		const data: CSGO = {
 			provider: raw.provider,
 			observer,
@@ -265,6 +316,7 @@ class CSGOGSI {
 				rounds
 			}
 		};
+
 		this.current = data;
 		if (!this.last) {
 			this.last = data;
@@ -434,7 +486,7 @@ class CSGOGSI {
 	}
 }
 
-export { CSGOGSI, mapSteamIDToPlayer, parseTeam };
+export { CSGOGSI, mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound };
 
 export {
 	CSGO,

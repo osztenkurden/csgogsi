@@ -22,7 +22,7 @@ const parsePlayer = (basePlayer: PlayerRaw, steamid: string, team: Team, extensi
 		observer_slot: basePlayer.observer_slot,
 		stats: basePlayer.match_stats,
 		weapons: basePlayer.weapons,
-		state: { ...basePlayer.state, smoked: basePlayer.state.smoked || 0 },
+		state: { ...basePlayer.state, smoked: basePlayer.state.smoked || 0, adr: 0 },
 		position: basePlayer.position.split(', ').map(pos => Number(pos)),
 		forward: basePlayer.forward.split(', ').map(pos => Number(pos)),
 		team,
@@ -60,7 +60,7 @@ export const parseTeam = (
 	extra: (extension && extension.extra) || {}
 });
 
-const getHalfFromRound = (round: number, mr: number) => {
+export const getHalfFromRound = (round: number, mr: number) => {
 	let currentRoundHalf = 1;
 	if (round <= 30) {
 		currentRoundHalf = round <= 15 ? 1 : 2;
@@ -71,7 +71,7 @@ const getHalfFromRound = (round: number, mr: number) => {
 	return currentRoundHalf;
 };
 
-const didTeamWinThatRound = (team: Team, round: number, wonBy: Side, currentRound: number, mr: number) => {
+export const didTeamWinThatRound = (team: Team, round: number, wonBy: Side, currentRound: number, mr: number) => {
 	// czy round i currentRound są w tej samej połowie === (czy team jest === wonBy)
 	const currentRoundHalf = getHalfFromRound(currentRound, mr);
 	const roundToCheckHalf = getHalfFromRound(round, mr);

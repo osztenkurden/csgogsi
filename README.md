@@ -1,4 +1,4 @@
-![Statements](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)
+![Statements](https://img.shields.io/badge/Coverage-97.86%25-brightgreen.svg)
 ![CI](https://img.shields.io/github/workflow/status/osztenkurden/csgogsi/CI)
 ![Dependencies](https://img.shields.io/david/osztenkurden/csgogsi)
 ![Downloads](https://img.shields.io/npm/dm/csgogsi)
@@ -175,7 +175,7 @@ Beside that, CSGOGSI implements standard Event Emitter interfaces.
 |observer_slot|`number`|
 |team|`Team Object`|
 |stats|`{kills, assists, deaths, mvps, score} all numbers`|
-|state|`{health, armor, helmet, defusekit?, flashed, smoked, burning, money, round_kills, round_killshs, round_totaldmg, equip_value}`|
+|state|`{health, armor, helmet, defusekit?, flashed, smoked, burning, money, round_kills, round_killshs, round_totaldmg, equip_value, adr}`|
 |position|`Array of numbers`|
 |forward|`number`|
 |avatar|`string or null`|
