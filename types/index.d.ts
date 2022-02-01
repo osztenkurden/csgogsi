@@ -70,7 +70,7 @@ declare class CSGOGSI {
 	digestMIRV(raw: RawKill | RawHurt, eventType?: string): DigestMirvType;
 	static findSite(mapName: string, position: number[]): 'A' | 'B' | null;
 }
-export { CSGOGSI, mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound };
+export { CSGOGSI, mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound, RoundDamage };
 export {
 	CSGO,
 	CSGORaw,

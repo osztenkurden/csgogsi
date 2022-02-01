@@ -489,7 +489,7 @@ class CSGOGSI {
 	}
 }
 
-export { CSGOGSI, mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound };
+export { CSGOGSI, mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound, RoundDamage };
 
 export {
 	CSGO,
