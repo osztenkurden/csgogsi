@@ -164,7 +164,7 @@ class CSGOGSI {
 		return this.descriptors.get(eventName) || [];
 	};
 
-	digest(raw: CSGORaw): CSGO | null {
+	digest = (raw: CSGORaw): CSGO | null => {
 		if (!raw.allplayers || !raw.map || !raw.phase_countdowns) {
 			return null;
 		}
@@ -411,9 +411,9 @@ class CSGOGSI {
 		this.emit('data', data);
 		this.last = data;
 		return data;
-	}
+	};
 
-	digestMIRV(raw: RawKill | RawHurt, eventType = 'player_death'): DigestMirvType {
+	digestMIRV = (raw: RawKill | RawHurt, eventType = 'player_death'): DigestMirvType => {
 		if (eventType === 'player_death') {
 			const rawKill = raw as RawKill;
 
@@ -468,7 +468,7 @@ class CSGOGSI {
 		};
 		this.emit('hurt', kill);
 		return kill;
-	}
+	};
 
 	static findSite(mapName: string, position: number[]) {
 		const realMapName = mapName.substr(mapName.lastIndexOf('/') + 1);
@@ -480,7 +480,8 @@ class CSGOGSI {
 			de_dust2: position => (position[0] > -500 ? 'A' : 'B'),
 			de_inferno: position => (position[0] > 1400 ? 'A' : 'B'),
 			de_vertigo: position => (position[0] > -1400 ? 'A' : 'B'),
-			de_train: position => (position[1] > -450 ? 'A' : 'B')
+			de_train: position => (position[1] > -450 ? 'A' : 'B'),
+			de_ancient: position => (position[0] < -500 ? 'A' : 'B')
 		};
 		if (realMapName in mapReference) {
 			return mapReference[realMapName](position);

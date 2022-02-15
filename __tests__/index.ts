@@ -49,6 +49,20 @@ test('parser > dont break with no bomb data', () => {
 	expect(result?.bomb).toBeNull();
 });
 
+test('parser > clear damage data on new map', () => {
+	const GSI = new CSGOGSI();
+
+	GSI.digest(createGSIPacket({ map: { name: 'de_mirage' } }));
+	GSI.damage = [
+		{ round: 1, players: [] },
+		{ round: 2, players: [] }
+	];
+
+	GSI.digest(createGSIPacket({ map: { name: 'de_nuke' } }));
+
+	expect(GSI.damage.length).toBe(1);
+});
+
 test('parser > remove all listeners from specific event', () => {
 	const { GSI, callback } = createGSIAndCallback('data');
 

@@ -66,8 +66,8 @@ declare class CSGOGSI {
 	removeAllListeners: (eventName: EventNames) => this;
 	setMaxListeners: (n: number) => this;
 	rawListeners: (eventName: EventNames) => EventDescriptor[];
-	digest(raw: CSGORaw): CSGO | null;
-	digestMIRV(raw: RawKill | RawHurt, eventType?: string): DigestMirvType;
+	digest: (raw: CSGORaw) => CSGO | null;
+	digestMIRV: (raw: RawKill | RawHurt, eventType?: string) => DigestMirvType;
 	static findSite(mapName: string, position: number[]): 'A' | 'B' | null;
 }
 export { CSGOGSI, mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound, RoundDamage };
