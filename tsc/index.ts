@@ -430,7 +430,7 @@ class CSGOGSI {
 				return null;
 			}
 			const kill: KillEvent = {
-				killer: killer || null,
+				killer: killer || (data.weapon === 'trigger_hurt' || data.weapon === 'worldspawn' ? victim : null),
 				victim,
 				assister: assister || null,
 				flashed: data.assistedflash,
