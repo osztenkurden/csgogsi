@@ -34,6 +34,7 @@ declare class CSGOGSI {
 	listeners: (
 		eventName: EventNames
 	) => (
+		| ((data: CSGORaw) => void)
 		| ((data: CSGO) => void)
 		| ((team: Score) => void)
 		| ((score: Score) => void)

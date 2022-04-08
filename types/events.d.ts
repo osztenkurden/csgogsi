@@ -1,6 +1,7 @@
 import * as I from './interfaces';
 
 export interface Events {
+	raw: (data: I.CSGORaw) => void;
 	data: (data: I.CSGO) => void;
 	roundEnd: (team: I.Score) => void;
 	matchEnd: (score: I.Score) => void;
