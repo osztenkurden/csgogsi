@@ -1,10 +1,21 @@
-import { CSGO, CSGORaw, Events, KillEvent, PlayerExtension, RawKill, Score, TeamExtension } from './interfaces';
+import {
+	CSGO,
+	CSGORaw,
+	Events,
+	KillEvent,
+	PlayerExtension,
+	RawKill,
+	Score,
+	TeamExtension,
+	Callback,
+	EventNames,
+	BaseEvents
+} from './interfaces';
 import { RawHurt } from './mirv';
 import { DigestMirvType, HurtEvent } from './parsed';
 import { mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound } from './utils.js';
-declare type EventNames = keyof Events;
 interface EventDescriptor {
-	listener: Events[EventNames];
+	listener: Events[BaseEvents];
 	once: boolean;
 }
 declare type RoundPlayerDamage = {
@@ -28,7 +39,7 @@ declare class CSGOGSI {
 	last?: CSGO;
 	current?: CSGO;
 	constructor();
-	eventNames: () => (keyof Events)[];
+	eventNames: () => EventNames[];
 	getMaxListeners: () => number;
 	listenerCount: (eventName: EventNames) => number;
 	listeners: (
@@ -56,14 +67,14 @@ declare class CSGOGSI {
 		| (<K extends keyof Events>(eventName: K, listener: Events[K]) => void)
 		| (<K_1 extends keyof Events>(eventName: K_1, listener: Events[K_1]) => void)
 	)[];
-	removeListener: <K extends keyof Events>(eventName: K, listener: Events[K]) => this;
-	off: <K extends keyof Events>(eventName: K, listener: Events[K]) => this;
-	addListener: <K extends keyof Events>(eventName: K, listener: Events[K]) => this;
-	on: <K extends keyof Events>(eventName: K, listener: Events[K]) => this;
-	once: <K extends keyof Events>(eventName: K, listener: Events[K]) => this;
-	prependListener: <K extends keyof Events>(eventName: K, listener: Events[K]) => this;
+	removeListener: <K extends EventNames>(eventName: K, listener: Callback<K>) => this;
+	off: <K extends EventNames>(eventName: K, listener: Callback<K>) => this;
+	addListener: <K extends EventNames>(eventName: K, listener: Callback<K>) => this;
+	on: <K extends EventNames>(eventName: K, listener: Callback<K>) => this;
+	once: <K extends EventNames>(eventName: K, listener: Callback<K>) => this;
+	prependListener: <K extends EventNames>(eventName: K, listener: Callback<K>) => this;
 	emit: (eventName: EventNames, arg?: any, arg2?: any) => boolean;
-	prependOnceListener: <K extends keyof Events>(eventName: K, listener: Events[K]) => this;
+	prependOnceListener: <K extends EventNames>(eventName: K, listener: Callback<K>) => this;
 	removeAllListeners: (eventName: EventNames) => this;
 	setMaxListeners: (n: number) => this;
 	rawListeners: (eventName: EventNames) => EventDescriptor[];

@@ -1,4 +1,5 @@
 import { CSGOGSI, CSGORaw, Events, KillEvent, PlayerExtension, PlayerRaw, TeamExtension } from '../tsc';
+import { Callback } from '../tsc/events';
 import { createGSIPacket, createHurtPacket, createKillPacket } from './data';
 import { testCases } from './data/bombSites';
 
@@ -7,7 +8,7 @@ const createGSIAndCallback = <K extends keyof Events>(eventName: K) => {
 
 	const GSI = new CSGOGSI();
 
-	GSI.addListener(eventName, callback);
+	GSI.addListener(eventName, (callback as unknown) as Callback<K>);
 
 	return { GSI, callback };
 };

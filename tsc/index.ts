@@ -8,15 +8,17 @@ import {
 	RawKill,
 	Score,
 	TeamExtension,
-	RoundInfo
+	RoundInfo,
+	Callback,
+	EventNames,
+	BaseEvents
 } from './interfaces';
 import { RawHurt } from './mirv';
 import { DigestMirvType, HurtEvent } from './parsed';
 import { getRoundWin, mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound } from './utils.js';
 
-type EventNames = keyof Events;
 interface EventDescriptor {
-	listener: Events[EventNames];
+	listener: Events[BaseEvents];
 	once: boolean;
 }
 
@@ -78,11 +80,11 @@ class CSGOGSI {
 		return descriptors.map(descriptor => descriptor.listener);
 	};
 
-	removeListener = <K extends EventNames>(eventName: K, listener: Events[K]) => {
+	removeListener = <K extends EventNames>(eventName: K, listener: Callback<K>) => {
 		return this.off(eventName, listener);
 	};
 
-	off = <K extends EventNames>(eventName: K, listener: Events[K]) => {
+	off = <K extends EventNames>(eventName: K, listener: Callback<K>) => {
 		const descriptors = this.descriptors.get(eventName) || [];
 
 		this.descriptors.set(
@@ -93,11 +95,11 @@ class CSGOGSI {
 		return this;
 	};
 
-	addListener = <K extends EventNames>(eventName: K, listener: Events[K]) => {
+	addListener = <K extends EventNames>(eventName: K, listener: Callback<K>) => {
 		return this.on(eventName, listener);
 	};
 
-	on = <K extends EventNames>(eventName: K, listener: Events[K]) => {
+	on = <K extends EventNames>(eventName: K, listener: Callback<K>) => {
 		this.emit('newListener', eventName, listener);
 		const listOfListeners = [...(this.descriptors.get(eventName) || [])];
 
@@ -107,7 +109,7 @@ class CSGOGSI {
 		return this;
 	};
 
-	once = <K extends EventNames>(eventName: K, listener: Events[K]) => {
+	once = <K extends EventNames>(eventName: K, listener: Callback<K>) => {
 		const listOfListeners = [...(this.descriptors.get(eventName) || [])];
 
 		listOfListeners.push({ listener, once: true });
@@ -116,7 +118,7 @@ class CSGOGSI {
 		return this;
 	};
 
-	prependListener = <K extends EventNames>(eventName: K, listener: Events[K]) => {
+	prependListener = <K extends EventNames>(eventName: K, listener: Callback<K>) => {
 		const listOfListeners = [...(this.descriptors.get(eventName) || [])];
 
 		listOfListeners.unshift({ listener, once: false });
@@ -141,7 +143,7 @@ class CSGOGSI {
 		return true;
 	};
 
-	prependOnceListener = <K extends EventNames>(eventName: K, listener: Events[K]) => {
+	prependOnceListener = <K extends EventNames>(eventName: K, listener: Callback<K>) => {
 		const listOfListeners = [...(this.descriptors.get(eventName) || [])];
 
 		listOfListeners.unshift({ listener, once: true });

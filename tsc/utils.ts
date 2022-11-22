@@ -53,7 +53,7 @@ export const parseTeam = (
 	timeouts_remaining: team.timeouts_remaining,
 	matches_won_this_series: (extension && extension.map_score) || team.matches_won_this_series,
 	side,
-	name: (extension && extension.name) || (side === 'CT' ? 'Counter-Terrorists' : 'Terrorists'),
+	name: (extension && extension.name) || team.name || (side === 'CT' ? 'Counter-Terrorists' : 'Terrorists'),
 	country: (extension && extension.country) || null,
 	id: (extension && extension.id) || null,
 	orientation,
