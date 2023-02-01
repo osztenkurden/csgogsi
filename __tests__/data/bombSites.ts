@@ -103,5 +103,9 @@ export const testCases: SiteTestCase[] = [
 
 	// de_ancient
 	{ map: 'de_ancient', site: 'A', position: '-1461, 714, 191' },
-	{ map: 'de_ancient', site: 'B', position: '955, 88, 183' }
+	{ map: 'de_ancient', site: 'B', position: '955, 88, 183' },
+
+	// de_anubis
+	{ map: 'de_anubis', site: 'A', position: '1204, 1906, 19' },
+	{ map: 'de_anubis', site: 'B', position: '-1040, 599, 44' }
 ];
