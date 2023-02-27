@@ -291,7 +291,7 @@ class CSGOGSI {
 				? {
 						state: bomb.state,
 						countdown: bomb.countdown,
-						position: bomb.position,
+						position: bomb.position.split(', ').map(pos => Number(pos)),
 						player: players.find(player => player.steamid === bomb.player) || undefined,
 						site:
 							bomb.state === 'planted' ||

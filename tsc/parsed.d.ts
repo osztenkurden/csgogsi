@@ -70,7 +70,7 @@ export interface Bomb {
 	countdown?: string;
 	player?: Player;
 	site: 'A' | 'B' | null;
-	position: string;
+	position: number[];
 }
 
 export interface Map {
