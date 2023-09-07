@@ -35,7 +35,8 @@ declare class CSGOGSI {
 	};
 	damage: RoundDamage[];
 	players: PlayerExtension[];
-	MR: number;
+	overtimeMR: number;
+	regulationMR: number;
 	last?: CSGO;
 	current?: CSGO;
 	constructor();

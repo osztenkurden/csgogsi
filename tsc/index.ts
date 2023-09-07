@@ -41,7 +41,8 @@ class CSGOGSI {
 	};
 	damage: RoundDamage[];
 	players: PlayerExtension[];
-	MR: number;
+	overtimeMR: number;
+	regulationMR: number;
 	last?: CSGO;
 	current?: CSGO;
 
@@ -53,7 +54,8 @@ class CSGOGSI {
 		};
 		this.maxListeners = 10;
 		this.players = [];
-		this.MR = 3;
+		this.overtimeMR = 3;
+		this.regulationMR = 15;
 		this.damage = [];
 	}
 	eventNames = () => {
@@ -227,7 +229,14 @@ class CSGOGSI {
 				currentRound = raw.map.round;
 			}
 			for (let i = 1; i <= currentRound; i++) {
-				const result = getRoundWin(currentRound, { ct: teamCT, t: teamT }, raw.map.round_wins, i, this.MR);
+				const result = getRoundWin(
+					currentRound,
+					{ ct: teamCT, t: teamT },
+					raw.map.round_wins,
+					i,
+					this.regulationMR,
+					this.overtimeMR
+				);
 				if (!result) continue;
 
 				rounds.push(result);

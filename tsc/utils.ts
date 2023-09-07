@@ -60,21 +60,28 @@ export const parseTeam = (
 	extra: (extension && extension.extra) || {}
 });
 
-export const getHalfFromRound = (round: number, mr: number) => {
+export const getHalfFromRound = (round: number, regulationMR: number, mr: number) => {
 	let currentRoundHalf = 1;
-	if (round <= 30) {
-		currentRoundHalf = round <= 15 ? 1 : 2;
+	if (round <= 2 * regulationMR) {
+		currentRoundHalf = round <= regulationMR ? 1 : 2;
 	} else {
-		const roundInOT = ((round - 31) % (mr * 2)) + 1;
+		const roundInOT = ((round - (2 * regulationMR + 1)) % (mr * 2)) + 1;
 		currentRoundHalf = roundInOT <= mr ? 1 : 2;
 	}
 	return currentRoundHalf;
 };
 
-export const didTeamWinThatRound = (team: Team, round: number, wonBy: Side, currentRound: number, mr: number) => {
+export const didTeamWinThatRound = (
+	team: Team,
+	round: number,
+	wonBy: Side,
+	currentRound: number,
+	regulationMR: number,
+	mr: number
+) => {
 	// czy round i currentRound są w tej samej połowie === (czy team jest === wonBy)
-	const currentRoundHalf = getHalfFromRound(currentRound, mr);
-	const roundToCheckHalf = getHalfFromRound(round, mr);
+	const currentRoundHalf = getHalfFromRound(currentRound, regulationMR, mr);
+	const roundToCheckHalf = getHalfFromRound(round, regulationMR, mr);
 
 	return (team.side === wonBy) === (currentRoundHalf === roundToCheckHalf);
 };
@@ -84,15 +91,17 @@ export const getRoundWin = (
 	teams: { ct: Team; t: Team },
 	roundWins: RoundWins,
 	round: number,
-	mr: number
+	regulationMR: number,
+	overtimeMR: number
 ) => {
 	let indexRound = round;
-	if (mapRound > 30) {
-		const maxOvertimeRounds = 6 * Math.floor((mapRound - 31) / 6) + 30;
+	if (mapRound > 2 * regulationMR) {
+		const maxOvertimeRounds =
+			2 * overtimeMR * Math.floor((mapRound - (2 * regulationMR + 1)) / (2 * overtimeMR)) + 2 * regulationMR;
 		if (round <= maxOvertimeRounds) {
 			return null;
 		}
-		const roundInOT = ((round - 31) % (mr * 2)) + 1;
+		const roundInOT = ((round - (2 * regulationMR + 1)) % (overtimeMR * 2)) + 1;
 		indexRound = roundInOT;
 	}
 	const roundOutcome = roundWins[indexRound];
@@ -107,7 +116,7 @@ export const getRoundWin = (
 		outcome: roundOutcome
 	};
 
-	if (didTeamWinThatRound(teams.ct, round, winSide, mapRound, mr)) {
+	if (didTeamWinThatRound(teams.ct, round, winSide, mapRound, regulationMR, overtimeMR)) {
 		return result;
 	}
 
