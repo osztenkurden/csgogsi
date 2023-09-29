@@ -211,13 +211,13 @@ class CSGOGSI {
 		const playerMapper = mapSteamIDToPlayer(raw.allplayers, { CT: teamCT, T: teamT }, this.players);
 
 		const players = Object.keys(raw.allplayers).map(playerMapper);
-		const observed = players.find(player => player.steamid === raw.player.steamid) || null;
+		const observed = players.find(player => raw.player && player.steamid === raw.player.steamid) || null;
 
 		const observer: Observer = {
-			activity: raw.player.activity,
-			spectarget: raw.player.spectarget,
-			position: raw.player.position.split(', ').map(n => Number(n)),
-			forward: raw.player.forward.split(', ').map(n => Number(n))
+			activity: raw.player?.activity,
+			spectarget: raw.player?.spectarget,
+			position: raw.player?.position.split(', ').map(n => Number(n)),
+			forward: raw.player?.forward.split(', ').map(n => Number(n))
 		};
 
 		const rounds: RoundInfo[] = [];

@@ -129,7 +129,7 @@ export interface CSGORaw {
 	provider: Provider;
 	map?: MapRaw;
 	round?: RoundRaw;
-	player: PlayerObservedRaw;
+	player?: PlayerObservedRaw;
 	allplayers?: PlayersRaw;
 	bomb?: BombRaw;
 	grenades?: {
