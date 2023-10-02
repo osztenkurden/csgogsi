@@ -1,6 +1,6 @@
 {
   "name": "csgogsi",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "description": "",
   "type": "module",
   "main": "./lib/cjs/index.js",
@@ -9,7 +9,6 @@
     "import": "./lib/esm/index.js",
     "default": "./lib/cjs/index.js"
   },
-  "types": "./types/index.d.ts",
   "devDependencies": {
     "@types/jest": "^26.0.21",
     "@types/lodash.merge": "^4.6.6",
@@ -34,7 +33,7 @@
     "transpile:esm": "tsc -p tsconfig.esm.json",
     "transpile:all": "npm run transpile:cjs && npm run transpile:esm",
     "transpile": "npm run transpile:all && npm run post-compile && npm run move-build",
-    "move-build": "cp tsc/*.d.ts lib/cjs && mv lib/cjs/*.d.ts types/",
+    "move-build": "cp tsc/*.d.ts lib/cjs && cp lib/cjs/*.d.ts lib/esm",
     "lint": "eslint . --ext .ts",
     "prettier-format": "prettier --config .prettierrc --write **/*.ts",
     "post-compile": "npm run prettier-format && npm run lint && npm test && npm run make-badges"
