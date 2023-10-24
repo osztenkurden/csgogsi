@@ -11,6 +11,8 @@ import {
 	RoundInfo,
 	RoundWins
 } from '.';
+import { GrenadeRaw } from './csgo';
+import { Grenade } from './parsed';
 
 const parsePlayer = (basePlayer: PlayerRaw, steamid: string, team: Team, extensions: PlayerExtension[]) => {
 	const extension = extensions.find(player => player.steamid === steamid);
@@ -21,7 +23,7 @@ const parsePlayer = (basePlayer: PlayerRaw, steamid: string, team: Team, extensi
 		clan: basePlayer.clan,
 		observer_slot: basePlayer.observer_slot,
 		stats: basePlayer.match_stats,
-		weapons: basePlayer.weapons,
+		weapons: Object.entries(basePlayer.weapons).map(([id, weapon]) => ({ ...weapon, id })),
 		state: { ...basePlayer.state, smoked: basePlayer.state.smoked || 0, adr: 0 },
 		position: basePlayer.position.split(', ').map(pos => Number(pos)),
 		forward: basePlayer.forward.split(', ').map(pos => Number(pos)),
@@ -84,6 +86,45 @@ export const didTeamWinThatRound = (
 	const roundToCheckHalf = getHalfFromRound(round, regulationMR, mr);
 
 	return (team.side === wonBy) === (currentRoundHalf === roundToCheckHalf);
+};
+
+const parseGrenade = (grenade: GrenadeRaw, id: string): Grenade => {
+	if (grenade.type === 'inferno') {
+		return {
+			...grenade,
+			id,
+			flames: Object.entries(grenade.flames).map(([id, position]) => ({
+				id,
+				position: position.split(', ').map(parseFloat)
+			})),
+			lifetime: parseFloat(grenade.lifetime)
+		};
+	}
+
+	if (grenade.type === 'smoke' || grenade.type === 'decoy') {
+		return {
+			...grenade,
+			id,
+			velocity: grenade.velocity.split(', ').map(parseFloat),
+			position: grenade.position.split(', ').map(parseFloat),
+			lifetime: parseFloat(grenade.lifetime),
+			effecttime: parseFloat(grenade.effecttime)
+		};
+	}
+	return {
+		type: grenade.type,
+		owner: grenade.owner,
+		id,
+		velocity: grenade.velocity.split(', ').map(parseFloat),
+		position: grenade.position.split(', ').map(parseFloat),
+		lifetime: parseFloat(grenade.lifetime)
+	};
+};
+
+export const parseGrenades = (grenades?: { [key: string]: GrenadeRaw }): Grenade[] => {
+	if (!grenades) return [];
+
+	return Object.entries(grenades).map(([id, grenade]) => parseGrenade(grenade, id));
 };
 
 export const getRoundWin = (

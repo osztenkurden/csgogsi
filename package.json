@@ -1,6 +1,6 @@
 {
   "name": "csgogsi",
-  "version": "2.7.4",
+  "version": "3.0.0",
   "description": "",
   "type": "module",
   "main": "./lib/cjs/index.js",

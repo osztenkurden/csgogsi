@@ -125,6 +125,31 @@ export interface PhaseRaw {
 	phase_ends_in: string;
 }
 
+export interface GrenadeBaseRaw {
+	owner: string;
+	lifetime: string;
+}
+
+export interface DecoySmokeGrenadeRaw extends GrenadeBaseRaw {
+	position: string;
+	velocity: string;
+	type: 'decoy' | 'smoke';
+	effecttime: string;
+}
+
+export interface FragOrFireBombOrFlashbandGrenadeRaw extends GrenadeBaseRaw {
+	position: string;
+	type: 'frag' | 'firebomb' | 'flashbang';
+	velocity: string;
+}
+
+export interface InfernoGrenadeRaw extends GrenadeBaseRaw {
+	type: 'inferno';
+	flames: { [key: string]: string };
+}
+
+export type GrenadeRaw = DecoySmokeGrenadeRaw | FragOrFireBombOrFlashbandGrenadeRaw | InfernoGrenadeRaw;
+
 export interface CSGORaw {
 	provider: Provider;
 	map?: MapRaw;
@@ -133,7 +158,7 @@ export interface CSGORaw {
 	allplayers?: PlayersRaw;
 	bomb?: BombRaw;
 	grenades?: {
-		[key: string]: any;
+		[key: string]: GrenadeRaw;
 		/*{
             owner:number,
             position:string,

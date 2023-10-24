@@ -10,6 +10,8 @@ import {
 	RoundInfo,
 	RoundWins
 } from '.';
+import { GrenadeRaw } from './csgo';
+import { Grenade } from './parsed';
 export declare const mapSteamIDToPlayer: (
 	players: PlayersRaw,
 	teams: {
@@ -33,6 +35,13 @@ export declare const didTeamWinThatRound: (
 	regulationMR: number,
 	mr: number
 ) => boolean;
+export declare const parseGrenades: (
+	grenades?:
+		| {
+				[key: string]: GrenadeRaw;
+		  }
+		| undefined
+) => Grenade[];
 export declare const getRoundWin: (
 	mapRound: number,
 	teams: {

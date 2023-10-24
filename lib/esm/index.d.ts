@@ -116,5 +116,16 @@ export {
 	TeamExtension,
 	RoundInfo,
 	PlayerExtension,
-	Orientation
+	Orientation,
+	Grenade,
+	GrenadeBaseRaw,
+	GrenadeBase,
+	DecoySmokeGrenade,
+	DecoySmokeGrenadeRaw,
+	InfernoGrenade,
+	InfernoGrenadeRaw,
+	FragOrFireBombOrFlashbandGrenade,
+	FragOrFireBombOrFlashbandGrenadeRaw,
+	Weapon,
+	GrenadeRaw
 } from './interfaces';

@@ -15,7 +15,14 @@ import {
 } from './interfaces';
 import { RawHurt } from './mirv';
 import { DigestMirvType, HurtEvent } from './parsed';
-import { getRoundWin, mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound } from './utils.js';
+import {
+	getRoundWin,
+	mapSteamIDToPlayer,
+	parseTeam,
+	getHalfFromRound,
+	didTeamWinThatRound,
+	parseGrenades
+} from './utils.js';
 
 interface EventDescriptor {
 	listener: Events[BaseEvents];
@@ -320,7 +327,7 @@ class CSGOGSI {
 								: null
 				  }
 				: null,
-			grenades: raw.grenades,
+			grenades: parseGrenades(raw.grenades),
 			phase_countdowns: raw.phase_countdowns,
 			auth: raw.auth,
 			map: {
@@ -543,5 +550,16 @@ export {
 	TeamExtension,
 	RoundInfo,
 	PlayerExtension,
-	Orientation
+	Orientation,
+	Grenade,
+	GrenadeBaseRaw,
+	GrenadeBase,
+	DecoySmokeGrenade,
+	DecoySmokeGrenadeRaw,
+	InfernoGrenade,
+	InfernoGrenadeRaw,
+	FragOrFireBombOrFlashbandGrenade,
+	FragOrFireBombOrFlashbandGrenadeRaw,
+	Weapon,
+	GrenadeRaw
 } from './interfaces';

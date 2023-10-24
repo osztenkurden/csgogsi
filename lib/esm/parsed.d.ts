@@ -22,6 +22,17 @@ export interface RoundInfo {
 	side: I.Side;
 	outcome: I.RoundOutcome;
 }
+export interface Weapon {
+	name: string;
+	paintkit: string;
+	type?: I.WeaponType;
+	ammo_clip?: number;
+	ammo_clip_max?: number;
+	ammo_reserve?: number;
+	state: 'active' | 'holstered';
+	id: string;
+}
+
 export interface Player {
 	steamid: string;
 	name: string;
@@ -36,9 +47,7 @@ export interface Player {
 		mvps: number;
 		score: number;
 	};
-	weapons: {
-		[key: string]: I.WeaponRaw;
-	};
+	weapons: Weapon[];
 	state: {
 		health: number;
 		armor: number;
@@ -100,6 +109,32 @@ export interface Observer {
 	forward?: number[];
 }
 
+export interface GrenadeBase {
+	id: string;
+	owner: string;
+	lifetime: number;
+}
+
+export interface DecoySmokeGrenade extends GrenadeBase {
+	position: number[];
+	velocity: number[];
+	type: 'decoy' | 'smoke';
+	effecttime: number;
+}
+
+export interface FragOrFireBombOrFlashbandGrenade extends GrenadeBase {
+	position: number[];
+	type: 'frag' | 'firebomb' | 'flashbang';
+	velocity: number[];
+}
+
+export interface InfernoGrenade extends GrenadeBase {
+	type: 'inferno';
+	flames: { id: string; position: number[] }[];
+}
+
+export type Grenade = DecoySmokeGrenade | FragOrFireBombOrFlashbandGrenade | InfernoGrenade;
+
 export interface CSGO {
 	provider: I.Provider;
 	map: Map;
@@ -108,9 +143,7 @@ export interface CSGO {
 	player: Player | null;
 	players: Player[];
 	bomb: Bomb | null;
-	grenades?: {
-		[key: string]: any;
-	};
+	grenades: Grenade[];
 	previously?: any;
 	phase_countdowns: I.PhaseRaw;
 	auth?: {
