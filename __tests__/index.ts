@@ -1,4 +1,4 @@
-import { CSGOGSI, CSGORaw, Events, KillEvent, PlayerExtension, PlayerRaw, TeamExtension } from '../tsc';
+import { CSGOGSI, CSGORaw, DecoySmokeGrenade, Events, FragOrFireBombOrFlashbandGrenade, InfernoGrenade, KillEvent, PlayerExtension, PlayerRaw, TeamExtension } from '../tsc';
 import { Callback } from '../tsc/events';
 import { createGSIPacket, createHurtPacket, createKillPacket } from './data';
 import { testCases } from './data/bombSites';
@@ -926,4 +926,158 @@ test('data > bomb: return null on unknown map', () => {
 			)?.bomb?.site
 		).toBeNull();
 	}
+});
+
+test('data > damage: clear after first round starts', () => {
+	const GSI = new CSGOGSI();
+
+	const packet = createGSIPacket({
+		map: {
+			round: 0,
+		},
+		phase_countdowns: {
+			phase: 'freezetime'
+		},
+		allplayers: {
+			'76561199031036917': {
+				state: {
+					round_totaldmg: 100
+				}
+			}
+		}
+	});
+	GSI.digest(packet);
+	const result = GSI.digest(packet);
+
+	const player = result?.players.find(pl => pl.steamid === '76561199031036917');
+
+	expect(player).not.toBeNull();
+	expect(GSI.damage.length).toBe(0);
+});
+
+test('data > damage: clear on warmup', () => {
+	const GSI = new CSGOGSI();
+
+	const packet = createGSIPacket({
+		map: {
+			round: 0,
+		},
+		phase_countdowns: {
+			phase: 'warmup'
+		},
+		allplayers: {
+			'76561199031036917': {
+				state: {
+					round_totaldmg: 100
+				}
+			}
+		}
+	});
+	GSI.digest(packet);
+	const result = GSI.digest(packet);
+
+	const player = result?.players.find(pl => pl.steamid === '76561199031036917');
+
+	expect(player).not.toBeNull();
+	expect(GSI.damage.length).toBe(0);
+});
+
+test('data > adr', () => {
+	const GSI = new CSGOGSI();
+	const roundOne = createGSIPacket({
+		map: {
+			round: 0,
+		},
+		allplayers: {
+			'76561199031036917': {
+				state: {
+					round_totaldmg: 100
+				}
+			}
+		}
+	});
+	const roundTwo = createGSIPacket({
+		map: {
+			round: 1,
+		},
+		allplayers: {
+			'76561199031036917': {
+				state: {
+					round_totaldmg: 50
+				}
+			}
+		}
+	});
+	const roundThree = createGSIPacket({
+		map: {
+			round: 2,
+		},
+		allplayers: {
+			'76561199031036917': {
+				state: {
+					round_totaldmg: 120
+				}
+			}
+		}
+	});
+	GSI.digest(roundOne);
+	GSI.digest(roundTwo);
+	//GSI.digest(roundThree);
+	const result = GSI.digest(roundThree);
+	//console.log(GSI.damage.map(dmg => ({ round: dmg.round, amount: dmg.players.find(pl => pl.steamid === '76561199031036917')})))
+
+	const player = result?.players.find(pl => pl.steamid === '76561199031036917');
+
+	expect(player).not.toBeNull();
+	expect(player?.state.adr).toBe(75);
+});
+
+test('data > grenades > flashbang', () => {
+	const GSI = new CSGOGSI();
+
+	const result = GSI.digest(createGSIPacket());
+
+	//console.log(GSI.damage.map(dmg => ({ round: dmg.round, amount: dmg.players.find(pl => pl.steamid === '76561199031036917')})))
+
+	const flash = result?.grenades.find(g => g.type === "flashbang")
+
+	expect(flash).not.toBeUndefined();
+	expect((flash as FragOrFireBombOrFlashbandGrenade).position.length).toBe(3);
+	expect((flash as FragOrFireBombOrFlashbandGrenade).velocity.length).toBe(3);
+});
+
+test('data > grenades > inferno', () => {
+	const GSI = new CSGOGSI();
+
+	const result = GSI.digest(createGSIPacket());
+
+	//console.log(GSI.damage.map(dmg => ({ round: dmg.round, amount: dmg.players.find(pl => pl.steamid === '76561199031036917')})))
+
+	const flash = result?.grenades.find(g => g.type === "inferno")
+
+	expect(flash).not.toBeUndefined();
+	expect((flash as InfernoGrenade).lifetime).toBeTruthy();
+	expect((flash as InfernoGrenade).flames.length).toBe(1);
+});
+
+test('data > grenades > smoke', () => {
+	const GSI = new CSGOGSI();
+
+	const result = GSI.digest(createGSIPacket());
+
+	//console.log(GSI.damage.map(dmg => ({ round: dmg.round, amount: dmg.players.find(pl => pl.steamid === '76561199031036917')})))
+
+	const flash = result?.grenades.find(g => g.type === "smoke")
+
+	expect(flash).not.toBeUndefined();
+	expect((flash as DecoySmokeGrenade).lifetime).toBeTruthy();
+	expect((flash as DecoySmokeGrenade).effecttime).toBeTruthy();
+});
+
+test('data > grenades > none', () => {
+	const GSI = new CSGOGSI();
+
+	const result = GSI.digest(createGSIPacket({ grenades: null as any }));
+
+	expect(result?.grenades.length).toBe(0);
 });

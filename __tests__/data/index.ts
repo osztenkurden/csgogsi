@@ -474,7 +474,31 @@ export const createGSIPacket = (options: OptionalCSGORaw = {}, mutate?: (CSGO: C
 			phase: 'live',
 			phase_ends_in: '69.1'
 		},
-		grenades: {},
+		grenades: {
+			"123": {
+				type: "flashbang",
+				position: '123.3, 67.78, 401.12',
+				velocity: '123.3, 67.78, 401.12',
+				lifetime: '1.4',
+				owner: '76561199031036917'
+			},
+			"124": {
+				type: "inferno",
+				flames: {
+					'1': '123.04, 5.06, 964.1'
+				},
+				lifetime: '1.4',
+				owner: '76561199031036917'
+			},
+			"125": {
+				type: "smoke",
+				position: '123.3, 67.78, 401.12',
+				velocity: '0, 0, 0.0',
+				effecttime: '0.3',
+				lifetime: '1.4',
+				owner: '76561199031036917'
+			}
+		},
 		bomb: {
 			state: 'carried',
 			position: '-243.02, -2167.67, -171.24',

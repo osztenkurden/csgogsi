@@ -253,12 +253,6 @@ class CSGOGSI {
 		if (this.last && this.last.map.name !== raw.map.name) {
 			this.damage = [];
 		}
-		if (
-			(raw.map.round === 0 && raw.phase_countdowns.phase === 'freezetime') ||
-			raw.phase_countdowns.phase === 'warmup'
-		) {
-			this.damage = [];
-		}
 
 		let currentRoundForDamage = raw.map.round + 1;
 		if (raw.round && raw.round.phase === 'over') {
@@ -274,6 +268,14 @@ class CSGOGSI {
 
 			this.damage.push(currentRoundDamage);
 		}
+
+		if (
+			(raw.map.round === 0 && raw.phase_countdowns.phase === 'freezetime') ||
+			raw.phase_countdowns.phase === 'warmup'
+		) {
+			this.damage = [];
+		}
+
 		currentRoundDamage.players = players.map(player => ({
 			steamid: player.steamid,
 			damage: player.state.round_totaldmg
@@ -283,7 +285,7 @@ class CSGOGSI {
 			const { current, damage } = this;
 			if (!current) continue;
 
-			const damageForRound = damage.filter(damageEntry => damageEntry.round <= current.map.round);
+			const damageForRound = damage.filter(damageEntry => damageEntry.round < currentRoundForDamage);
 
 			if (damageForRound.length === 0) continue;
 			//damagex.players.find(player => player.steamid === steamid).damage
@@ -293,7 +295,7 @@ class CSGOGSI {
 				);
 				return playerDamageEntry ? playerDamageEntry.damage : 0;
 			});
-			const adr = damageEntries.reduce((a, b) => a + b, 0) / (current.map.round || 1);
+			const adr = damageEntries.reduce((a, b) => a + b, 0) / (raw.map.round || 1);
 			player.state.adr = Math.floor(adr);
 		}
 
