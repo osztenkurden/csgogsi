@@ -475,23 +475,23 @@ export const createGSIPacket = (options: OptionalCSGORaw = {}, mutate?: (CSGO: C
 			phase_ends_in: '69.1'
 		},
 		grenades: {
-			"123": {
-				type: "flashbang",
+			'123': {
+				type: 'flashbang',
 				position: '123.3, 67.78, 401.12',
 				velocity: '123.3, 67.78, 401.12',
 				lifetime: '1.4',
 				owner: '76561199031036917'
 			},
-			"124": {
-				type: "inferno",
+			'124': {
+				type: 'inferno',
 				flames: {
 					'1': '123.04, 5.06, 964.1'
 				},
 				lifetime: '1.4',
 				owner: '76561199031036917'
 			},
-			"125": {
-				type: "smoke",
+			'125': {
+				type: 'smoke',
 				position: '123.3, 67.78, 401.12',
 				velocity: '0, 0, 0.0',
 				effecttime: '0.3',
@@ -575,7 +575,7 @@ export const createKillPacket = (options: OptionalKillRaw = {}) => {
 			noreplay: false
 		}
 	};
-	const kill = (merge(base, options) as unknown) as RawKill;
+	const kill = merge(base, options) as unknown as RawKill;
 
 	return kill;
 };
@@ -600,7 +600,7 @@ export const createHurtPacket = (options: OptionalHurtRaw = {}) => {
 			hitgroup: 0
 		}
 	};
-	const hurt = (merge(base, options) as unknown) as RawHurt;
+	const hurt = merge(base, options) as unknown as RawHurt;
 
 	return hurt;
 };

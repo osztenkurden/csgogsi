@@ -37,11 +37,9 @@ const parsePlayer = (basePlayer: PlayerRaw, steamid: string, team: Team, extensi
 	return player;
 };
 
-export const mapSteamIDToPlayer = (
-	players: PlayersRaw,
-	teams: { CT: Team; T: Team },
-	extensions: PlayerExtension[]
-) => (steamid: string) => parsePlayer(players[steamid], steamid, teams[players[steamid].team], extensions);
+export const mapSteamIDToPlayer =
+	(players: PlayersRaw, teams: { CT: Team; T: Team }, extensions: PlayerExtension[]) => (steamid: string) =>
+		parsePlayer(players[steamid], steamid, teams[players[steamid].team], extensions);
 
 export const parseTeam = (
 	team: TeamRaw,

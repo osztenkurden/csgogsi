@@ -1,4 +1,15 @@
-import { CSGOGSI, CSGORaw, DecoySmokeGrenade, Events, FragOrFireBombOrFlashbandGrenade, InfernoGrenade, KillEvent, PlayerExtension, PlayerRaw, TeamExtension } from '../tsc';
+import {
+	CSGOGSI,
+	CSGORaw,
+	DecoySmokeGrenade,
+	Events,
+	FragOrFireBombOrFlashbandGrenade,
+	InfernoGrenade,
+	KillEvent,
+	PlayerExtension,
+	PlayerRaw,
+	TeamExtension
+} from '../tsc';
 import { Callback } from '../tsc/events';
 import { createGSIPacket, createHurtPacket, createKillPacket } from './data';
 import { testCases } from './data/bombSites';
@@ -8,7 +19,7 @@ const createGSIAndCallback = <K extends keyof Events>(eventName: K) => {
 
 	const GSI = new CSGOGSI();
 
-	GSI.addListener(eventName, (callback as unknown) as Callback<K>);
+	GSI.addListener(eventName, callback as unknown as Callback<K>);
 
 	return { GSI, callback };
 };
@@ -933,7 +944,7 @@ test('data > damage: clear after first round starts', () => {
 
 	const packet = createGSIPacket({
 		map: {
-			round: 0,
+			round: 0
 		},
 		phase_countdowns: {
 			phase: 'freezetime'
@@ -960,7 +971,7 @@ test('data > damage: clear on warmup', () => {
 
 	const packet = createGSIPacket({
 		map: {
-			round: 0,
+			round: 0
 		},
 		phase_countdowns: {
 			phase: 'warmup'
@@ -986,7 +997,7 @@ test('data > adr', () => {
 	const GSI = new CSGOGSI();
 	const roundOne = createGSIPacket({
 		map: {
-			round: 0,
+			round: 0
 		},
 		allplayers: {
 			'76561199031036917': {
@@ -998,7 +1009,7 @@ test('data > adr', () => {
 	});
 	const roundTwo = createGSIPacket({
 		map: {
-			round: 1,
+			round: 1
 		},
 		allplayers: {
 			'76561199031036917': {
@@ -1010,7 +1021,7 @@ test('data > adr', () => {
 	});
 	const roundThree = createGSIPacket({
 		map: {
-			round: 2,
+			round: 2
 		},
 		allplayers: {
 			'76561199031036917': {
@@ -1039,7 +1050,7 @@ test('data > grenades > flashbang', () => {
 
 	//console.log(GSI.damage.map(dmg => ({ round: dmg.round, amount: dmg.players.find(pl => pl.steamid === '76561199031036917')})))
 
-	const flash = result?.grenades.find(g => g.type === "flashbang")
+	const flash = result?.grenades.find(g => g.type === 'flashbang');
 
 	expect(flash).not.toBeUndefined();
 	expect((flash as FragOrFireBombOrFlashbandGrenade).position.length).toBe(3);
@@ -1053,7 +1064,7 @@ test('data > grenades > inferno', () => {
 
 	//console.log(GSI.damage.map(dmg => ({ round: dmg.round, amount: dmg.players.find(pl => pl.steamid === '76561199031036917')})))
 
-	const flash = result?.grenades.find(g => g.type === "inferno")
+	const flash = result?.grenades.find(g => g.type === 'inferno');
 
 	expect(flash).not.toBeUndefined();
 	expect((flash as InfernoGrenade).lifetime).toBeTruthy();
@@ -1067,7 +1078,7 @@ test('data > grenades > smoke', () => {
 
 	//console.log(GSI.damage.map(dmg => ({ round: dmg.round, amount: dmg.players.find(pl => pl.steamid === '76561199031036917')})))
 
-	const flash = result?.grenades.find(g => g.type === "smoke")
+	const flash = result?.grenades.find(g => g.type === 'smoke');
 
 	expect(flash).not.toBeUndefined();
 	expect((flash as DecoySmokeGrenade).lifetime).toBeTruthy();
