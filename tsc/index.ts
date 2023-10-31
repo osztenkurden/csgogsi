@@ -314,8 +314,8 @@ class CSGOGSI {
 			bomb: bomb
 				? {
 						state: bomb.state,
-						countdown: bomb.countdown,
-						position: bomb.position.split(', ').map(pos => Number(pos)),
+						countdown: bomb.countdown ? parseFloat(bomb.countdown) : undefined,
+						position: bomb.position.split(', ').map(pos => parseFloat(pos)),
 						player: players.find(player => player.steamid === bomb.player) || undefined,
 						site:
 							bomb.state === 'planted' ||
@@ -324,13 +324,16 @@ class CSGOGSI {
 							bomb.state === 'planting'
 								? CSGOGSI.findSite(
 										raw.map.name,
-										bomb.position.split(', ').map(n => Number(n))
+										bomb.position.split(', ').map(n => parseFloat(n))
 								  )
 								: null
 				  }
 				: null,
 			grenades: parseGrenades(raw.grenades),
-			phase_countdowns: raw.phase_countdowns,
+			phase_countdowns: {
+				phase: raw.phase_countdowns.phase,
+				phase_ends_in: parseFloat(raw.phase_countdowns.phase_ends_in)
+			},
 			auth: raw.auth,
 			map: {
 				mode: raw.map.mode,
