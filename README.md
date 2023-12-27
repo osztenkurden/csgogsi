@@ -30,8 +30,8 @@ app.post('/', (req, res) => {
     res.sendStatus(200);
 });
 
-GSI.on('roundEnd', team => {
-    console.log(`Team  ${team.name} win!`);
+GSI.on('roundEnd', score => {
+    console.log(`Team ${score.winner.name} win!`);
 });
 GSI.on('bombPlant', player => {
     console.log(`${player.name} planted the bomb`);
@@ -46,7 +46,7 @@ app.listen(3000);
 |---|---|---|---|
 |`digest(GSIData)`|Gets raw GSI data from CSGO and does magic|`GSI.digest(req.body)`|CSGO Parsed|
 |`digestMIRV(event: RawKill or RawHurt, eventType: "player_death" (default) or "player_hurt)`|Gets raw kill data from mirv pgl and does magic|`GSI.digestMIRV(mirv)`|KillEvent or HurtEvent|
-|`on('event', callback)`|Sets listener for given event (check them below)|`GSI.on('roundEnd', team => console.log(team.name));`||
+|`on('event', callback)`|Sets listener for given event (check them below)|`GSI.on('roundEnd', score => { console.log(score.winner.name); });`||
 |`static findSite(mapName, position)`|Tries to guess the bombsite of the position||`A, B, null`|
 
 CSGOGSI also has MR property, which specifies the MR system for overtimes (used in map.rounds). Default value is 3.
