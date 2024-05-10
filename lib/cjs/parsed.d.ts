@@ -76,7 +76,7 @@ export type RoundWins = {
 };
 export interface Bomb {
 	state: 'carried' | 'planted' | 'dropped' | 'defused' | 'defusing' | 'planting' | 'exploded';
-	countdown?: string;
+	countdown?: number;
 	player?: Player;
 	site: 'A' | 'B' | null;
 	position: number[];
@@ -135,6 +135,10 @@ export interface InfernoGrenade extends GrenadeBase {
 
 export type Grenade = DecoySmokeGrenade | FragOrFireBombOrFlashbandGrenade | InfernoGrenade;
 
+export interface Phase {
+	phase?: 'freezetime' | 'bomb' | 'warmup' | 'live' | 'over' | 'defuse' | 'paused' | 'timeout_ct' | 'timeout_t';
+	phase_ends_in: number;
+}
 export interface CSGO {
 	provider: I.Provider;
 	map: Map;
@@ -145,7 +149,7 @@ export interface CSGO {
 	bomb: Bomb | null;
 	grenades: Grenade[];
 	previously?: any;
-	phase_countdowns: I.PhaseRaw;
+	phase_countdowns: I.Phase;
 	auth?: {
 		token: string;
 	};

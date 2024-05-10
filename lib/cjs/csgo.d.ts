@@ -1,7 +1,16 @@
 export type Side = 'CT' | 'T';
 export type RoundOutcome = 'ct_win_elimination' | 't_win_elimination' | 'ct_win_time' | 'ct_win_defuse' | 't_win_bomb';
 
-export type WeaponType = 'Knife' | 'Pistol' | 'Grenade' | 'Rifle' | 'SniperRifle' | 'C4' | 'Submachine Gun';
+export type WeaponType =
+	| 'Knife'
+	| 'Pistol'
+	| 'Grenade'
+	| 'Rifle'
+	| 'SniperRifle'
+	| 'C4'
+	| 'Submachine Gun'
+	| 'Shotgun'
+	| 'Machine Gun';
 
 export interface WeaponRaw {
 	name: string;
