@@ -28,6 +28,7 @@ export interface RawKill {
 		noscope: boolean;
 		penetrated: number;
 		noreplay: boolean;
+		attackerinair: boolean;
 	};
 }
 

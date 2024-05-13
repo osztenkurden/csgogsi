@@ -135,6 +135,7 @@ export interface KillEvent {
 	attackerblind: boolean;
 	thrusmoke: boolean;
 	noscope: boolean;
+	attackerinair: boolean;
 }
 
 export interface HurtEvent {

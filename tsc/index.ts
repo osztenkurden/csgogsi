@@ -469,7 +469,8 @@ class CSGOGSI {
 				wallbang: data.penetrated > 0,
 				attackerblind: data.attackerblind,
 				thrusmoke: data.thrusmoke,
-				noscope: data.noscope
+				noscope: data.noscope,
+				attackerinair: data.attackerinair
 			};
 			this.emit('kill', kill);
 			return kill;
