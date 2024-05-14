@@ -1,5 +1,4 @@
-import {
-	CSGOGSI,
+import type {
 	CSGORaw,
 	DecoySmokeGrenade,
 	Events,
@@ -10,7 +9,8 @@ import {
 	PlayerRaw,
 	TeamExtension
 } from '../tsc';
-import { Callback } from '../tsc/events';
+import { CSGOGSI } from '../tsc';
+import type { Callback } from '../tsc/events';
 import { createGSIPacket, createHurtPacket, createKillPacket } from './data';
 import { testCases } from './data/bombSites';
 
@@ -331,9 +331,9 @@ test('data > rounds: proper parser in 1st half', () => {
 	expect(data).not.toBeNull();
 
 	expect(data?.map.rounds.length).toBe(3);
-	expect(data?.map.rounds[0].round).toBe(1);
-	expect(data?.map.rounds[1].side).toBe('CT');
-	expect(data?.map.rounds[2].team.side).toBe('T');
+	expect(data?.map.rounds[0]?.round).toBe(1);
+	expect(data?.map.rounds[1]?.side).toBe('CT');
+	expect(data?.map.rounds[2]?.team.side).toBe('T');
 });
 
 test('data > rounds: proper parser in 2nd half', () => {
@@ -378,12 +378,12 @@ test('data > rounds: proper parser in 2nd half', () => {
 	expect(data).not.toBeNull();
 
 	expect(data?.map.rounds.length).toBe(23);
-	expect(data?.map.rounds[0].side).not.toBe(data?.map.rounds[0].team.side);
-	expect(data?.map.rounds[5].side).not.toBe(data?.map.rounds[5].team.side);
-	expect(data?.map.rounds[10].side).not.toBe(data?.map.rounds[10].team.side);
-	expect(data?.map.rounds[18].side).toBe(data?.map.rounds[18].team.side);
-	expect(data?.map.rounds[20].side).toBe(data?.map.rounds[20].team.side);
-	expect(data?.map.rounds[21].side).toBe(data?.map.rounds[21].team.side);
+	expect(data?.map.rounds[0]?.side).not.toBe(data?.map.rounds[0]?.team.side);
+	expect(data?.map.rounds[5]?.side).not.toBe(data?.map.rounds[5]?.team.side);
+	expect(data?.map.rounds[10]?.side).not.toBe(data?.map.rounds[10]?.team.side);
+	expect(data?.map.rounds[18]?.side).toBe(data?.map.rounds[18]?.team.side);
+	expect(data?.map.rounds[20]?.side).toBe(data?.map.rounds[20]?.team.side);
+	expect(data?.map.rounds[21]?.side).toBe(data?.map.rounds[21]?.team.side);
 });
 
 test('data > rounds: parser doesnt throw on wrong round wins list', () => {
@@ -430,9 +430,9 @@ test('data > rounds: parser correctly gets just ended round', () => {
 	);
 
 	expect(data?.map.rounds.length).toBe(4);
-	expect(data?.map.rounds[3].side).toBe('T');
-	expect(data?.map.rounds[3].round).toBe(4);
-	expect(data?.map.rounds[3].outcome).toBe('t_win_elimination');
+	expect(data?.map.rounds[3]?.side).toBe('T');
+	expect(data?.map.rounds[3]?.round).toBe(4);
+	expect(data?.map.rounds[3]?.outcome).toBe('t_win_elimination');
 });
 
 test('data > player: dont assign observer if cant find', () => {

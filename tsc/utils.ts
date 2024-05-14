@@ -1,4 +1,4 @@
-import {
+import type {
 	PlayerRaw,
 	Team,
 	PlayerExtension,
@@ -11,8 +11,8 @@ import {
 	RoundInfo,
 	RoundWins
 } from '.';
-import { GrenadeRaw } from './csgo';
-import { Grenade } from './parsed';
+import type { GrenadeRaw } from './csgo';
+import type { Grenade } from './parsed';
 
 const parsePlayer = (basePlayer: PlayerRaw, steamid: string, team: Team, extensions: PlayerExtension[]) => {
 	const extension = extensions.find(player => player.steamid === steamid);
@@ -39,7 +39,7 @@ const parsePlayer = (basePlayer: PlayerRaw, steamid: string, team: Team, extensi
 
 export const mapSteamIDToPlayer =
 	(players: PlayersRaw, teams: { CT: Team; T: Team }, extensions: PlayerExtension[]) => (steamid: string) =>
-		parsePlayer(players[steamid], steamid, teams[players[steamid].team], extensions);
+		parsePlayer(players[steamid]!, steamid, teams[players[steamid]!.team], extensions);
 
 export const parseTeam = (
 	team: TeamRaw,

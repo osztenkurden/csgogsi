@@ -1,4 +1,4 @@
-import {
+import type {
 	CSGO,
 	CSGORaw,
 	Events,
@@ -13,8 +13,8 @@ import {
 	EventNames,
 	BaseEvents
 } from './interfaces';
-import { RawHurt } from './mirv';
-import { DigestMirvType, HurtEvent } from './parsed';
+import type { RawHurt } from './mirv';
+import type { DigestMirvType, HurtEvent } from './parsed';
 import {
 	getRoundWin,
 	mapSteamIDToPlayer,
@@ -504,27 +504,27 @@ class CSGOGSI {
 	static findSite(mapName: string, position: number[]) {
 		const realMapName = mapName.substr(mapName.lastIndexOf('/') + 1);
 		const mapReference: { [mapName: string]: (position: number[]) => 'A' | 'B' } = {
-			de_mirage: position => (position[1] < -600 ? 'A' : 'B'),
-			de_cache: position => (position[1] > 0 ? 'A' : 'B'),
-			de_overpass: position => (position[2] > 400 ? 'A' : 'B'),
-			de_nuke: position => (position[2] > -500 ? 'A' : 'B'),
-			de_dust2: position => (position[0] > -500 ? 'A' : 'B'),
-			de_inferno: position => (position[0] > 1400 ? 'A' : 'B'),
-			de_vertigo: position => (position[0] > -1400 ? 'A' : 'B'),
-			de_train: position => (position[1] > -450 ? 'A' : 'B'),
-			de_ancient: position => (position[0] < -500 ? 'A' : 'B'),
-			de_anubis: position => (position[0] > 0 ? 'A' : 'B')
+			de_mirage: position => (position[1]! < -600 ? 'A' : 'B'),
+			de_cache: position => (position[1]! > 0 ? 'A' : 'B'),
+			de_overpass: position => (position[2]! > 400 ? 'A' : 'B'),
+			de_nuke: position => (position[2]! > -500 ? 'A' : 'B'),
+			de_dust2: position => (position[0]! > -500 ? 'A' : 'B'),
+			de_inferno: position => (position[0]! > 1400 ? 'A' : 'B'),
+			de_vertigo: position => (position[0]! > -1400 ? 'A' : 'B'),
+			de_train: position => (position[1]! > -450 ? 'A' : 'B'),
+			de_ancient: position => (position[0]! < -500 ? 'A' : 'B'),
+			de_anubis: position => (position[0]! > 0 ? 'A' : 'B')
 		};
 		if (realMapName in mapReference) {
-			return mapReference[realMapName](position);
+			return mapReference[realMapName]!(position);
 		}
 		return null;
 	}
 }
 
-export { CSGOGSI, mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound, RoundDamage };
+export { CSGOGSI, mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound, type RoundDamage };
 
-export {
+export type {
 	CSGO,
 	CSGORaw,
 	Side,
