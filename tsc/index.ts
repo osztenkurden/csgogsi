@@ -398,6 +398,8 @@ class CSGOGSI {
 			} else if (last.bomb.state !== 'planting' && data.bomb.state === 'planting') {
 				this.emit('bombPlantStart', last.bomb.player);
 			}
+		} else if (!last.bomb && data.bomb && data.bomb.state === 'exploded') {
+			this.emit('bombExplode');
 		}
 
 		// Intermission (between halfs)
