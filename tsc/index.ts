@@ -232,7 +232,7 @@ class CSGOGSI {
 		if (raw.round && raw.map && raw.map.round_wins) {
 			let currentRound = raw.map.round + 1;
 
-			if (raw.round && raw.round.phase === 'over') {
+			if (raw.round && (raw.round.phase === 'over' || raw.map?.phase === 'gameover')) {
 				currentRound = raw.map.round;
 			}
 			for (let i = 1; i <= currentRound; i++) {
@@ -255,7 +255,7 @@ class CSGOGSI {
 		}
 
 		let currentRoundForDamage = raw.map.round + 1;
-		if (raw.round && raw.round.phase === 'over') {
+		if (raw.round && (raw.round.phase === 'over' || raw.map?.phase === 'gameover')) {
 			currentRoundForDamage = raw.map.round;
 		}
 		let currentRoundDamage = this.damage.find(damage => damage.round === currentRoundForDamage);
