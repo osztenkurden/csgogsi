@@ -7,7 +7,7 @@ export interface Events {
 	matchEnd: (score: I.Score) => void;
 	kill: (kill: I.KillEvent) => void;
 	hurt: (kill: I.HurtEvent) => void;
-	timeoutStart: (team: any) => void;
+	timeoutStart: (team: I.Team) => void;
 	timeoutEnd: () => void;
 	/*roundStart: (round: number) => void,
     warmupStart: () => void,
@@ -20,6 +20,7 @@ export interface Events {
 	defuseStart: (player: I.Player) => void;
 	defuseStop: (player: I.Player) => void;
 	bombPlantStart: (player: I.Player) => void;
+	bombPlantStop: (player: I.Player) => void;
 	bombPlant: (player: I.Player) => void;
 	bombExplode: () => void;
 	bombDefuse: (player: I.Player) => void;

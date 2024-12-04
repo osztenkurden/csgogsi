@@ -191,7 +191,7 @@ interface Events {
 	matchEnd: (score: Score) => void;
 	kill: (kill: KillEvent) => void;
 	hurt: (kill: HurtEvent) => void;
-	timeoutStart: (team: any) => void;
+	timeoutStart: (team: Team) => void;
 	timeoutEnd: () => void;
 	/*roundStart: (round: number) => void,
     warmupStart: () => void,
@@ -204,6 +204,7 @@ interface Events {
 	defuseStart: (player: Player) => void;
 	defuseStop: (player: Player) => void;
 	bombPlantStart: (player: Player) => void;
+	bombPlantStop: (player: Player) => void;
 	bombPlant: (player: Player) => void;
 	bombExplode: () => void;
 	bombDefuse: (player: Player) => void;
@@ -521,7 +522,7 @@ declare class CSGOGSI {
     eventNames: () => EventNames[];
     getMaxListeners: () => number;
     listenerCount: (eventName: EventNames) => number;
-    listeners: (eventName: EventNames) => (((data: CSGORaw) => void) | ((data: CSGO) => void) | ((team: Score) => void) | ((score: Score) => void) | ((kill: KillEvent) => void) | ((kill: HurtEvent) => void) | ((team: any) => void) | (() => void) | ((player: Player) => void) | (() => void) | (() => void) | (() => void) | (() => void) | ((player: Player) => void) | ((player: Player) => void) | ((player: Player) => void) | ((player: Player) => void) | (() => void) | ((player: Player) => void) | (<K extends keyof Events>(eventName: K, listener: Events[K]) => void) | (<K_1 extends keyof Events>(eventName: K_1, listener: Events[K_1]) => void))[];
+    listeners: (eventName: EventNames) => (((data: CSGORaw) => void) | ((data: CSGO) => void) | ((team: Score) => void) | ((score: Score) => void) | ((kill: KillEvent) => void) | ((kill: HurtEvent) => void) | ((team: Team) => void) | (() => void) | ((player: Player) => void) | (() => void) | (() => void) | (() => void) | (() => void) | ((player: Player) => void) | ((player: Player) => void) | ((player: Player) => void) | ((player: Player) => void) | ((player: Player) => void) | (() => void) | ((player: Player) => void) | (<K extends keyof Events>(eventName: K, listener: Events[K]) => void) | (<K_1 extends keyof Events>(eventName: K_1, listener: Events[K_1]) => void))[];
     removeListener: <K extends EventNames>(eventName: K, listener: Callback<K>) => this;
     off: <K extends EventNames>(eventName: K, listener: Callback<K>) => this;
     addListener: <K extends EventNames>(eventName: K, listener: Callback<K>) => this;
