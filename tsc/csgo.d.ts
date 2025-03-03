@@ -19,7 +19,7 @@ export interface WeaponRaw {
 	ammo_clip?: number;
 	ammo_clip_max?: number;
 	ammo_reserve?: number;
-	state: 'active' | 'holstered';
+	state: 'active' | 'holstered' | 'reloading';
 }
 
 export interface TeamRaw {
