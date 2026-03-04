@@ -133,17 +133,7 @@ export const getRoundWin = (
 	regulationMR: number,
 	overtimeMR: number
 ) => {
-	let indexRound = round;
-	if (mapRound > 2 * regulationMR) {
-		const maxOvertimeRounds =
-			2 * overtimeMR * Math.floor((mapRound - (2 * regulationMR + 1)) / (2 * overtimeMR)) + 2 * regulationMR;
-		if (round <= maxOvertimeRounds) {
-			return null;
-		}
-		const roundInOT = ((round - (2 * regulationMR + 1)) % (overtimeMR * 2)) + 1;
-		indexRound = roundInOT;
-	}
-	const roundOutcome = roundWins[indexRound];
+	const roundOutcome = roundWins[round];
 	if (!roundOutcome) return null;
 
 	const winSide = roundOutcome.substr(0, roundOutcome.indexOf('_')).toUpperCase() as Side;
