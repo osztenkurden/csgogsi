@@ -16,6 +16,7 @@
     "moduleResolution": "Bundler",
     "module": "ESNext",
     "noEmit": true,
+    "types": ["node", "bun-types"],
     /* If your code runs in the DOM: */
     "lib": ["es2022", "dom", "dom.iterable"],
   }

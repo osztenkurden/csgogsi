@@ -21,5 +21,5 @@ export default defineConfig(
         "@typescript-eslint/camelcase":0
     },
   },
-  globalIgnores(["types/*", "lib/*", "__tests__", "eslint.config.js", "jest.config.js"])
+  globalIgnores(["types/*", "lib/*", "__tests__", "eslint.config.js"])
 );

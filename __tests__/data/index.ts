@@ -1,5 +1,5 @@
 import type { CSGORaw, RawKill, RawHurt } from '../../tsc';
-import { O } from 'ts-toolbelt';
+import type { O } from 'ts-toolbelt';
 import merge from 'lodash.merge';
 
 type OptionalCSGORaw = O.Optional<CSGORaw, keyof CSGORaw, 'deep'>;
