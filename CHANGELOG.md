@@ -1,5 +1,12 @@
 # Changelog
 
+## [4.1.2](https://github.com/osztenkurden/csgogsi/compare/v4.1.1...v4.1.2) (2026-04-13)
+
+
+### Bug Fixes
+
+* fixed (and trigger) npm release ([e201548](https://github.com/osztenkurden/csgogsi/commit/e2015483c30a799459d36289b18d4f9de3e70560))
+
 ## 4.1.1 (2026-04-13)
 
 
