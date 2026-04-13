@@ -6,7 +6,7 @@
 
 # CS:GO GSI Digest
 
-## How does it work?
+## How does it work
 
 The GSI object takes raw request from CS:GO GSI's system, parses this to more comfortable form and calls listeners on certain events. You need to configure GSI file and receiving end yourself.
 
