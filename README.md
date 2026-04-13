@@ -4,11 +4,11 @@
 ![Downloads](https://img.shields.io/npm/dm/csgogsi)
 ![Version](https://img.shields.io/npm/v/csgogsi)
 
-# CS:GO GSI Digest
+# CS2 GSI Digest
 
 ## How does it work?
 
-The GSI object takes raw request from CS:GO GSI's system, parses this to more comfortable form and calls listeners on certain events. You need to configure GSI file and receiving end yourself.
+The GSI object takes raw request from CS:GO & CS2 GSI's system, parses this to more comfortable form and calls listeners on certain events. You need to configure GSI file and receiving end yourself.
 
 ## Installing
 
