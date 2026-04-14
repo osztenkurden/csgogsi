@@ -1,5 +1,21 @@
 # Changelog
 
+## [5.0.0](https://github.com/osztenkurden/csgogsi/compare/v4.1.2...v5.0.0) (2026-04-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* move to esm-only
+
+### Features
+
+* move to esm-only ([de47296](https://github.com/osztenkurden/csgogsi/commit/de4729646db6459200a48c071ac68ea5c92416c8))
+
+
+### Bug Fixes
+
+* test runner to run actually on node ([902d81f](https://github.com/osztenkurden/csgogsi/commit/902d81fcb6a67ba536ffde9d60fc5ea35e3b54a2))
+
 ## [4.1.2](https://github.com/osztenkurden/csgogsi/compare/v4.1.1...v4.1.2) (2026-04-13)
 
 
