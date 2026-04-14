@@ -11,7 +11,6 @@
         "@types/node": "^22.18.8",
         "@typescript/native-preview": "^7.0.0-dev.20260413.1",
         "eslint": "^9.36.0",
-        "istanbul-badges-readme": "^1.2.1",
         "lodash.merge": "^4.6.2",
         "prettier": "^3.0.3",
         "ts-toolbelt": "^9.6.0",
@@ -267,8 +266,6 @@
     "is-glob": ["is-glob@4.0.3", "", { "dependencies": { "is-extglob": "^2.1.1" } }, "sha512-xelSayHH36ZgE7ZWhli7pW34hNbNl8Ojv5KVmkJD4hBdD3th8Tfk9vYasLM+mXWOZhFkgZfxhLSnrwRr4elSSg=="],
 
     "isexe": ["isexe@2.0.0", "", {}, "sha512-RHxMLp9lnKHGHRng9QFhRCMbYAcVpn69smSGcq3f36xjgVVWThj4qqLbTLlq7Ssj8B+fIQ1EuCEGI2lKsyQeIw=="],
-
-    "istanbul-badges-readme": ["istanbul-badges-readme@1.2.1", "", { "bin": "lib/index.js" }, "sha512-/rXtmpI0bzdmgaeZrutA5vL6c0NikSRRfBmjVxS0yJgU1o5elQARXiFQTiakkxGCrI2vS/k4X6zjGrV+32FJFQ=="],
 
     "js-yaml": ["js-yaml@4.1.1", "", { "dependencies": { "argparse": "^2.0.1" }, "bin": "bin/js-yaml.js" }, "sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA=="],
 
