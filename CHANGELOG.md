@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.0.1](https://github.com/osztenkurden/csgogsi/compare/v5.0.0...v5.0.1) (2026-04-14)
+
+
+### Bug Fixes
+
+* build process ([1b2a19e](https://github.com/osztenkurden/csgogsi/commit/1b2a19ecb9cc6f8604a20b5ee085d5479f93b177))
+
 ## [5.0.0](https://github.com/osztenkurden/csgogsi/compare/v4.1.2...v5.0.0) (2026-04-14)
 
 
