@@ -1,4 +1,4 @@
-import type { CSGORaw, RawKill, RawHurt } from '../../tsc';
+import type { CSGORaw, RawKill, RawHurt } from '../../index';
 import type { O } from 'ts-toolbelt';
 import merge from 'lodash.merge';
 

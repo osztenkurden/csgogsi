@@ -25,4 +25,4 @@ jobs:
       uses: oven-sh/setup-bun@v2
     - run: bun i
     - run: bun run typecheck
-    - run: bun run test
+    - run: npm test

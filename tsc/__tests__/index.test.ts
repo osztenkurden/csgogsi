@@ -1,4 +1,7 @@
-import { test, expect, jest } from 'bun:test';
+// import { test, expect, jest } from 'bun:test';
+import { mock, test } from 'node:test';
+import assert from 'node:assert/strict';
+
 import type {
 	CSGORaw,
 	DecoySmokeGrenade,
@@ -9,14 +12,14 @@ import type {
 	PlayerExtension,
 	PlayerRaw,
 	TeamExtension
-} from '../tsc';
-import { CSGOGSI } from '../tsc';
-import type { Callback } from '../tsc/events';
-import { createGSIPacket, createHurtPacket, createKillPacket } from './data';
-import { testCases } from './data/bombSites';
+} from '../index';
+import { CSGOGSI } from '../index.ts';
+import type { Callback } from '../events';
+import { createGSIPacket, createHurtPacket, createKillPacket } from './data/index.ts';
+import { testCases } from './data/bombSites.ts';
 
 const createGSIAndCallback = <K extends keyof Events>(eventName: K) => {
-	const callback = jest.fn(() => {});
+	const callback = mock.fn((() => {}) as Callback<K>);
 
 	const GSI = new CSGOGSI();
 
@@ -27,7 +30,7 @@ const createGSIAndCallback = <K extends keyof Events>(eventName: K) => {
 
 test('parser > create CSGOGSI object', () => {
 	const GSI = new CSGOGSI();
-	expect(GSI).toBeDefined();
+	assert.ok(GSI);
 });
 
 test('parser > throw on bad data', () => {
@@ -37,7 +40,7 @@ test('parser > throw on bad data', () => {
 		phase_countdowns: {}
 	} as any;
 	const GSI = new CSGOGSI();
-	expect(() => GSI.digest(dummyData)).toThrow();
+	assert.throws(() => GSI.digest(dummyData));
 });
 
 test('parser > dont parse data in the menu', () => {
@@ -47,9 +50,9 @@ test('parser > dont parse data in the menu', () => {
 	const result2 = GSI.digest({ ...createGSIPacket(), map: undefined });
 	const result3 = GSI.digest({ ...createGSIPacket(), phase_countdowns: undefined });
 
-	expect(result1).toBeNull();
-	expect(result2).toBeNull();
-	expect(result3).toBeNull();
+	assert.equal(result1, null);
+	assert.equal(result2, null);
+	assert.equal(result3, null);
 });
 
 test('parser > dont break with no bomb data', () => {
@@ -58,8 +61,8 @@ test('parser > dont break with no bomb data', () => {
 	GSI.digest({ ...createGSIPacket(), bomb: undefined });
 	const result = GSI.digest({ ...createGSIPacket(), bomb: undefined });
 
-	expect(result).toBeDefined();
-	expect(result?.bomb).toBeNull();
+	assert.ok(result);
+	assert.equal(result?.bomb, null);
 });
 
 test('parser > clear damage data on new map', () => {
@@ -73,7 +76,7 @@ test('parser > clear damage data on new map', () => {
 
 	GSI.digest(createGSIPacket({ map: { name: 'de_nuke' } }));
 
-	expect(GSI.damage.length).toBe(1);
+	assert.equal(GSI.damage.length, 1);
 });
 
 test('parser > remove all listeners from specific event', () => {
@@ -83,7 +86,7 @@ test('parser > remove all listeners from specific event', () => {
 
 	GSI.digest(createGSIPacket());
 
-	expect(callback.mock.calls.length).toBe(0);
+	assert.equal(callback.mock.calls.length, 0);
 });
 
 test('parser > remove specific listeners from specific event #1', () => {
@@ -93,7 +96,7 @@ test('parser > remove specific listeners from specific event #1', () => {
 
 	GSI.digest(createGSIPacket());
 
-	expect(callback.mock.calls.length).toBe(0);
+	assert.equal(callback.mock.calls.length, 0);
 });
 
 test('parser > remove specific listeners from specific event #2', () => {
@@ -104,7 +107,7 @@ test('parser > remove specific listeners from specific event #2', () => {
 	GSI.digest(createGSIPacket({ bomb: { state: 'planting' } }));
 	GSI.digest(createGSIPacket({ bomb: { state: 'planted' } }));
 
-	expect(callback.mock.calls.length).toBe(0);
+	assert.equal(callback.mock.calls.length, 0);
 });
 
 test('parser > remove specific listeners from specific event #3', () => {
@@ -115,22 +118,22 @@ test('parser > remove specific listeners from specific event #3', () => {
 	GSI.digest(createGSIPacket({ bomb: { state: 'planted' } }));
 	GSI.digest(createGSIPacket({ bomb: { state: 'defusing' } }));
 
-	expect(callback.mock.calls.length).toBe(0);
+	assert.equal(callback.mock.calls.length, 0);
 });
 
 test('parser > remove specific listeners fom specific event #4', () => {
-	const callback = jest.fn(() => {});
+	const callback = mock.fn(() => {});
 	const GSI = new CSGOGSI();
 
 	GSI.removeListener('data', callback);
 
 	GSI.digest(createGSIPacket());
 
-	expect(callback.mock.calls.length).toBe(0);
+	assert.equal(callback.mock.calls.length, 0);
 });
 
 test('event listener > gets event names', () => {
-	const callback = jest.fn(() => {});
+	const callback = mock.fn(() => {});
 	const GSI = new CSGOGSI();
 
 	GSI.on('mvp', callback);
@@ -145,10 +148,10 @@ test('event listener > gets event names', () => {
 
 	const eventNames = GSI.eventNames();
 
-	expect(eventNames.includes('mvp')).toBe(true);
-	expect(eventNames.includes('matchEnd')).toBe(true);
-	expect(eventNames.includes('roundEnd')).toBe(true);
-	expect(eventNames.length).toBe(3);
+	assert(eventNames.includes('mvp'));
+	assert(eventNames.includes('matchEnd'));
+	assert(eventNames.includes('roundEnd'));
+	assert.equal(eventNames.length, 3);
 });
 
 test('event listener > gets max listeners', () => {
@@ -162,7 +165,7 @@ test('event listener > gets max listeners', () => {
 
 	GSI.setMaxListeners(newMax);
 
-	expect(GSI.getMaxListeners()).toBe(newMax);
+	assert.equal(GSI.getMaxListeners(), newMax);
 });
 
 test('event listener > gets listener count', () => {
@@ -170,8 +173,8 @@ test('event listener > gets listener count', () => {
 
 	GSI.on('defuseStart', callback);
 
-	expect(GSI.listenerCount('defuseStart')).toBe(2);
-	expect(GSI.listenerCount('mvp')).toBe(0);
+	assert.equal(GSI.listenerCount('defuseStart'), 2);
+	assert.equal(GSI.listenerCount('mvp'), 0);
 });
 
 test('event listener > gets descriptors', () => {
@@ -179,12 +182,12 @@ test('event listener > gets descriptors', () => {
 
 	GSI.on('defuseStart', callback);
 
-	expect(GSI.rawListeners('defuseStart').length).toBe(2);
-	expect(GSI.rawListeners('mvp').length).toBe(0);
+	assert.equal(GSI.rawListeners('defuseStart').length, 2);
+	assert.equal(GSI.rawListeners('mvp').length, 0);
 });
 
 test('event listener > calls once listeners only once', () => {
-	const callback = jest.fn(() => {});
+	const callback = mock.fn(() => {});
 	const GSI = new CSGOGSI();
 
 	GSI.once('defuseStart', callback);
@@ -193,7 +196,7 @@ test('event listener > calls once listeners only once', () => {
 	GSI.emit('defuseStart');
 	GSI.emit('defuseStart');
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event listener > prepend listener', () => {
@@ -208,7 +211,7 @@ test('event listener > prepend listener', () => {
 			i = 2;
 		}
 	};
-	const callback = jest.fn(() => {});
+	const callback = mock.fn(() => {});
 	const GSI = new CSGOGSI();
 
 	GSI.on('defuseStart', callbackOne);
@@ -219,8 +222,8 @@ test('event listener > prepend listener', () => {
 	GSI.emit('defuseStart');
 	GSI.emit('defuseStop');
 
-	expect(i).toBe(2);
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(i, 2);
+	assert.equal(callback.mock.calls.length, 1);
 });
 test('event listener > prepend once listener', () => {
 	let i = 0;
@@ -234,7 +237,7 @@ test('event listener > prepend once listener', () => {
 			i = 2;
 		}
 	};
-	const callback = jest.fn(() => {});
+	const callback = mock.fn(() => {});
 	const GSI = new CSGOGSI();
 
 	GSI.once('defuseStart', callbackOne);
@@ -245,8 +248,8 @@ test('event listener > prepend once listener', () => {
 	GSI.emit('defuseStart');
 	GSI.emit('defuseStop');
 
-	expect(i).toBe(2);
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(i, 2);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('data > assign teams in the first half, left to CT, right to T', () => {
@@ -272,11 +275,11 @@ test('data > assign teams in the first half, left to CT, right to T', () => {
 
 	GSI.teams = { left, right };
 
-	expect(GSI.digest(createGSIPacket())?.map?.team_ct.name).toBe('Left Team');
-	expect(GSI.digest(createGSIPacket())?.map?.team_t.name).toBe('Right Team');
+	assert.equal(GSI.digest(createGSIPacket())?.map?.team_ct.name, 'Left Team');
+	assert.equal(GSI.digest(createGSIPacket())?.map?.team_t.name, 'Right Team');
 
-	expect(GSI.digest(createGSIPacket())?.map?.team_ct.orientation).toBe('left');
-	expect(GSI.digest(createGSIPacket())?.map?.team_t.orientation).toBe('right');
+	assert.equal(GSI.digest(createGSIPacket())?.map?.team_ct.orientation, 'left');
+	assert.equal(GSI.digest(createGSIPacket())?.map?.team_t.orientation, 'right');
 });
 
 test('data > assign teams in the second half, left to T, right to CT', () => {
@@ -316,11 +319,11 @@ test('data > assign teams in the second half, left to T, right to CT', () => {
 		return gsi;
 	};
 
-	expect(GSI.digest(createGSIPacket({}, mapGSI))?.map?.team_ct.name).toBe('Right Team');
-	expect(GSI.digest(createGSIPacket({}, mapGSI))?.map?.team_t.name).toBe('Left Team');
+	assert.equal(GSI.digest(createGSIPacket({}, mapGSI))?.map?.team_ct.name, 'Right Team');
+	assert.equal(GSI.digest(createGSIPacket({}, mapGSI))?.map?.team_t.name, 'Left Team');
 
-	expect(GSI.digest(createGSIPacket({}, mapGSI))?.map?.team_ct.orientation).toBe('right');
-	expect(GSI.digest(createGSIPacket({}, mapGSI))?.map?.team_t.orientation).toBe('left');
+	assert.equal(GSI.digest(createGSIPacket({}, mapGSI))?.map?.team_ct.orientation, 'right');
+	assert.equal(GSI.digest(createGSIPacket({}, mapGSI))?.map?.team_t.orientation, 'left');
 });
 
 test('data > rounds: proper parser in 1st half', () => {
@@ -328,13 +331,13 @@ test('data > rounds: proper parser in 1st half', () => {
 
 	const data = GSI.digest(createGSIPacket({ map: { round: 3, team_ct: { score: 2 }, team_t: { score: 1 } } }));
 
-	expect(data).toBeDefined();
-	expect(data).not.toBeNull();
+	assert.ok(data);
+	assert.notEqual(data, null);
 
-	expect(data?.map.rounds.length).toBe(3);
-	expect(data?.map.rounds[0]?.round).toBe(1);
-	expect(data?.map.rounds[1]?.side).toBe('CT');
-	expect(data?.map.rounds[2]?.team.side).toBe('T');
+	assert.equal(data?.map.rounds.length, 3);
+	assert.equal(data?.map.rounds[0]?.round, 1);
+	assert.equal(data?.map.rounds[1]?.side, 'CT');
+	assert.equal(data?.map.rounds[2]?.team.side, 'T');
 });
 
 test('data > rounds: proper parser in 2nd half', () => {
@@ -375,16 +378,16 @@ test('data > rounds: proper parser in 2nd half', () => {
 		})
 	);
 
-	expect(data).toBeDefined();
-	expect(data).not.toBeNull();
+	assert.ok(data);
+	assert.notEqual(data, null);
 
-	expect(data?.map.rounds.length).toBe(23);
-	expect(data?.map.rounds[0]?.side).not.toBe(data?.map.rounds[0]?.team.side);
-	expect(data?.map.rounds[5]?.side).not.toBe(data?.map.rounds[5]?.team.side);
-	expect(data?.map.rounds[10]?.side).not.toBe(data?.map.rounds[10]?.team.side);
-	expect(data?.map.rounds[18]?.side).toBe(data?.map.rounds[18]?.team.side);
-	expect(data?.map.rounds[20]?.side).toBe(data?.map.rounds[20]?.team.side);
-	expect(data?.map.rounds[21]?.side).toBe(data?.map.rounds[21]?.team.side);
+	assert.equal(data?.map.rounds.length, 23);
+	assert.notEqual(data?.map.rounds[0]?.side, data?.map.rounds[0]?.team.side);
+	assert.notEqual(data?.map.rounds[5]?.side, data?.map.rounds[5]?.team.side);
+	assert.notEqual(data?.map.rounds[10]?.side, data?.map.rounds[10]?.team.side);
+	assert.equal(data?.map.rounds[18]?.side, data?.map.rounds[18]?.team.side);
+	assert.equal(data?.map.rounds[20]?.side, data?.map.rounds[20]?.team.side);
+	assert.equal(data?.map.rounds[21]?.side, data?.map.rounds[21]?.team.side);
 });
 
 test('data > rounds: parser doesnt throw on wrong round wins list', () => {
@@ -404,10 +407,7 @@ test('data > rounds: parser doesnt throw on wrong round wins list', () => {
 			}
 		}
 	});
-
-	expect(() => {
-		GSI.digest(dataPacker);
-	}).not.toThrow();
+	assert.doesNotThrow(() => GSI.digest(dataPacker));
 });
 
 test('data > rounds: parser correctly gets just ended round', () => {
@@ -430,10 +430,10 @@ test('data > rounds: parser correctly gets just ended round', () => {
 		})
 	);
 
-	expect(data?.map.rounds.length).toBe(4);
-	expect(data?.map.rounds[3]?.side).toBe('T');
-	expect(data?.map.rounds[3]?.round).toBe(4);
-	expect(data?.map.rounds[3]?.outcome).toBe('t_win_elimination');
+	assert.equal(data?.map.rounds.length, 4);
+	assert.equal(data?.map.rounds[3]?.side, 'T');
+	assert.equal(data?.map.rounds[3]?.round, 4);
+	assert.equal(data?.map.rounds[3]?.outcome, 't_win_elimination');
 });
 
 test('data > player: dont assign observer if cant find', () => {
@@ -441,9 +441,9 @@ test('data > player: dont assign observer if cant find', () => {
 
 	const data = GSI.digest(createGSIPacket({ player: { steamid: 'gotvorincorrect' } }));
 
-	expect(data).toBeDefined();
-	expect(data).not.toBeNull();
-	expect(data?.player).toBeNull();
+	assert.ok(data);
+	assert.notEqual(data, null);
+	assert.equal(data?.player, null);
 });
 
 test('data > player: assign extension', () => {
@@ -463,15 +463,15 @@ test('data > player: assign extension', () => {
 
 	const data = GSI.digest(createGSIPacket());
 
-	expect(data).toBeDefined();
+	assert.ok(data);
 
 	const target = data?.players.find(player => player.steamid === targetSteamID);
 
-	expect(target).toBeDefined();
-	expect(target?.avatar).toBe(extension.avatar);
-	expect(target?.name).toBe(extension.name);
-	expect(target?.realName).toBe(extension.realName);
-	expect(target?.country).toBe(extension.country);
+	assert.ok(target);
+	assert.equal(target?.avatar, extension.avatar);
+	assert.equal(target?.name, extension.name);
+	assert.equal(target?.realName, extension.realName);
+	assert.equal(target?.country, extension.country);
 });
 
 test('data > round: assign null if doesnt exist', () => {
@@ -479,8 +479,8 @@ test('data > round: assign null if doesnt exist', () => {
 
 	const data = GSI.digest({ ...createGSIPacket(), round: undefined });
 
-	expect(data).toBeDefined();
-	expect(data?.round).toBeNull();
+	assert.ok(data);
+	assert.equal(data?.round, null);
 });
 
 test('data > bomb: assign null if doesnt exist', () => {
@@ -488,8 +488,8 @@ test('data > bomb: assign null if doesnt exist', () => {
 
 	const data = GSI.digest({ ...createGSIPacket(), bomb: undefined });
 
-	expect(data).toBeDefined();
-	expect(data?.bomb).toBeNull();
+	assert.ok(data);
+	assert.equal(data?.bomb, null);
 });
 
 test('data > bomb: undefined player if doesnt exist or not specified', () => {
@@ -501,10 +501,10 @@ test('data > bomb: undefined player if doesnt exist or not specified', () => {
 	const playerNotSpecified = GSI.digest(gsiPacket);
 	const playerDoesntExist = GSI.digest(createGSIPacket({ bomb: { player: 'notExistingPlayerId' } }));
 
-	expect(playerNotSpecified).toBeDefined();
-	expect(playerDoesntExist).toBeDefined();
-	expect(playerNotSpecified?.bomb?.player).toBeUndefined();
-	expect(playerNotSpecified?.bomb?.player).toBeUndefined();
+	assert.ok(playerNotSpecified);
+	assert.ok(playerDoesntExist);
+	assert.equal(playerNotSpecified?.bomb?.player, undefined);
+	assert.equal(playerNotSpecified?.bomb?.player, undefined);
 });
 
 test('data > timeout: doesnt crash on lack of phase', () => {
@@ -513,7 +513,7 @@ test('data > timeout: doesnt crash on lack of phase', () => {
 	GSI.digest({ ...createGSIPacket(), phase_countdowns: { phase_ends_in: '120' } });
 	const result2 = GSI.digest({ ...createGSIPacket(), phase_countdowns: { phase_ends_in: '120' } });
 
-	expect(result2).toBeTruthy();
+	assert.ok(result2);
 });
 
 test('event > intermission: start', () => {
@@ -522,7 +522,7 @@ test('event > intermission: start', () => {
 	GSI.digest(createGSIPacket());
 	GSI.digest(createGSIPacket({ map: { phase: 'intermission' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > intermission: end', () => {
@@ -531,7 +531,7 @@ test('event > intermission: end', () => {
 	GSI.digest(createGSIPacket({ map: { phase: 'intermission' } }));
 	GSI.digest(createGSIPacket());
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > freezetime: start', () => {
@@ -540,7 +540,7 @@ test('event > freezetime: start', () => {
 	GSI.digest(createGSIPacket());
 	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'freezetime' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > freezetime: end', () => {
@@ -549,7 +549,7 @@ test('event > freezetime: end', () => {
 	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'freezetime' } }));
 	GSI.digest(createGSIPacket());
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > timeout: start (CT)', () => {
@@ -558,8 +558,8 @@ test('event > timeout: start (CT)', () => {
 	GSI.digest(createGSIPacket());
 	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'timeout_ct' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
-	expect((callback.mock.calls[0] as any)[0].side).toBe('CT');
+	assert.equal(callback.mock.calls.length, 1);
+	assert.equal(callback.mock.calls[0]?.arguments[0]?.side, 'CT');
 });
 
 test('event > timeout: start (T)', () => {
@@ -568,8 +568,8 @@ test('event > timeout: start (T)', () => {
 	GSI.digest(createGSIPacket());
 	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'timeout_t' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
-	expect((callback.mock.calls[0] as any)[0].side).toBe('T');
+	assert.equal(callback.mock.calls.length, 1);
+	assert.equal(callback.mock.calls[0]?.arguments[0]?.side, 'T');
 });
 
 test('event > timeout: end', () => {
@@ -578,7 +578,7 @@ test('event > timeout: end', () => {
 	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'timeout_t' } }));
 	GSI.digest(createGSIPacket());
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > timeout: end #2', () => {
@@ -587,7 +587,7 @@ test('event > timeout: end #2', () => {
 	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'timeout_ct' } }));
 	GSI.digest(createGSIPacket());
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > timeout: continue', () => {
@@ -596,7 +596,7 @@ test('event > timeout: continue', () => {
 	GSI.digest({ ...createGSIPacket(), phase_countdowns: { phase_ends_in: '120' } });
 	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'timeout_ct' } }));
 
-	expect(callback.mock.calls.length).toBe(0);
+	assert.equal(callback.mock.calls.length, 0);
 });
 
 test('event > bomb: plant started listener', () => {
@@ -605,7 +605,7 @@ test('event > bomb: plant started listener', () => {
 	GSI.digest(createGSIPacket());
 	GSI.digest(createGSIPacket({ bomb: { state: 'planting' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > bomb: plant listener', () => {
@@ -614,7 +614,7 @@ test('event > bomb: plant listener', () => {
 	GSI.digest(createGSIPacket({ bomb: { state: 'planting' } }));
 	GSI.digest(createGSIPacket({ bomb: { state: 'planted' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > bomb: stop listener', () => {
@@ -623,7 +623,7 @@ test('event > bomb: stop listener', () => {
 	GSI.digest(createGSIPacket({ bomb: { state: 'planting' } }));
 	GSI.digest(createGSIPacket({ bomb: { state: 'carried' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > bomb: exploded listener', () => {
@@ -632,7 +632,7 @@ test('event > bomb: exploded listener', () => {
 	GSI.digest(createGSIPacket({ bomb: { state: 'planted' } }));
 	GSI.digest(createGSIPacket({ bomb: { state: 'exploded' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > bomb: exploded listener, empty bomb packet', () => {
@@ -644,7 +644,7 @@ test('event > bomb: exploded listener, empty bomb packet', () => {
 	GSI.digest(createGSIPacket({ bomb: { state: 'exploded' } }));
 	GSI.digest(createGSIPacket({ bomb: { state: 'exploded' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > bomb: defuse started listener', () => {
@@ -653,7 +653,7 @@ test('event > bomb: defuse started listener', () => {
 	GSI.digest(createGSIPacket({ bomb: { state: 'planted' } }));
 	GSI.digest(createGSIPacket({ bomb: { state: 'defusing' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test("event > bomb: defuse stopped (didn't explode) listener", () => {
@@ -662,7 +662,7 @@ test("event > bomb: defuse stopped (didn't explode) listener", () => {
 	GSI.digest(createGSIPacket({ bomb: { state: 'defusing' } }));
 	GSI.digest(createGSIPacket({ bomb: { state: 'planted' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > bomb: defuse stopped listener dont call on explode #1', () => {
@@ -671,7 +671,7 @@ test('event > bomb: defuse stopped listener dont call on explode #1', () => {
 	GSI.digest(createGSIPacket({ bomb: { state: 'defusing' } }));
 	GSI.digest(createGSIPacket({ bomb: { state: 'exploded' } }));
 
-	expect(callback.mock.calls.length).toBe(0);
+	assert.equal(callback.mock.calls.length, 0);
 });
 
 test('event > bomb: defuse stopped listener dont call on explode #2', () => {
@@ -680,7 +680,7 @@ test('event > bomb: defuse stopped listener dont call on explode #2', () => {
 	GSI.digest(createGSIPacket({ bomb: { state: 'planted' } }));
 	GSI.digest(createGSIPacket({ bomb: { state: 'exploded' } }));
 
-	expect(callback.mock.calls.length).toBe(0);
+	assert.equal(callback.mock.calls.length, 0);
 });
 
 test('event > bomb: defused listener', () => {
@@ -689,7 +689,7 @@ test('event > bomb: defused listener', () => {
 	GSI.digest(createGSIPacket({ bomb: { state: 'defusing' } }));
 	GSI.digest(createGSIPacket({ bomb: { state: 'defused' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > bomb: defused listener', () => {
@@ -698,7 +698,7 @@ test('event > bomb: defused listener', () => {
 	GSI.digest(createGSIPacket({ bomb: { state: 'defusing' } }));
 	GSI.digest(createGSIPacket({ bomb: { state: 'defused' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > round: ended listener, CT wins', () => {
@@ -707,8 +707,8 @@ test('event > round: ended listener, CT wins', () => {
 	GSI.digest(createGSIPacket());
 	GSI.digest(createGSIPacket({ round: { win_team: 'CT' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
-	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('CT');
+	assert.equal(callback.mock.calls.length, 1);
+	assert.equal(callback.mock.calls[0]?.arguments[0]?.winner.side, 'CT');
 });
 
 test('event > round: ended listener, T wins', () => {
@@ -717,8 +717,8 @@ test('event > round: ended listener, T wins', () => {
 	GSI.digest(createGSIPacket());
 	GSI.digest(createGSIPacket({ round: { win_team: 'T' } }));
 
-	expect(callback.mock.calls.length).toBe(1);
-	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('T');
+	assert.equal(callback.mock.calls.length, 1);
+	assert.equal(callback.mock.calls[0]?.arguments[0]?.winner.side, 'T');
 });
 
 test('event > round: ended listener, score validness', () => {
@@ -727,9 +727,9 @@ test('event > round: ended listener, score validness', () => {
 	GSI.digest(createGSIPacket({ map: { team_t: { score: 14 } } }));
 	GSI.digest(createGSIPacket({ round: { win_team: 'T' }, map: { team_t: { score: 14 } } }));
 
-	expect(callback.mock.calls.length).toBe(1);
-	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('T');
-	expect((callback.mock.calls[0] as any)[0].winner.score).toBe(15);
+	assert.equal(callback.mock.calls.length, 1);
+	assert.equal(callback.mock.calls[0]?.arguments[0]?.winner.side, 'T');
+	assert.equal(callback.mock.calls[0]?.arguments[0]?.winner.score, 15);
 });
 
 test('event > round: ended listener, score validness #2', () => {
@@ -738,9 +738,9 @@ test('event > round: ended listener, score validness #2', () => {
 	GSI.digest(createGSIPacket({ map: { team_t: { score: 14 } } }));
 	GSI.digest(createGSIPacket({ round: { win_team: 'T' }, map: { team_t: { score: 15 } } }));
 
-	expect(callback.mock.calls.length).toBe(1);
-	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('T');
-	expect((callback.mock.calls[0] as any)[0].winner.score).toBe(15);
+	assert.equal(callback.mock.calls.length, 1);
+	assert.equal(callback.mock.calls[0]?.arguments[0]?.winner.side, 'T');
+	assert.equal(callback.mock.calls[0]?.arguments[0]?.winner.score, 15);
 });
 
 test('event > round: mvp listener', () => {
@@ -749,7 +749,7 @@ test('event > round: mvp listener', () => {
 	GSI.digest(createGSIPacket({ allplayers: { '76561199031036917': { match_stats: { mvps: 5 } } } }));
 	GSI.digest(createGSIPacket({ allplayers: { '76561199031036917': { match_stats: { mvps: 6 } } } }));
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > round: mvp listener #2', () => {
@@ -764,7 +764,7 @@ test('event > round: mvp listener #2', () => {
 	GSI.digest(packet);
 	GSI.digest(createGSIPacket({ allplayers: { '76561198238326438': { match_stats: { mvps: 6 } } } }));
 
-	expect(callback.mock.calls.length).toBe(1);
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > match: ended listener, CT wins', () => {
@@ -778,8 +778,8 @@ test('event > match: ended listener, CT wins', () => {
 		})
 	);
 
-	expect(callback.mock.calls.length).toBe(1);
-	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('CT');
+	assert.equal(callback.mock.calls.length, 1);
+	assert.equal(callback.mock.calls[0]?.arguments[0]?.winner.side, 'CT');
 });
 
 test('event > match: ended listener, T wins', () => {
@@ -793,8 +793,8 @@ test('event > match: ended listener, T wins', () => {
 		})
 	);
 
-	expect(callback.mock.calls.length).toBe(1);
-	expect((callback.mock.calls[0] as any)[0].winner.side).toBe('T');
+	assert.equal(callback.mock.calls.length, 1);
+	assert.equal(callback.mock.calls[0]?.arguments[0]?.winner.side, 'T');
 });
 
 test('event > hurt: ignore for non-existing player #1', () => {
@@ -804,7 +804,7 @@ test('event > hurt: ignore for non-existing player #1', () => {
 	GSI.digest(createGSIPacket());
 	GSI.digestMIRV(hurt, 'player_hurt');
 
-	expect(callback.mock.calls.length).toBe(0);
+	assert.equal(callback.mock.calls.length, 0);
 });
 
 test('event > hurt: ignore for non-existing player #2', () => {
@@ -814,7 +814,7 @@ test('event > hurt: ignore for non-existing player #2', () => {
 	GSI.digest(createGSIPacket());
 	GSI.digestMIRV(hurt, 'player_hurt');
 
-	expect(callback.mock.calls.length).toBe(0);
+	assert.equal(callback.mock.calls.length, 0);
 });
 
 test('event > hurt: ignore for lacking data', () => {
@@ -823,8 +823,8 @@ test('event > hurt: ignore for lacking data', () => {
 
 	const response = GSI.digestMIRV(hurt, 'player_hurt');
 
-	expect(callback.mock.calls.length).toBe(0);
-	expect(response).toBeNull();
+	assert.equal(callback.mock.calls.length, 0);
+	assert.equal(response, null);
 });
 
 test('event > hurt: get correct victim', () => {
@@ -834,8 +834,8 @@ test('event > hurt: get correct victim', () => {
 	GSI.digest(createGSIPacket());
 	const response = GSI.digestMIRV(hurt, 'player_hurt');
 
-	expect(callback.mock.calls.length).toBe(1);
-	expect(response?.victim.steamid).toBe('76561199031036917');
+	assert.equal(callback.mock.calls.length, 1);
+	assert.equal(response?.victim.steamid, '76561199031036917');
 });
 
 test('event > kill: get correct attacker', () => {
@@ -845,8 +845,9 @@ test('event > kill: get correct attacker', () => {
 	GSI.digest(createGSIPacket());
 	const response = GSI.digestMIRV(hurt, 'player_hurt');
 
-	expect(callback.mock.calls.length).toBe(1);
-	expect(response && 'attacker' in response && response?.attacker && response?.attacker.steamid).toBe(
+	assert.equal(callback.mock.calls.length, 1);
+	assert.equal(
+		response && 'attacker' in response && response?.attacker && response?.attacker.steamid,
 		'76561199031036917'
 	);
 });
@@ -858,8 +859,8 @@ test('event > kill: ignore for non-existing player #1', () => {
 	GSI.digest(createGSIPacket());
 	const response = GSI.digestMIRV(kill);
 
-	expect(callback.mock.calls.length).toBe(0);
-	expect(response).toBeNull();
+	assert.equal(callback.mock.calls.length, 0);
+	assert.equal(response, null);
 });
 
 test('event > kill: ignore for non-existing player #2', () => {
@@ -869,8 +870,8 @@ test('event > kill: ignore for non-existing player #2', () => {
 	GSI.digest(createGSIPacket());
 	const response = GSI.digestMIRV(kill);
 
-	expect(callback.mock.calls.length).toBe(1);
-	expect((response as KillEvent).killer).toBeNull();
+	assert.equal(callback.mock.calls.length, 1);
+	assert.equal((response as KillEvent).killer, null);
 });
 
 test('event > kill: ignore for lacking data', () => {
@@ -879,8 +880,8 @@ test('event > kill: ignore for lacking data', () => {
 
 	const response = GSI.digestMIRV(kill);
 
-	expect(callback.mock.calls.length).toBe(0);
-	expect(response).toBeNull();
+	assert.equal(callback.mock.calls.length, 0);
+	assert.equal(response, null);
 });
 
 test('event > kill: get correct victim', () => {
@@ -890,8 +891,8 @@ test('event > kill: get correct victim', () => {
 	GSI.digest(createGSIPacket());
 	const response = GSI.digestMIRV(kill);
 
-	expect(callback.mock.calls.length).toBe(1);
-	expect(response?.victim.steamid).toBe('76561199031036917');
+	assert.equal(callback.mock.calls.length, 1);
+	assert.equal(response?.victim.steamid, '76561199031036917');
 });
 
 test('event > kill: get correct killer', () => {
@@ -901,8 +902,8 @@ test('event > kill: get correct killer', () => {
 	GSI.digest(createGSIPacket());
 	const response = GSI.digestMIRV(kill);
 
-	expect(callback.mock.calls.length).toBe(1);
-	expect(response && 'killer' in response && response?.killer && response?.killer.steamid).toBe('76561199031036917');
+	assert.equal(callback.mock.calls.length, 1);
+	assert.equal(response && 'killer' in response && response?.killer && response?.killer.steamid, '76561199031036917');
 });
 
 test('event > kill: get correct assister', () => {
@@ -912,22 +913,23 @@ test('event > kill: get correct assister', () => {
 	GSI.digest(createGSIPacket());
 	const response = GSI.digestMIRV(kill);
 
-	expect(callback.mock.calls.length).toBe(1);
-	expect(response && 'killer' in response && response?.killer && response?.killer.steamid).toBe('76561199031036917');
+	assert.equal(callback.mock.calls.length, 1);
+	assert.equal(response && 'killer' in response && response?.killer && response?.killer.steamid, '76561199031036917');
 });
 
 for (const testCase of testCases) {
 	test(`data > bomb: find the correct site (${testCase.map}, ${testCase.site})`, () => {
 		const GSI = new CSGOGSI();
 
-		expect(
+		assert.equal(
 			GSI.digest(
 				createGSIPacket({
 					map: { name: testCase.map },
 					bomb: { state: 'planted', position: testCase.position }
 				})
-			)?.bomb?.site
-		).toBe(testCase.site);
+			)?.bomb?.site,
+			testCase.site
+		);
 	});
 }
 
@@ -950,14 +952,15 @@ test('data > bomb: return null on unknown map', () => {
 	for (const testCase of testCases) {
 		const GSI = new CSGOGSI();
 
-		expect(
+		assert.equal(
 			GSI.digest(
 				createGSIPacket({
 					map: { name: testCase.map },
 					bomb: { state: 'planted', position: testCase.position }
 				})
-			)?.bomb?.site
-		).toBeNull();
+			)?.bomb?.site,
+			null
+		);
 	}
 });
 
@@ -984,8 +987,8 @@ test('data > damage: clear after first round starts', () => {
 
 	const player = result?.players.find(pl => pl.steamid === '76561199031036917');
 
-	expect(player).not.toBeNull();
-	expect(GSI.damage.length).toBe(0);
+	assert.notEqual(player, null);
+	assert.equal(GSI.damage.length, 0);
 });
 
 test('data > damage: clear on warmup', () => {
@@ -1011,8 +1014,8 @@ test('data > damage: clear on warmup', () => {
 
 	const player = result?.players.find(pl => pl.steamid === '76561199031036917');
 
-	expect(player).not.toBeNull();
-	expect(GSI.damage.length).toBe(0);
+	assert.notEqual(player, null);
+	assert.equal(GSI.damage.length, 0);
 });
 
 test('data > adr', () => {
@@ -1061,8 +1064,8 @@ test('data > adr', () => {
 
 	const player = result?.players.find(pl => pl.steamid === '76561199031036917');
 
-	expect(player).not.toBeNull();
-	expect(player?.state.adr).toBe(75);
+	assert.notEqual(player, null);
+	assert.equal(player?.state.adr, 75);
 });
 
 test('data > grenades > flashbang', () => {
@@ -1074,9 +1077,9 @@ test('data > grenades > flashbang', () => {
 
 	const flash = result?.grenades.find(g => g.type === 'flashbang');
 
-	expect(flash).not.toBeUndefined();
-	expect((flash as FragOrFireBombOrFlashbandGrenade).position.length).toBe(3);
-	expect((flash as FragOrFireBombOrFlashbandGrenade).velocity.length).toBe(3);
+	assert.notEqual(flash, undefined);
+	assert.equal((flash as FragOrFireBombOrFlashbandGrenade).position.length, 3);
+	assert.equal((flash as FragOrFireBombOrFlashbandGrenade).velocity.length, 3);
 });
 
 test('data > grenades > inferno', () => {
@@ -1088,9 +1091,9 @@ test('data > grenades > inferno', () => {
 
 	const flash = result?.grenades.find(g => g.type === 'inferno');
 
-	expect(flash).not.toBeUndefined();
-	expect((flash as InfernoGrenade).lifetime).toBeTruthy();
-	expect((flash as InfernoGrenade).flames.length).toBe(1);
+	assert.notEqual(flash, undefined);
+	assert.ok((flash as InfernoGrenade).lifetime);
+	assert.equal((flash as InfernoGrenade).flames.length, 1);
 });
 
 test('data > grenades > smoke', () => {
@@ -1102,9 +1105,9 @@ test('data > grenades > smoke', () => {
 
 	const flash = result?.grenades.find(g => g.type === 'smoke');
 
-	expect(flash).not.toBeUndefined();
-	expect((flash as DecoySmokeGrenade).lifetime).toBeTruthy();
-	expect((flash as DecoySmokeGrenade).effecttime).toBeTruthy();
+	assert.notEqual(flash, undefined);
+	assert.ok((flash as DecoySmokeGrenade).lifetime);
+	assert.ok((flash as DecoySmokeGrenade).effecttime);
 });
 
 test('data > grenades > none', () => {
@@ -1112,5 +1115,5 @@ test('data > grenades > none', () => {
 
 	const result = GSI.digest(createGSIPacket({ grenades: null as any }));
 
-	expect(result?.grenades.length).toBe(0);
+	assert.equal(result?.grenades.length, 0);
 });

@@ -1,4 +1,3 @@
-![Statements](https://img.shields.io/badge/Coverage-100%25-brightgreen.svg)
 ![CI](https://img.shields.io/github/actions/workflow/status/osztenkurden/csgogsi/.github/workflows/main.yaml?branch=master)
 ![Dependencies](https://img.shields.io/librariesio/github/osztenkurden/csgogsi)
 ![Downloads](https://img.shields.io/npm/dm/csgogsi)

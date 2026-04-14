@@ -1,23 +1,31 @@
 {
+  
   "compilerOptions": {
+    "types": ["node"],
     /* Base Options: */
     "esModuleInterop": true,
     "skipLibCheck": true,
     "target": "es2022",
-    "verbatimModuleSyntax": true,
     "allowJs": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
     "moduleDetection": "force",
+    "isolatedModules": true,
+    "rootDir": ".",
+    "verbatimModuleSyntax": true,
+    "allowImportingTsExtensions": true,
     /* Strictness */
     "strict": true,
     "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    /* AND if you're building for a library: */
+    "declaration": true,
     /* If NOT transpiling with TypeScript: */
-    "moduleResolution": "Bundler",
-    "module": "ESNext",
+    "module": "preserve",
     "noEmit": true,
-    "types": ["node", "bun-types"],
-    /* If your code runs in the DOM: */
-    "lib": ["es2022", "dom", "dom.iterable"],
+    "outDir": "dist",
+    /* If your code doesn't run in the DOM: */
+    "lib": [
+      "es2022"
+    ]
   }
 }

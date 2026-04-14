@@ -22,7 +22,7 @@ import {
 	getHalfFromRound,
 	didTeamWinThatRound,
 	parseGrenades
-} from './utils.js';
+} from './utils.ts';
 
 interface EventDescriptor {
 	listener: Events[BaseEvents];

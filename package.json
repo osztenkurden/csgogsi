@@ -21,7 +21,6 @@
 		"@types/node": "^22.18.8",
 		"@typescript/native-preview": "^7.0.0-dev.20260413.1",
 		"eslint": "^9.36.0",
-		"istanbul-badges-readme": "^1.2.1",
 		"lodash.merge": "^4.6.2",
 		"prettier": "^3.0.3",
 		"ts-toolbelt": "^9.6.0",
@@ -30,14 +29,12 @@
 		"typescript-eslint": "^8.58.1"
 	},
 	"scripts": {
-		"test": "bun test --coverage --coverage-reporter=lcov --coverage-reporter=text",
+		"test": "node --test",
 		"typecheck": "tsgo",
-		"make-badges": "bun run scripts/lcov-to-summary.ts && istanbul-badges-readme",
-		"rollup": "tsdown tsc/index.ts --format cjs,esm --dts -d dist",
-		"build": "npm run rollup",
+		"build": "tsdown tsc/index.ts --format cjs,esm --dts -d dist",
 		"lint": "eslint .",
 		"prettier-format": "prettier --config .prettierrc --write tsc/*.ts",
-		"format": "npm run prettier-format && npm run lint && npm test && npm run make-badges"
+		"format": "npm run prettier-format && npm run lint && npm test"
 	},
 	"repository": {
 		"type": "git",
