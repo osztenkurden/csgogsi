@@ -17,8 +17,6 @@
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    /* AND if you're building for a library: */
-    "declaration": true,
     /* If NOT transpiling with TypeScript: */
     "module": "preserve",
     "noEmit": true,
