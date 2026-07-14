@@ -4,8 +4,7 @@
       "Bash(ls C:/repos/csgogsi/.prettierrc.*)",
       "Bash(bun install:*)",
       "Bash(bun test:*)",
-      "Bash(bun run:*)",
-      "Bash(npx eslint:*)"
+      "Bash(bun run:*)"
     ]
   }
 }
