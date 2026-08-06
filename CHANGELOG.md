@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.1.0](https://github.com/osztenkurden/csgogsi/compare/v5.0.1...v5.1.0) (2026-08-06)
+
+
+### Features
+
+* added overtime and warmup events ([a18dfb7](https://github.com/osztenkurden/csgogsi/commit/a18dfb75acdc5eeff5999429bb2483fb87e2d161))
+* make 12 a default regulationMR ([4af4ddf](https://github.com/osztenkurden/csgogsi/commit/4af4ddf9908472c7bf7359da508452ac786776b7))
+
 ## [5.0.1](https://github.com/osztenkurden/csgogsi/compare/v5.0.0...v5.0.1) (2026-04-14)
 
 
