@@ -74,7 +74,7 @@ class CSGOGSI {
 		this.maxListeners = 10;
 		this.players = [];
 		this.overtimeMR = 3;
-		this.regulationMR = 15;
+		this.regulationMR = 12;
 		this.damage = [];
 	}
 	eventNames = () => {
