@@ -369,12 +369,21 @@ class CSGOGSI {
 		};
 
 		this.current = data;
+
+		if (data.map.phase === 'warmup' && this.last?.map.phase !== 'warmup') {
+			this.emit('warmupStart');
+		}
+
 		if (!this.last) {
 			this.last = data;
 			this.emit('data', data);
 			return data;
 		}
 		const last = this.last;
+
+		if (data.map.phase !== 'warmup' && last.map.phase === 'warmup') {
+			this.emit('warmupEnd');
+		}
 
 		// Round end
 		if (last.round && data.round && data.round.win_team && !last.round.win_team) {
@@ -398,6 +407,14 @@ class CSGOGSI {
 			// Match end
 			if (roundScore.mapEnd && last.map.phase !== 'gameover') {
 				this.emit('matchEnd', roundScore);
+			}
+
+			if (
+				!roundScore.mapEnd &&
+				roundScore.winner.score === this.regulationMR &&
+				roundScore.loser.score === this.regulationMR
+			) {
+				this.emit('overtime');
 			}
 		}
 

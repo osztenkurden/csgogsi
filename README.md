@@ -51,9 +51,24 @@ app.listen(3000);
 | `on('event', callback)`                                                                      | Sets listener for given event (check them below) | `GSI.on('roundEnd', score => { console.log(score.winner.name); });` |                        |
 | `static findSite(mapName, position)`                                                         | Tries to guess the bombsite of the position      |                                                                     | `A, B, null`           |
 
-CSGOGSI also has MR property, which specifies the MR system for overtimes (used in map.rounds). Default value is 3.
-
 Beside that, CSGOGSI implements standard Event Emitter interfaces.
+
+## MR system
+
+CSGOGSI has two properties describing the MR system of the match. They are used to work out which team won a given round (`map.rounds`, where sides swap at every half) and when to emit the `overtime` event.
+
+| Property       | Default | Description                                                                         |
+| -------------- | ------- | ----------------------------------------------------------------------------------- |
+| `regulationMR` | `12`    | Rounds per half in regulation - MR12 means the map is won at 13 rounds, OT at 12:12 |
+| `overtimeMR`   | `3`     | Rounds per half in overtime                                                         |
+
+If your server still runs the old MR15 system, set it before feeding any data in:
+
+```javascript
+const GSI = new CSGOGSI();
+
+GSI.regulationMR = 15;
+```
 
 ## Events
 
@@ -62,11 +77,14 @@ Beside that, CSGOGSI implements standard Event Emitter interfaces.
 | Data incoming                                     | `data`              | (data: CSGO Parsed) => {} |
 | End of the round                                  | `roundEnd`          | (score: Score) => {}      |
 | End of the map                                    | `matchEnd`          | (score: Score) => {}      |
+| Score tied at `regulationMR` (map goes to OT)     | `overtime`          | () => {}                  |
 | Kill                                              | `kill`              | (kill: KillEvent) => {}   |
 | Hurt                                              | `hurt`              | (hurt: HurtEvent) => {}   |
 | Timeout start                                     | `timeoutStart`      | (team: Team) => {}        |
 | Timeout end                                       | `timeoutEnd`        | () => {}                  |
 | MVP of the round                                  | `mvp`               | (player: Player) => {}    |
+| Warmup start                                      | `warmupStart`       | () => {}                  |
+| Warmup end                                        | `warmupEnd`         | () => {}                  |
 | Freezetime start                                  | `freezetimeStart`   | () => {}                  |
 | Freezetime end                                    | `freezetimeEnd`     | () => {}                  |
 | Intermission start                                | `intermissionStart` | () => {}                  |
@@ -77,6 +95,11 @@ Beside that, CSGOGSI implements standard Event Emitter interfaces.
 | Bomb planted                                      | `bombPlant`         | (player: Player) => {}    |
 | Bomb exploded                                     | `bombExplode`       | () => {}                  |
 | Bomb defused                                      | `bombDefuse`        | (player: Player) => {}    |
+
+### Notes on some events
+
+-   `overtime` is emitted together with `roundEnd`, on the round that ties the score at `regulationMR` (12:12 by default) without ending the map. It is not emitted when the map ends at that score instead - which is what happens when overtime is disabled on the server and the map ends in a draw.
+-   `warmupStart` and `warmupEnd` follow `map.phase`. `warmupStart` is also emitted for the very first packet you feed in if the game is already in warmup at that point, while `warmupEnd` needs a previous packet to compare against, so it is never emitted for the first one.
 
 ## Objects
 

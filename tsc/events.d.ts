@@ -5,13 +5,14 @@ export interface Events {
 	data: (data: I.CSGO) => void;
 	roundEnd: (team: I.Score) => void;
 	matchEnd: (score: I.Score) => void;
+	overtime: () => void;
 	kill: (kill: I.KillEvent) => void;
 	hurt: (kill: I.HurtEvent) => void;
 	timeoutStart: (team: I.Team) => void;
 	timeoutEnd: () => void;
-	/*roundStart: (round: number) => void,
-    warmupStart: () => void,
-    warmupEnd: () => void,*/
+	/*roundStart: (round: number) => void, */
+	warmupStart: () => void;
+	warmupEnd: () => void;
 	mvp: (player: I.Player) => void;
 	freezetimeStart: () => void;
 	freezetimeEnd: () => void;

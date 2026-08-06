@@ -13,7 +13,7 @@ import type {
 	PlayerRaw,
 	TeamExtension
 } from '../index';
-import { CSGOGSI } from '../index.ts';
+import { CSGOGSI, getHalfFromRound } from '../index.ts';
 import type { Callback } from '../events';
 import { createGSIPacket, createHurtPacket, createKillPacket } from './data/index.ts';
 import { testCases } from './data/bombSites.ts';
@@ -31,6 +31,24 @@ const createGSIAndCallback = <K extends keyof Events>(eventName: K) => {
 test('parser > create CSGOGSI object', () => {
 	const GSI = new CSGOGSI();
 	assert.ok(GSI);
+});
+
+test('config > defaults to the MR12 system', () => {
+	const GSI = new CSGOGSI();
+
+	assert.equal(GSI.regulationMR, 12);
+	assert.equal(GSI.overtimeMR, 3);
+});
+
+test('config > default MR values place the half break after round 12', () => {
+	const GSI = new CSGOGSI();
+
+	assert.equal(getHalfFromRound(12, GSI.regulationMR, GSI.overtimeMR), 1);
+	assert.equal(getHalfFromRound(13, GSI.regulationMR, GSI.overtimeMR), 2);
+	assert.equal(getHalfFromRound(24, GSI.regulationMR, GSI.overtimeMR), 2);
+	// first overtime half
+	assert.equal(getHalfFromRound(25, GSI.regulationMR, GSI.overtimeMR), 1);
+	assert.equal(getHalfFromRound(28, GSI.regulationMR, GSI.overtimeMR), 2);
 });
 
 test('parser > throw on bad data', () => {
@@ -340,6 +358,48 @@ test('data > rounds: proper parser in 1st half', () => {
 	assert.equal(data?.map.rounds[2]?.team.side, 'T');
 });
 
+test('data > rounds: side swap happens after round 12 with the default MR', () => {
+	const GSI = new CSGOGSI();
+
+	const data = GSI.digest(
+		createGSIPacket({
+			map: {
+				round: 13,
+				team_ct: { score: 6 },
+				team_t: { score: 7 },
+				round_wins: {
+					'1': 'ct_win_elimination',
+					'2': 'ct_win_elimination',
+					'3': 't_win_bomb',
+					'4': 't_win_elimination',
+					'5': 'ct_win_elimination',
+					'6': 't_win_bomb',
+					'7': 'ct_win_elimination',
+					'8': 't_win_elimination',
+					'9': 'ct_win_elimination',
+					'10': 't_win_bomb',
+					'11': 'ct_win_elimination',
+					'12': 't_win_elimination',
+					'13': 'ct_win_elimination'
+				}
+			}
+		})
+	);
+
+	assert.ok(data);
+	assert.equal(data?.map.rounds.length, 13);
+
+	// rounds 1-12 belong to the first half, so their winners play the opposite side now
+	assert.equal(data?.map.rounds[0]?.side, 'CT');
+	assert.equal(data?.map.rounds[0]?.team.side, 'T');
+	assert.equal(data?.map.rounds[11]?.side, 'T');
+	assert.equal(data?.map.rounds[11]?.team.side, 'CT');
+
+	// round 13 already is the second half - no swap
+	assert.equal(data?.map.rounds[12]?.side, 'CT');
+	assert.equal(data?.map.rounds[12]?.team.side, 'CT');
+});
+
 test('data > rounds: proper parser in 2nd half', () => {
 	const GSI = new CSGOGSI();
 
@@ -532,6 +592,86 @@ test('event > intermission: end', () => {
 	GSI.digest(createGSIPacket());
 
 	assert.equal(callback.mock.calls.length, 1);
+});
+
+test('event > warmup: start', () => {
+	const { GSI, callback } = createGSIAndCallback('warmupStart');
+
+	GSI.digest(createGSIPacket({ map: { phase: 'live' } }));
+	GSI.digest(createGSIPacket({ map: { phase: 'warmup' } }));
+
+	assert.equal(callback.mock.calls.length, 1);
+});
+
+test('event > warmup: start on the very first packet', () => {
+	const { GSI, callback } = createGSIAndCallback('warmupStart');
+
+	GSI.digest(createGSIPacket({ map: { phase: 'warmup' } }));
+
+	assert.equal(callback.mock.calls.length, 1);
+});
+
+test('event > warmup: start only once per warmup', () => {
+	const { GSI, callback } = createGSIAndCallback('warmupStart');
+
+	GSI.digest(createGSIPacket({ map: { phase: 'warmup' } }));
+	GSI.digest(createGSIPacket({ map: { phase: 'warmup' } }));
+	GSI.digest(createGSIPacket({ map: { phase: 'warmup' } }));
+
+	assert.equal(callback.mock.calls.length, 1);
+});
+
+test('event > warmup: start not emitted when the map is live', () => {
+	const { GSI, callback } = createGSIAndCallback('warmupStart');
+
+	GSI.digest(createGSIPacket({ map: { phase: 'live' } }));
+	GSI.digest(createGSIPacket({ map: { phase: 'live' } }));
+
+	assert.equal(callback.mock.calls.length, 0);
+});
+
+test('event > warmup: end', () => {
+	const { GSI, callback } = createGSIAndCallback('warmupEnd');
+
+	GSI.digest(createGSIPacket({ map: { phase: 'warmup' } }));
+	GSI.digest(createGSIPacket({ map: { phase: 'live' } }));
+
+	assert.equal(callback.mock.calls.length, 1);
+});
+
+test('event > warmup: end only once', () => {
+	const { GSI, callback } = createGSIAndCallback('warmupEnd');
+
+	GSI.digest(createGSIPacket({ map: { phase: 'warmup' } }));
+	GSI.digest(createGSIPacket({ map: { phase: 'live' } }));
+	GSI.digest(createGSIPacket({ map: { phase: 'live' } }));
+
+	assert.equal(callback.mock.calls.length, 1);
+});
+
+test('event > warmup: end not emitted on the very first packet', () => {
+	const { GSI, callback } = createGSIAndCallback('warmupEnd');
+
+	GSI.digest(createGSIPacket({ map: { phase: 'live' } }));
+
+	assert.equal(callback.mock.calls.length, 0);
+});
+
+test('event > warmup: start and end on a second warmup (map restart)', () => {
+	const start = mock.fn(() => {});
+	const end = mock.fn(() => {});
+	const GSI = new CSGOGSI();
+
+	GSI.on('warmupStart', start);
+	GSI.on('warmupEnd', end);
+
+	GSI.digest(createGSIPacket({ map: { phase: 'warmup' } }));
+	GSI.digest(createGSIPacket({ map: { phase: 'live' } }));
+	GSI.digest(createGSIPacket({ map: { phase: 'warmup' } }));
+	GSI.digest(createGSIPacket({ map: { phase: 'live' } }));
+
+	assert.equal(start.mock.calls.length, 2);
+	assert.equal(end.mock.calls.length, 2);
 });
 
 test('event > freezetime: start', () => {
@@ -795,6 +935,109 @@ test('event > match: ended listener, T wins', () => {
 
 	assert.equal(callback.mock.calls.length, 1);
 	assert.equal(callback.mock.calls[0]?.arguments[0]?.winner.side, 'T');
+});
+
+test('event > overtime: emitted when the score gets tied at regulationMR', () => {
+	const { GSI, callback } = createGSIAndCallback('overtime');
+
+	GSI.digest(createGSIPacket({ map: { team_ct: { score: 12 }, team_t: { score: 11 }, phase: 'live' } }));
+	GSI.digest(
+		createGSIPacket({
+			map: { team_ct: { score: 12 }, team_t: { score: 12 }, phase: 'live' },
+			round: { win_team: 'T' }
+		})
+	);
+
+	assert.equal(callback.mock.calls.length, 1);
+});
+
+test('event > overtime: emitted when the tying score is not updated yet', () => {
+	const { GSI, callback } = createGSIAndCallback('overtime');
+
+	GSI.digest(createGSIPacket({ map: { team_ct: { score: 12 }, team_t: { score: 11 }, phase: 'live' } }));
+	GSI.digest(
+		createGSIPacket({
+			map: { team_ct: { score: 12 }, team_t: { score: 11 }, phase: 'live' },
+			round: { win_team: 'T' }
+		})
+	);
+
+	assert.equal(callback.mock.calls.length, 1);
+});
+
+test('event > overtime: not emitted when the score is not tied', () => {
+	const { GSI, callback } = createGSIAndCallback('overtime');
+
+	GSI.digest(createGSIPacket({ map: { team_ct: { score: 12 }, team_t: { score: 10 }, phase: 'live' } }));
+	GSI.digest(
+		createGSIPacket({
+			map: { team_ct: { score: 12 }, team_t: { score: 11 }, phase: 'live' },
+			round: { win_team: 'T' }
+		})
+	);
+
+	assert.equal(callback.mock.calls.length, 0);
+});
+
+test('event > overtime: not emitted when the map ends in a draw', () => {
+	const { GSI, callback } = createGSIAndCallback('overtime');
+
+	GSI.digest(createGSIPacket({ map: { team_ct: { score: 12 }, team_t: { score: 11 }, phase: 'live' } }));
+	GSI.digest(
+		createGSIPacket({
+			map: { team_ct: { score: 12 }, team_t: { score: 12 }, phase: 'gameover' },
+			round: { win_team: 'T' }
+		})
+	);
+
+	assert.equal(callback.mock.calls.length, 0);
+});
+
+test('event > overtime: emitted only once per tie', () => {
+	const { GSI, callback } = createGSIAndCallback('overtime');
+
+	GSI.digest(createGSIPacket({ map: { team_ct: { score: 12 }, team_t: { score: 11 }, phase: 'live' } }));
+	GSI.digest(
+		createGSIPacket({
+			map: { team_ct: { score: 12 }, team_t: { score: 12 }, phase: 'live' },
+			round: { win_team: 'T' }
+		})
+	);
+	GSI.digest(createGSIPacket({ map: { team_ct: { score: 12 }, team_t: { score: 12 }, phase: 'live' } }));
+	GSI.digest(
+		createGSIPacket({
+			map: { team_ct: { score: 13 }, team_t: { score: 12 }, phase: 'live' },
+			round: { win_team: 'CT' }
+		})
+	);
+
+	assert.equal(callback.mock.calls.length, 1);
+});
+
+test('event > overtime: follows a custom regulationMR', () => {
+	const { GSI, callback } = createGSIAndCallback('overtime');
+
+	GSI.regulationMR = 15;
+
+	GSI.digest(createGSIPacket({ map: { team_ct: { score: 12 }, team_t: { score: 11 }, phase: 'live' } }));
+	GSI.digest(
+		createGSIPacket({
+			map: { team_ct: { score: 12 }, team_t: { score: 12 }, phase: 'live' },
+			round: { win_team: 'T' }
+		})
+	);
+
+	assert.equal(callback.mock.calls.length, 0);
+
+	GSI.digest(createGSIPacket({ map: { team_ct: { score: 15 }, team_t: { score: 14 }, phase: 'live' } }));
+	GSI.digest(
+		createGSIPacket({
+			map: { team_ct: { score: 15 }, team_t: { score: 15 }, phase: 'live' },
+			round: { win_team: 'T' }
+		})
+	);
+
+	assert.equal(callback.mock.calls.length, 1);
 });
 
 test('event > hurt: ignore for non-existing player #1', () => {
