@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.1](https://github.com/osztenkurden/csgogsi/compare/v5.1.0...v5.1.1) (2026-08-12)
+
+
+### Bug Fixes
+
+* make logic based on non-zero players (obs slot move) ([b0b08c7](https://github.com/osztenkurden/csgogsi/commit/b0b08c7df799c8016ff316b36a2fbf81649b0ea9))
+
 ## [5.1.0](https://github.com/osztenkurden/csgogsi/compare/v5.0.1...v5.1.0) (2026-08-06)
 
 
