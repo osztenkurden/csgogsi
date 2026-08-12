@@ -195,18 +195,13 @@ class CSGOGSI {
 		let isCTLeft = true;
 
 		const examplePlayerT = Object.values(raw.allplayers).find(
-			({ observer_slot, team }) => observer_slot !== undefined && team === 'T'
+			({ observer_slot, team }) => observer_slot && team === 'T'
 		);
 		const examplePlayerCT = Object.values(raw.allplayers).find(
-			({ observer_slot, team }) => observer_slot !== undefined && team === 'CT'
+			({ observer_slot, team }) => observer_slot && team === 'CT'
 		);
 
-		if (
-			examplePlayerCT &&
-			examplePlayerCT.observer_slot !== undefined &&
-			examplePlayerT &&
-			examplePlayerT.observer_slot !== undefined
-		) {
+		if (examplePlayerCT && examplePlayerCT.observer_slot && examplePlayerT && examplePlayerT.observer_slot) {
 			if ((examplePlayerCT.observer_slot || 10) > (examplePlayerT.observer_slot || 10)) {
 				isCTLeft = false;
 			}
@@ -319,7 +314,7 @@ class CSGOGSI {
 						phase: raw.round.phase,
 						bomb: raw.round.bomb,
 						win_team: raw.round.win_team
-				  }
+					}
 				: null,
 			player: observed,
 			players: players,
@@ -337,9 +332,9 @@ class CSGOGSI {
 								? CSGOGSI.findSite(
 										raw.map.name,
 										bomb.position.split(', ').map(n => parseFloat(n))
-								  )
+									)
 								: null
-				  }
+					}
 				: null,
 			grenades: parseGrenades(raw.grenades),
 			phase_countdowns: {
@@ -349,8 +344,8 @@ class CSGOGSI {
 					raw.phase_countdowns.phase === 'timeout_ct'
 						? teamCT
 						: raw.phase_countdowns.phase === 'timeout_t'
-						? teamT
-						: undefined
+							? teamT
+							: undefined
 			},
 			auth: raw.auth,
 			map: {
