@@ -423,7 +423,7 @@ class CSGOGSI {
 			) {
 				this.emit('bombPlantStop', last.bomb.player);
 			}
-			if (last.bomb.state === 'planting' && data.bomb.state === 'planted') {
+			if (last.bomb.state !== 'planted' && data.bomb.state === 'planted') {
 				this.emit('bombPlant', last.bomb.player);
 			} else if (last.bomb.state !== 'exploded' && data.bomb.state === 'exploded') {
 				this.emit('bombExplode');
