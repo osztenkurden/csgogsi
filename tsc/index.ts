@@ -370,8 +370,8 @@ class CSGOGSI {
 		}
 
 		if (!this.last) {
-			this.last = data;
 			this.emit('data', data);
+			this.last = data;
 			return data;
 		}
 		const last = this.last;
