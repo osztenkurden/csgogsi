@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.1.2](https://github.com/osztenkurden/csgogsi/compare/v5.1.1...v5.1.2) (2026-08-12)
+
+
+### Bug Fixes
+
+* data assignment ([285f8d1](https://github.com/osztenkurden/csgogsi/commit/285f8d1db14b24e29dc88fbec0f7a32c39265d37))
+
 ## [5.1.1](https://github.com/osztenkurden/csgogsi/compare/v5.1.0...v5.1.1) (2026-08-12)
 
 
