@@ -1,5 +1,13 @@
 # Changelog
 
+## [5.1.3](https://github.com/osztenkurden/csgogsi/compare/v5.1.2...v5.1.3) (2026-08-12)
+
+
+### Bug Fixes
+
+* bomb  plant evenet ([80ae58e](https://github.com/osztenkurden/csgogsi/commit/80ae58ec7747bc5d6180e8de5608819735eb521d))
+* edge case on fake defuse ([17e630e](https://github.com/osztenkurden/csgogsi/commit/17e630e226be34f155661dd7b84fdf2085bfa790))
+
 ## [5.1.2](https://github.com/osztenkurden/csgogsi/compare/v5.1.1...v5.1.2) (2026-08-12)
 
 
