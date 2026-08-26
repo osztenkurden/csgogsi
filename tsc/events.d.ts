@@ -8,6 +8,7 @@ export interface Events {
 	overtime: () => void;
 	kill: (kill: I.KillEvent) => void;
 	hurt: (kill: I.HurtEvent) => void;
+	phaseChange: (from: NonNullable<I.Phase['phase']>, to: NonNullable<I.Phase['phase']>) => void;
 	timeoutStart: (team: I.Team) => void;
 	timeoutEnd: () => void;
 	pauseStart: () => void;

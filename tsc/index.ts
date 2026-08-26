@@ -448,30 +448,36 @@ class CSGOGSI {
 		}
 
 		const { phase } = data.phase_countdowns;
+		const lastPhase = last.phase_countdowns.phase;
+
+		// Generic phase transition
+		if (phase && lastPhase && phase !== lastPhase) {
+			this.emit('phaseChange', lastPhase, phase);
+		}
 
 		// Freezetime (between round end & start)
-		if (phase === 'freezetime' && last.phase_countdowns.phase !== 'freezetime') {
+		if (phase === 'freezetime' && lastPhase !== 'freezetime') {
 			this.emit('freezetimeStart');
-		} else if (phase !== 'freezetime' && last.phase_countdowns.phase === 'freezetime') {
+		} else if (phase !== 'freezetime' && lastPhase === 'freezetime') {
 			this.emit('freezetimeEnd');
 		}
 
 		// Pauses
-		if (phase && last.phase_countdowns.phase) {
-			if (phase === 'paused' && last.phase_countdowns.phase !== 'paused') {
+		if (phase && lastPhase) {
+			if (phase === 'paused' && lastPhase !== 'paused') {
 				this.emit('pauseStart');
-			} else if (phase !== 'paused' && last.phase_countdowns.phase === 'paused') {
+			} else if (phase !== 'paused' && lastPhase === 'paused') {
 				this.emit('pauseEnd');
 			}
 		}
 
 		// Timeouts
-		if (phase && last.phase_countdowns.phase) {
-			if (phase.startsWith('timeout') && !last.phase_countdowns.phase.startsWith('timeout')) {
+		if (phase && lastPhase) {
+			if (phase.startsWith('timeout') && !lastPhase.startsWith('timeout')) {
 				const team = phase === 'timeout_ct' ? teamCT : teamT;
 
 				this.emit('timeoutStart', team);
-			} else if (last.phase_countdowns.phase.startsWith('timeout') && !phase.startsWith('timeout')) {
+			} else if (lastPhase.startsWith('timeout') && !phase.startsWith('timeout')) {
 				this.emit('timeoutEnd');
 			}
 		}

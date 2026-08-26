@@ -692,6 +692,33 @@ test('event > freezetime: end', () => {
 	assert.equal(callback.mock.calls.length, 1);
 });
 
+test('event > phase: change emits previous and current phase names', () => {
+	const { GSI, callback } = createGSIAndCallback('phaseChange');
+
+	GSI.digest(createGSIPacket());
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'paused' } }));
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'paused' } }));
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'bomb' } }));
+
+	assert.deepEqual(
+		callback.mock.calls.map(call => call.arguments),
+		[
+			['live', 'paused'],
+			['paused', 'bomb']
+		]
+	);
+});
+
+test('event > phase: does not infer transitions when phase is missing', () => {
+	const { GSI, callback } = createGSIAndCallback('phaseChange');
+
+	GSI.digest(createGSIPacket());
+	GSI.digest({ ...createGSIPacket(), phase_countdowns: { phase_ends_in: '120' } });
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'paused' } }));
+
+	assert.equal(callback.mock.calls.length, 0);
+});
+
 test('event > pause: start', () => {
 	const { GSI, callback } = createGSIAndCallback('pauseStart');
 
