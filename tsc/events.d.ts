@@ -10,6 +10,8 @@ export interface Events {
 	hurt: (kill: I.HurtEvent) => void;
 	timeoutStart: (team: I.Team) => void;
 	timeoutEnd: () => void;
+	pauseStart: () => void;
+	pauseEnd: () => void;
 	/*roundStart: (round: number) => void, */
 	warmupStart: () => void;
 	warmupEnd: () => void;

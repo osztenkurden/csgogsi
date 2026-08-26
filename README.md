@@ -82,6 +82,8 @@ GSI.regulationMR = 15;
 | Hurt                                              | `hurt`              | (hurt: HurtEvent) => {}   |
 | Timeout start                                     | `timeoutStart`      | (team: Team) => {}        |
 | Timeout end                                       | `timeoutEnd`        | () => {}                  |
+| Pause start                                       | `pauseStart`        | () => {}                  |
+| Pause end                                         | `pauseEnd`          | () => {}                  |
 | MVP of the round                                  | `mvp`               | (player: Player) => {}    |
 | Warmup start                                      | `warmupStart`       | () => {}                  |
 | Warmup end                                        | `warmupEnd`         | () => {}                  |
@@ -100,6 +102,7 @@ GSI.regulationMR = 15;
 
 -   `overtime` is emitted together with `roundEnd`, on the round that ties the score at `regulationMR` (12:12 by default) without ending the map. It is not emitted when the map ends at that score instead - which is what happens when overtime is disabled on the server and the map ends in a draw.
 -   `warmupStart` and `warmupEnd` follow `map.phase`. `warmupStart` is also emitted for the very first packet you feed in if the game is already in warmup at that point, while `warmupEnd` needs a previous packet to compare against, so it is never emitted for the first one.
+-   `pauseStart` and `pauseEnd` follow the `paused` value of `phase_countdowns.phase`. They are transition events, so a previous packet with a known phase is required.
 
 ## Objects
 

@@ -456,6 +456,15 @@ class CSGOGSI {
 			this.emit('freezetimeEnd');
 		}
 
+		// Pauses
+		if (phase && last.phase_countdowns.phase) {
+			if (phase === 'paused' && last.phase_countdowns.phase !== 'paused') {
+				this.emit('pauseStart');
+			} else if (phase !== 'paused' && last.phase_countdowns.phase === 'paused') {
+				this.emit('pauseEnd');
+			}
+		}
+
 		// Timeouts
 		if (phase && last.phase_countdowns.phase) {
 			if (phase.startsWith('timeout') && !last.phase_countdowns.phase.startsWith('timeout')) {

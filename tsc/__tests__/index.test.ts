@@ -692,6 +692,60 @@ test('event > freezetime: end', () => {
 	assert.equal(callback.mock.calls.length, 1);
 });
 
+test('event > pause: start', () => {
+	const { GSI, callback } = createGSIAndCallback('pauseStart');
+
+	GSI.digest(createGSIPacket());
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'paused' } }));
+
+	assert.equal(callback.mock.calls.length, 1);
+});
+
+test('event > pause: start only once per pause', () => {
+	const { GSI, callback } = createGSIAndCallback('pauseStart');
+
+	GSI.digest(createGSIPacket());
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'paused' } }));
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'paused' } }));
+
+	assert.equal(callback.mock.calls.length, 1);
+});
+
+test('event > pause: end', () => {
+	const { GSI, callback } = createGSIAndCallback('pauseEnd');
+
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'paused' } }));
+	GSI.digest(createGSIPacket());
+
+	assert.equal(callback.mock.calls.length, 1);
+});
+
+test('event > pause: end only once per pause', () => {
+	const { GSI, callback } = createGSIAndCallback('pauseEnd');
+
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'paused' } }));
+	GSI.digest(createGSIPacket());
+	GSI.digest(createGSIPacket());
+
+	assert.equal(callback.mock.calls.length, 1);
+});
+
+test('event > pause: does not infer transitions when phase is missing', () => {
+	const start = mock.fn(() => {});
+	const end = mock.fn(() => {});
+	const GSI = new CSGOGSI();
+
+	GSI.on('pauseStart', start);
+	GSI.on('pauseEnd', end);
+
+	GSI.digest({ ...createGSIPacket(), phase_countdowns: { phase_ends_in: '120' } });
+	GSI.digest(createGSIPacket({ phase_countdowns: { phase: 'paused' } }));
+	GSI.digest({ ...createGSIPacket(), phase_countdowns: { phase_ends_in: '120' } });
+
+	assert.equal(start.mock.calls.length, 0);
+	assert.equal(end.mock.calls.length, 0);
+});
+
 test('event > timeout: start (CT)', () => {
 	const { GSI, callback } = createGSIAndCallback('timeoutStart');
 
