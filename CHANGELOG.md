@@ -1,5 +1,12 @@
 # Changelog
 
+## [5.3.0](https://github.com/osztenkurden/csgogsi/compare/v5.2.0...v5.3.0) (2026-08-26)
+
+
+### Features
+
+* add generic phase change event ([4771fa6](https://github.com/osztenkurden/csgogsi/commit/4771fa66b45144b8d181c6dc5ec4b76187f06af0))
+
 ## [5.2.0](https://github.com/osztenkurden/csgogsi/compare/v5.1.3...v5.2.0) (2026-08-26)
 
 
