@@ -3,6 +3,8 @@ import * as I from './interfaces';
 export interface Events {
 	raw: (data: I.CSGORaw) => void;
 	data: (data: I.CSGO) => void;
+	roundStart: () => void;
+	observerTargetChange: (from: I.Player | null, to: I.Player | null) => void;
 	roundEnd: (team: I.Score) => void;
 	matchEnd: (score: I.Score) => void;
 	overtime: () => void;
@@ -13,7 +15,6 @@ export interface Events {
 	timeoutEnd: () => void;
 	pauseStart: () => void;
 	pauseEnd: () => void;
-	/*roundStart: (round: number) => void, */
 	warmupStart: () => void;
 	warmupEnd: () => void;
 	mvp: (player: I.Player) => void;
@@ -21,13 +22,13 @@ export interface Events {
 	freezetimeEnd: () => void;
 	intermissionStart: () => void;
 	intermissionEnd: () => void;
-	defuseStart: (player: I.Player) => void;
-	defuseStop: (player: I.Player) => void;
-	bombPlantStart: (player: I.Player) => void;
-	bombPlantStop: (player: I.Player) => void;
-	bombPlant: (player: I.Player) => void;
+	defuseStart: (player: I.Player | undefined) => void;
+	defuseStop: (player: I.Player | undefined) => void;
+	bombPlantStart: (player: I.Player | undefined) => void;
+	bombPlantStop: (player: I.Player | undefined) => void;
+	bombPlant: (player: I.Player | undefined) => void;
 	bombExplode: () => void;
-	bombDefuse: (player: I.Player) => void;
+	bombDefuse: (player: I.Player | undefined) => void;
 	newListener: <K extends keyof Events>(eventName: K, listener: Events[K]) => void;
 	removeListener: <K extends keyof Events>(eventName: K, listener: Events[K]) => void;
 }

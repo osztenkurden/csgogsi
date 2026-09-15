@@ -12,7 +12,8 @@
 	},
 	"types": "./dist/index.d.mts",
 	"files": [
-		"dist"
+		"dist",
+		"ACKNOWLEDGEMENTS"
 	],
 	"devDependencies": {
 		"@types/bun": "^1.4.2",

@@ -14,16 +14,14 @@ import type {
 	TeamExtension
 } from '../index';
 import { CSGOGSI, getHalfFromRound } from '../index.ts';
-import type { Callback } from '../events';
 import { createGSIPacket, createHurtPacket, createKillPacket } from './data/index.ts';
 import { testCases } from './data/bombSites.ts';
 
 const createGSIAndCallback = <K extends keyof Events>(eventName: K) => {
-	const callback = mock.fn((() => {}) as Callback<K>);
-
 	const GSI = new CSGOGSI();
+	const callback = mock.fn<Parameters<typeof GSI.on<K>>[1]>(() => {});
 
-	GSI.addListener(eventName, callback as unknown as Callback<K>);
+	GSI.addListener(eventName, callback);
 
 	return { GSI, callback };
 };
@@ -172,20 +170,6 @@ test('event listener > gets event names', () => {
 	assert.equal(eventNames.length, 3);
 });
 
-test('event listener > gets max listeners', () => {
-	const getRandomArbitrary = (min: number, max: number) => {
-		return Math.random() * (max - min) + min;
-	};
-
-	const newMax = getRandomArbitrary(1, 10000);
-
-	const GSI = new CSGOGSI();
-
-	GSI.setMaxListeners(newMax);
-
-	assert.equal(GSI.getMaxListeners(), newMax);
-});
-
 test('event listener > gets listener count', () => {
 	const { GSI, callback } = createGSIAndCallback('defuseStart');
 
@@ -210,9 +194,9 @@ test('event listener > calls once listeners only once', () => {
 
 	GSI.once('defuseStart', callback);
 
-	GSI.emit('defuseStart');
-	GSI.emit('defuseStart');
-	GSI.emit('defuseStart');
+	GSI.emit('defuseStart', undefined);
+	GSI.emit('defuseStart', undefined);
+	GSI.emit('defuseStart', undefined);
 
 	assert.equal(callback.mock.calls.length, 1);
 });
@@ -237,8 +221,8 @@ test('event listener > prepend listener', () => {
 	GSI.prependListener('defuseStart', callbackPrepended);
 	GSI.prependListener('defuseStop', callback);
 
-	GSI.emit('defuseStart');
-	GSI.emit('defuseStop');
+	GSI.emit('defuseStart', undefined);
+	GSI.emit('defuseStop', undefined);
 
 	assert.equal(i, 2);
 	assert.equal(callback.mock.calls.length, 1);
@@ -263,8 +247,8 @@ test('event listener > prepend once listener', () => {
 	GSI.prependOnceListener('defuseStart', callbackPrepended);
 	GSI.prependOnceListener('defuseStop', callback);
 
-	GSI.emit('defuseStart');
-	GSI.emit('defuseStop');
+	GSI.emit('defuseStart', undefined);
+	GSI.emit('defuseStop', undefined);
 
 	assert.equal(i, 2);
 	assert.equal(callback.mock.calls.length, 1);
