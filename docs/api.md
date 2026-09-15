@@ -61,7 +61,7 @@ A `BombsiteResolver` accepts a read-only position array and returns `'A' | 'B' |
 
 ### Listener methods
 
-The class inherits a typed emitter. Listener calls are synchronous and regular functions receive the parser as `this`.
+The class inherits a typed emitter. Listener calls are synchronous. Ordinary function callbacks receive their internal listener descriptor as `this`; use a closure or an explicitly bound callback to access the parser.
 
 | Method                                                   | Returns          | Purpose                                                                |
 | :------------------------------------------------------- | :--------------- | :--------------------------------------------------------------------- |
@@ -71,12 +71,14 @@ The class inherits a typed emitter. Listener calls are synchronous and regular f
 | `prependOnceListener(name, callback)`                    | `this`           | Place a once listener first                                            |
 | `off(name, callback)` / `removeListener(name, callback)` | `this`           | Remove one matching registration, searching from the end               |
 | `removeAllListeners(name?)`                              | `this`           | Clear one event, or all events when omitted                            |
-| `emit(name, ...args)`                                    | `boolean`        | Dispatch the event's typed arguments; report whether listeners existed |
+| `emit(name, ...args)`                               | `boolean`        | Dispatch typed payload arguments; report whether listeners existed |
 | `eventNames()`                                           | Event-name array | Names with listeners                                                   |
 | `listeners(name)` / `rawListeners(name)`                 | Callback array   | Registered functions, including unwrapped once callbacks               |
 | `listenerCount(name)`                                    | `number`         | Number of registrations                                                |
 
 All registration methods emit `newListener` before adding a listener. Actual removals emit `removeListener`, including once consumption and bulk removal. Removing a nonexistent listener emits nothing. Listeners added during a dispatch wait until a later dispatch; removals leave the current dispatch's captured list intact.
+
+`emit` forwards all supplied payload arguments and preserves their count when invoking callbacks. Arrow and explicitly bound callbacks retain their own `this`. Once registrations run at most once even when a callback emits recursively. Bulk removal keeps `removeListener` observers until the other events have been processed.
 
 **Migration from 5.3.0:** `off` removes one duplicate registration per call; `rawListeners` returns callbacks instead of internal descriptors; meta-events cover all registration/removal paths. All instance methods, including `digest`, are prototype methods: bind them when passing them as detached callbacks (for example, `gsi.digest.bind(gsi)`). Max-listener accessors have been removed.
 

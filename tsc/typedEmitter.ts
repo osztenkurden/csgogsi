@@ -3,11 +3,12 @@
  * Copyright (c) 2014 Arnout Kazemier, MIT License; see ACKNOWLEDGEMENTS.
  *
  * The storage layout and `emit` dispatch follow eventemitter3 closely: a bare
- * record or an array per event, a null-prototype table with a live count, fixed
- * positional parameters instead of rest arguments, and copy-on-remove so `emit`
+ * record or an array per event, a null-prototype table with a live count,
+ * and copy-on-remove so `emit`
  * never clones the listener array. Deliberate differences for Node compatibility:
  * `newListener`/`removeListener` meta-events (also when a `once` listener fires),
  * prepend variants, and removal of only the most recently added duplicate.
+ * Dispatch uses rest/spread and direct calls with the listener record as receiver.
  * Dropped: listener contexts, the legacy `~` key prefix, and max-listener warnings.
  */
 
@@ -26,6 +27,7 @@ export type EmitterMetaEvents = {
 class EE {
 	readonly fn: Listener;
 	readonly once: boolean;
+	fired = false;
 
 	constructor(fn: Listener, once: boolean) {
 		this.fn = fn;
@@ -97,83 +99,31 @@ export class TypedEventEmitter<T extends EventMap<T>> {
 		return (listeners as EE[]).length;
 	}
 
-	/**
-	 * Calls each listener registered for `event`; returns whether any existed.
-	 * Positional parameters and `arguments.length` follow eventemitter3; the trailing
-	 * rest parameter only exists so the typed overloads are assignable (engines elide it).
-	 */
+	/** Dispatches typed payload arguments with the listener record as the receiver. */
 	emit<K extends keyof T>(event: K, ...args: T[K]): boolean;
 	emit<K extends keyof EmitterMetaEvents>(event: K, ...args: EmitterMetaEvents[K]): boolean;
-	emit(
-		event: PropertyKey,
-		a1?: unknown,
-		a2?: unknown,
-		a3?: unknown,
-		a4?: unknown,
-		a5?: unknown,
-		..._rest: unknown[]
-	): boolean {
+	emit(event: PropertyKey, ...args: unknown[]): boolean {
 		const stored = this._events[event];
 		if (!stored) return false;
-
-		const len = arguments.length;
-		let args: unknown[] | undefined;
-
 		if ((stored as EE).fn) {
 			const listener = stored as EE;
-			if (listener.once) this._removeListener(event, listener.fn, true);
-
-			switch (len) {
-				case 1:
-					return (listener.fn.call(this), true);
-				case 2:
-					return (listener.fn.call(this, a1), true);
-				case 3:
-					return (listener.fn.call(this, a1, a2), true);
-				case 4:
-					return (listener.fn.call(this, a1, a2, a3), true);
-				case 5:
-					return (listener.fn.call(this, a1, a2, a3, a4), true);
-				case 6:
-					return (listener.fn.call(this, a1, a2, a3, a4, a5), true);
-			}
-
-			args = new Array(len - 1);
-			for (let i = 1; i < len; i++) args[i - 1] = arguments[i];
-			listener.fn.apply(this, args);
+			if (!listener.once || this._consumeOnce(event, listener)) listener.fn(...args);
 		} else {
-			// Removal replaces the array rather than mutating it, so iterating the
-			// captured reference stays correct while listeners remove themselves.
+			// Capture the initial length; removal replaces the array.
 			const listeners = stored as EE[];
-			const length = listeners.length;
-
-			for (let i = 0; i < length; i++) {
+			for (let i = 0, length = listeners.length; i < length; i++) {
 				const listener = listeners[i]!;
-				if (listener.once) this._removeListener(event, listener.fn, true);
-
-				switch (len) {
-					case 1:
-						listener.fn.call(this);
-						break;
-					case 2:
-						listener.fn.call(this, a1);
-						break;
-					case 3:
-						listener.fn.call(this, a1, a2);
-						break;
-					case 4:
-						listener.fn.call(this, a1, a2, a3);
-						break;
-					default:
-						if (!args) {
-							args = new Array(len - 1);
-							for (let j = 1; j < len; j++) args[j - 1] = arguments[j];
-						}
-						listener.fn.apply(this, args);
-				}
+				if (!listener.once || this._consumeOnce(event, listener)) listener.fn(...args);
 			}
 		}
+		return true;
+	}
 
+	private _consumeOnce(event: PropertyKey, listener: EE): boolean {
+		if (listener.fired) return false;
+		// Mark before removal: removeListener observers may emit recursively too.
+		listener.fired = true;
+		this._removeListener(event, listener.fn, listener);
 		return true;
 	}
 
@@ -199,10 +149,10 @@ export class TypedEventEmitter<T extends EventMap<T>> {
 
 	/**
 	 * Remove the most recently added listener matching `fn` (Node semantics;
-	 * eventemitter3 removes every match). `once` restricts matches to one-time
-	 * listeners, as when `emit` consumes one.
+	 * eventemitter3 removes every match). An internal target removes the exact
+	 * registration consumed by `emit`, including duplicate functions.
 	 */
-	private _removeListener(event: PropertyKey, fn: Listener, once: boolean): void {
+	private _removeListener(event: PropertyKey, fn: Listener, target?: EE): void {
 		// Node throws here too; eventemitter3 instead clears the event. Use removeAllListeners for that.
 		if (typeof fn !== 'function') throw new TypeError('The listener must be a function');
 		const stored = this._events[event];
@@ -211,7 +161,7 @@ export class TypedEventEmitter<T extends EventMap<T>> {
 		let removed: EE | undefined;
 		if ((stored as EE).fn) {
 			const listener = stored as EE;
-			if (listener.fn === fn && (!once || listener.once)) {
+			if (listener.fn === fn && (!target || listener === target)) {
 				this._clearEvent(event);
 				removed = listener;
 			}
@@ -219,7 +169,7 @@ export class TypedEventEmitter<T extends EventMap<T>> {
 			const listeners = stored as EE[];
 			for (let i = listeners.length - 1; i >= 0; i--) {
 				const listener = listeners[i]!;
-				if (listener.fn !== fn || (once && !listener.once)) continue;
+				if (listener.fn !== fn || (target && listener !== target)) continue;
 				// Rebuild rather than splice, so an in-flight `emit` keeps its array intact.
 				const events = listeners.slice(0, i).concat(listeners.slice(i + 1));
 				this._events[event] = events.length === 1 ? events[0] : events;
@@ -234,12 +184,12 @@ export class TypedEventEmitter<T extends EventMap<T>> {
 	}
 
 	removeListener<K extends keyof T>(event: K, fn: (...args: T[K]) => void): this {
-		this._removeListener(event, fn, false);
+		this._removeListener(event, fn);
 		return this;
 	}
 
 	off<K extends keyof T>(event: K, fn: (...args: T[K]) => void): this {
-		this._removeListener(event, fn, false);
+		this._removeListener(event, fn);
 		return this;
 	}
 
@@ -255,15 +205,20 @@ export class TypedEventEmitter<T extends EventMap<T>> {
 			return this;
 		}
 
-		const names: PropertyKey[] = event === undefined ? this.eventNames() : [event];
-		for (const name of names) {
-			const stored = this._events[name];
-			if (!stored) continue;
-			this._clearEvent(name);
-			const listeners = (stored as EE).fn ? [stored as EE] : (stored as EE[]);
-			for (let i = listeners.length - 1; i >= 0; i--) {
-				this.emit('removeListener', name as EventName, listeners[i]!.fn);
+		if (event === undefined) {
+			for (const name of this.eventNames()) {
+				if (name !== 'removeListener') this.removeAllListeners(name);
 			}
+			// Keep observers until every other event has been processed.
+			this.removeAllListeners('removeListener' as keyof T);
+			return this;
+		}
+		const stored = this._events[event];
+		if (!stored) return this;
+		const listeners = (stored as EE).fn ? [stored as EE] : (stored as EE[]);
+		for (let i = listeners.length - 1; i >= 0; i--) {
+			const listener = listeners[i]!;
+			this._removeListener(event, listener.fn, listener);
 		}
 		return this;
 	}
