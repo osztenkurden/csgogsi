@@ -1,5 +1,12 @@
 # Changelog
 
+## [6.0.1](https://github.com/osztenkurden/csgogsi/compare/v6.0.0...v6.0.1) (2026-09-17)
+
+
+### Bug Fixes
+
+* desc ([1c45549](https://github.com/osztenkurden/csgogsi/commit/1c45549bbc8b449e4ea6f0b3fa8d5a1042bb320d))
+
 ## [6.0.0](https://github.com/osztenkurden/csgogsi/compare/v5.3.0...v6.0.0) (2026-09-17)
 
 
