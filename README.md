@@ -93,11 +93,11 @@ See the [integration guide](docs/integration.md) for data requirements, authenti
 ## Work with parsed data
 
 ```typescript
-import { CSGOGSI, type CSGORaw } from 'csgogsi';
+import { CSGOGSI, type GameStateRaw } from 'csgogsi';
 
 const gsi = new CSGOGSI();
 
-function receive(raw: CSGORaw) {
+function receive(raw: GameStateRaw) {
 	const data = gsi.digest(raw);
 	if (!data) return;
 

@@ -27,7 +27,7 @@ The parser targets full spectator snapshots. All-player information is available
 | `player_id`, `player_position`                                | Observed player and observer coordinates                            |
 | `bomb`, `allgrenades`                                         | Optional bomb and grenade parsing                                   |
 
-Missing `allplayers`, `map`, or `phase_countdowns` causes `digest()` to return `null`. Passing those three checks does not guarantee the packet is valid: nested weapons and coordinate fields are assumed to exist. A TypeScript `CSGORaw` annotation is not a runtime validator.
+Missing `allplayers`, `map`, or `phase_countdowns` causes `digest()` to return `null`. Passing those three checks does not guarantee the packet is valid: nested weapons and coordinate fields are assumed to exist. A TypeScript `GameStateRaw` annotation is not a runtime validator.
 
 ## Receiver behavior
 

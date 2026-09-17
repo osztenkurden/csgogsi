@@ -121,7 +121,7 @@ export interface BombRaw {
 	player?: string;
 	position: string;
 }
-export interface PhaseRaw {
+export interface PhaseCountdownRaw {
 	phase?: 'freezetime' | 'bomb' | 'warmup' | 'live' | 'over' | 'defuse' | 'paused' | 'timeout_ct' | 'timeout_t';
 	phase_ends_in: string;
 }
@@ -138,7 +138,7 @@ export interface DecoySmokeGrenadeRaw extends GrenadeBaseRaw {
 	effecttime: string;
 }
 
-export interface FragOrFireBombOrFlashbandGrenadeRaw extends GrenadeBaseRaw {
+export interface FragOrFireBombOrFlashbangGrenadeRaw extends GrenadeBaseRaw {
 	position: string;
 	type: 'frag' | 'firebomb' | 'flashbang';
 	velocity: string;
@@ -149,9 +149,9 @@ export interface InfernoGrenadeRaw extends GrenadeBaseRaw {
 	flames: { [key: string]: string };
 }
 
-export type GrenadeRaw = DecoySmokeGrenadeRaw | FragOrFireBombOrFlashbandGrenadeRaw | InfernoGrenadeRaw;
+export type GrenadeRaw = DecoySmokeGrenadeRaw | FragOrFireBombOrFlashbangGrenadeRaw | InfernoGrenadeRaw;
 
-export interface CSGORaw {
+export interface GameStateRaw {
 	provider: Provider;
 	map?: MapRaw;
 	round?: RoundRaw;
@@ -170,8 +170,17 @@ export interface CSGORaw {
         }*/
 	};
 	previously?: any;
-	phase_countdowns?: PhaseRaw;
+	phase_countdowns?: PhaseCountdownRaw;
 	auth?: {
 		token: string;
 	};
 }
+
+/** @deprecated Use GameStateRaw instead. */
+export type CSGORaw = GameStateRaw;
+
+/** @deprecated Use PhaseCountdownRaw instead. */
+export type PhaseRaw = PhaseCountdownRaw;
+
+/** @deprecated Use FragOrFireBombOrFlashbangGrenadeRaw instead. */
+export type FragOrFireBombOrFlashbandGrenadeRaw = FragOrFireBombOrFlashbangGrenadeRaw;

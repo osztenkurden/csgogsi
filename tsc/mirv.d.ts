@@ -1,4 +1,4 @@
-export interface RawKill {
+export interface KillEventRaw {
 	name: 'player_death';
 	clientTime: number;
 	keys: {
@@ -32,7 +32,7 @@ export interface RawKill {
 	};
 }
 
-export interface RawHurt {
+export interface HurtEventRaw {
 	name: 'player_hurt';
 	clientTime: number;
 	keys: {
@@ -52,3 +52,9 @@ export interface RawHurt {
 		hitgroup: number;
 	};
 }
+
+/** @deprecated Use KillEventRaw instead. */
+export type RawKill = KillEventRaw;
+
+/** @deprecated Use HurtEventRaw instead. */
+export type RawHurt = HurtEventRaw;

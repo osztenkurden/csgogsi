@@ -18,7 +18,7 @@ This reference describes the current source, including changes since 5.3.0. Full
 
 Creates an independent parser. Optional `bombsiteResolvers` supplies per-map overrides; calling the constructor without arguments retains all defaults. Register listeners and set match rules or metadata before feeding data.
 
-### `digest(raw: CSGORaw): CSGO | null`
+### `digest(raw: GameStateRaw): GameState | null`
 
 Parses a snapshot, updates instance state, synchronously emits inferred events, and returns the parsed snapshot.
 
@@ -104,14 +104,15 @@ Names are case-sensitive. These tables describe runtime payloads; bomb-player ar
 
 | Event      | Callback arguments | Trigger                                                                      |
 | :--------- | :----------------- | :--------------------------------------------------------------------------- |
-| `raw`      | `raw: CSGORaw`     | Payload passes the three-section check                                       |
-| `data`     | `data: CSGO`       | Snapshot parsed and gameplay events dispatched                               |
-| `roundEnd` | `score: Score`     | `round.win_team` appears after a round without it                            |
-| `matchEnd` | `score: Score`     | Detected round end also enters `map.phase = 'gameover'`                      |
+| `raw`      | `raw: GameStateRaw`     | Payload passes the three-section check                                       |
+| `data`     | `data: GameState`       | Snapshot parsed and gameplay events dispatched                               |
+| `roundEnd` | `event: RoundEndEvent`     | `round.win_team` appears after a round without it                            |
+| `mapEnd` | `event: RoundEndEvent`     | Detected round end also enters `map.phase = 'gameover'`                      |
+| `matchEnd` (deprecated) | `event: RoundEndEvent` | Same trigger and payload object as `mapEnd` |
 | `overtime` | None               | Detected round end ties both teams at `regulationMR`, without ending the map |
 | `mvp`      | `player: Player`   | First player found whose MVP count increased                                 |
 
-`roundEnd` increments the winner's parsed score when the raw score has not yet increased. This affects the returned map and later `data` callback. `matchEnd` denotes a map ending, not an entire best-of series.
+`roundEnd` increments the winner's parsed score when the raw score has not yet increased. This affects the returned map and later `data` callback. `mapEnd` denotes a map ending, not an entire best-of series. The deprecated `matchEnd` event fires first with the same payload object for compatibility. Subscribe to one name to avoid handling the same map end twice.
 
 `overtime` reports entry at the regulation tie, not every subsequent overtime. It is suppressed for a map ending in a draw at that score.
 
@@ -130,7 +131,7 @@ Neither event fires on the first accepted packet or across different normalized 
 
 | Event                                   | Callback arguments                                         | Trigger                                                         |
 | :-------------------------------------- | :--------------------------------------------------------- | :-------------------------------------------------------------- |
-| `phaseChange`                           | `from, to: NonNullable<CSGO['phase_countdowns']['phase']>` | Countdown phase changes between two known values                |
+| `phaseChange`                           | `from, to: NonNullable<GameState['phase_countdowns']['phase']>` | Countdown phase changes between two known values                |
 | `warmupStart` / `warmupEnd`             | None                                                       | Enter/leave map phase `warmup`                                  |
 | `intermissionStart` / `intermissionEnd` | None                                                       | Enter/leave map phase `intermission`                            |
 | `freezetimeStart` / `freezetimeEnd`     | None                                                       | Enter/leave countdown phase `freezetime`                        |
@@ -160,19 +161,19 @@ Except for the explosion case, both snapshots must contain a bomb. Skipped inter
 
 ## Parsed objects
 
-### `CSGO` — the snapshot
+### `GameState` — the snapshot
 
 | Field              | Type                         | Notes                                                  |
 | :----------------- | :--------------------------- | :----------------------------------------------------- |
 | `provider`         | `Provider`                   | Original object; Steam ID is a string                  |
-| `map`              | `Map`                        | Teams, scores, and reconstructed history               |
-| `round`            | `Round \| null`              | Current round, when available                          |
+| `map`              | `MapState`                        | Teams, scores, and reconstructed history               |
+| `round`            | `RoundState \| null`              | Current round, when available                          |
 | `player`           | `Player \| null`             | Observed player matched against `allplayers`           |
 | `players`          | `Player[]`                   | Parsed `allplayers` entries                            |
 | `observer`         | `Observer`                   | Optional activity, spectarget, position, and forward   |
 | `bomb`             | `Bomb \| null`               | Bomb, when available                                   |
 | `grenades`         | `Grenade[]`                  | Empty if no grenade section exists                     |
-| `phase_countdowns` | `CSGO['phase_countdowns']`   | Optional phase, numeric seconds, optional timeout team |
+| `phase_countdowns` | `GameState['phase_countdowns']`   | Optional phase, numeric seconds, optional timeout team |
 | `auth`             | Optional `{ token: string }` | Copied through; not validated                          |
 
 `previously` exists in the declaration but is not populated by `digest()`. `Provider.name` is declared as the legacy literal `'Counter-Strike: Global Offensive'`; the parser copies the provider without runtime name validation. Other provider fields are `appid: 730`, numeric `version` and `timestamp`, and `steamid: string`.
@@ -204,13 +205,13 @@ ADR is floored average damage from observed earlier rounds, divided by `raw.map.
 
 Left/right is inferred by comparing one nonzero observer slot from each side. CT defaults to left if that comparison cannot be made. Extensions attach to orientation, not a fixed side or stable roster identity.
 
-`Map` contains `mode`, `name`, `phase` (`warmup`, `live`, `intermission`, `gameover`), `round`, `team_ct`, `team_t`, numeric `num_matches_to_win_series`, `current_spectators`, `souvenirs_total`, raw `round_wins`, and parsed `rounds: RoundInfo[]`.
+`MapState` contains `mode`, `name`, `phase` (`warmup`, `live`, `intermission`, `gameover`), `round`, `team_ct`, `team_t`, numeric `num_matches_to_win_series`, `current_spectators`, `souvenirs_total`, raw `round_wins`, and parsed `rounds: RoundResult[]`.
 
-Each `RoundInfo` has a one-based `round`, winning `side` at the time, `outcome`, and `team` resolved to a current team object using half lengths. Missing outcomes are skipped rather than reconstructed from scores. Outcomes are `ct_win_elimination`, `t_win_elimination`, `ct_win_time`, `ct_win_defuse`, or `t_win_bomb`.
+Each `RoundResult` has a one-based `round`, winning `side` at the time, `outcome`, and `team` resolved to a current team object using half lengths. Missing outcomes are skipped rather than reconstructed from scores. Outcomes are `ct_win_elimination`, `t_win_elimination`, `ct_win_time`, `ct_win_defuse`, or `t_win_bomb`.
 
-`Round` has `phase: 'freezetime' | 'live' | 'over'`, optional `bomb: 'planted' | 'exploded' | 'defused'`, and optional `win_team: 'CT' | 'T'`.
+`RoundState` has `phase: 'freezetime' | 'live' | 'over'`, optional `bomb: 'planted' | 'exploded' | 'defused'`, and optional `win_team: 'CT' | 'T'`.
 
-`Score` contains `winner: Team`, `loser: Team`, `map: Map`, and `mapEnd: boolean`.
+`RoundEndEvent` contains `winner: Team`, `loser: Team`, `map: MapState`, and `mapEnd: boolean`.
 
 ### Bomb, observer, and countdowns
 
@@ -237,4 +238,24 @@ All variants have `id`, `owner: string`, and numeric `lifetime`. The owner remai
 | `getHalfFromRound(round, regulationMR, mr)`                               | Returns `1` or `2` within regulation or the current overtime block |
 | `didTeamWinThatRound(team, round, wonBy, currentRound, regulationMR, mr)` | Resolves historical ownership from sides and half numbers          |
 
-`RoundDamage`, `Phase`, `Bombsite`, `BombsiteResolver`, `CSGOGSIOptions`, and the domain types listed in the [root exports](../tsc/index.ts) are available as types. `normalizeMapName(mapName)` is also exported as a runtime helper. `Callback` and `EventNames` remain internal declaration helpers. `parseGrenades` and `getRoundWin` are internal utilities, not root exports.
+`RoundDamage`, `PhaseCountdown`, `Bombsite`, `BombsiteResolver`, `CSGOGSIOptions`, and the domain types listed in the [root exports](../tsc/index.ts) are available as types. `normalizeMapName(mapName)` is also exported as a runtime helper. `Callback` and `EventNames` remain internal declaration helpers. `parseGrenades` and `getRoundWin` are internal utilities, not root exports.
+
+### Deprecated type names
+
+The older names remain available as deprecated aliases with the same payload shapes. They will be removed in the next major version. New code should use:
+
+| Deprecated name | Replacement |
+| :--- | :--- |
+| `Score` | `RoundEndEvent` |
+| `CSGO` | `GameState` |
+| `CSGORaw` | `GameStateRaw` |
+| `Phase` | `PhaseCountdown` |
+| `PhaseRaw` | `PhaseCountdownRaw` |
+| `Map` | `MapState` |
+| `Round` | `RoundState` |
+| `RoundInfo` | `RoundResult` |
+| `RawKill` | `KillEventRaw` |
+| `RawHurt` | `HurtEventRaw` |
+| `DigestMirvType` | `MirvDigestResult` |
+| `FragOrFireBombOrFlashbandGrenade` | `FragOrFireBombOrFlashbangGrenade` |
+| `FragOrFireBombOrFlashbandGrenadeRaw` | `FragOrFireBombOrFlashbangGrenadeRaw` |

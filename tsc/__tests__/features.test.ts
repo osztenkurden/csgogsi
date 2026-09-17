@@ -1,8 +1,37 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { CSGOGSI, normalizeMapName, parseTeam } from '../index.ts';
-import type { CSGORaw, Phase, Player, PlayerExtension, TeamExtension } from '../index';
+import type { CSGORaw, Phase, Player, PlayerExtension, TeamExtension, RoundEndEvent } from '../index';
 import { createGSIPacket } from './data/index.ts';
+
+test('mapEnd > shares the legacy matchEnd payload and fires once per detected map end', () => {
+	for (const winner of ['CT', 'T'] as const) {
+		const gsi = new CSGOGSI();
+		const legacy: RoundEndEvent[] = [];
+		const current: RoundEndEvent[] = [];
+		gsi.on('matchEnd', event => legacy.push(event));
+		gsi.on('mapEnd', event => current.push(event));
+
+		gsi.digest(createGSIPacket());
+		gsi.digest(createGSIPacket({ round: { phase: 'over', win_team: winner } }));
+		assert.equal(legacy.length, 0);
+		assert.equal(current.length, 0);
+
+		gsi.digest(createGSIPacket());
+		const finalPacket = createGSIPacket({
+			map: { phase: 'gameover' },
+			round: { phase: 'over', win_team: winner }
+		});
+		gsi.digest(finalPacket);
+		gsi.digest(finalPacket);
+
+		assert.equal(legacy.length, 1);
+		assert.equal(current.length, 1);
+		assert.strictEqual(current[0], legacy[0]);
+		assert.equal(current[0]!.winner.side, winner);
+		assert.equal(current[0]!.mapEnd, true);
+	}
+});
 
 test('emitter > multiple once listeners are each removed after one call', () => {
 	const gsi = new CSGOGSI();

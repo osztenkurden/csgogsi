@@ -8,7 +8,7 @@ import type {
 	Orientation,
 	TeamExtension,
 	TeamRaw,
-	RoundInfo,
+	RoundResult,
 	RoundWins
 } from '.';
 import type { GrenadeRaw } from './csgo';
@@ -138,7 +138,7 @@ export const getRoundWin = (
 
 	const winSide = roundOutcome.substr(0, roundOutcome.indexOf('_')).toUpperCase() as Side;
 
-	const result: RoundInfo = {
+	const result: RoundResult = {
 		team: teams.ct,
 		round,
 		side: winSide,

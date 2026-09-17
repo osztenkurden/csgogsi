@@ -1,3 +1,5 @@
+import type { Callback } from './events';
+
 /**
  * Event emitter derived from eventemitter3 (https://github.com/primus/eventemitter3),
  * Copyright (c) 2014 Arnout Kazemier, MIT License; see ACKNOWLEDGEMENTS.
@@ -17,6 +19,8 @@ type Listener = (...args: any) => void;
 type EventName = string | symbol;
 /** Event name to listener argument tuple; a mapped constraint so interfaces qualify. */
 type EventMap<T> = { [K in keyof T]: any[] };
+
+export type ArgumentEvents<T extends EventMap<T>> = { [K in keyof T]: (...args: T[K]) => void };
 
 export type EmitterMetaEvents = {
 	newListener: [eventName: EventName, listener: Listener];
@@ -42,7 +46,12 @@ type Stored = EE | EE[];
 type Events = Record<PropertyKey, Stored | undefined>;
 const createEvents = (): Events => Object.create(null) as Events;
 
-export class TypedEventEmitter<T extends EventMap<T>> {
+// A separate name type preserves literal completions when T has an index signature.
+export class TypedEventEmitter<
+	T extends EventMap<T>,
+	M extends { [K in keyof M]: Listener } = ArgumentEvents<T>,
+	N extends keyof T = keyof T
+> {
 	private _events: Events = createEvents();
 	private _eventsCount = 0;
 
@@ -76,7 +85,7 @@ export class TypedEventEmitter<T extends EventMap<T>> {
 		return Reflect.ownKeys(this._events) as (keyof T)[];
 	}
 
-	listeners<K extends keyof T>(event: K): ((...args: T[K]) => void)[] {
+	listeners<K extends N>(event: K): ((...args: T[K]) => void)[] {
 		const handlers = this._events[event];
 		if (!handlers) return [];
 		if ((handlers as EE).fn) return [(handlers as EE).fn];
@@ -88,7 +97,7 @@ export class TypedEventEmitter<T extends EventMap<T>> {
 	}
 
 	/** `once` listeners are stored unwrapped, so this matches {@link listeners}. */
-	rawListeners<K extends keyof T>(event: K): ((...args: T[K]) => void)[] {
+	rawListeners<K extends N>(event: K): ((...args: T[K]) => void)[] {
 		return this.listeners(event);
 	}
 
@@ -100,7 +109,7 @@ export class TypedEventEmitter<T extends EventMap<T>> {
 	}
 
 	/** Dispatches typed payload arguments with the listener record as the receiver. */
-	emit<K extends keyof T>(event: K, ...args: T[K]): boolean;
+	emit<K extends N>(event: K, ...args: T[K]): boolean;
 	emit<K extends keyof EmitterMetaEvents>(event: K, ...args: EmitterMetaEvents[K]): boolean;
 	emit(event: PropertyKey, ...args: unknown[]): boolean {
 		const stored = this._events[event];
@@ -127,23 +136,23 @@ export class TypedEventEmitter<T extends EventMap<T>> {
 		return true;
 	}
 
-	on<K extends keyof T>(event: K, fn: (...args: T[K]) => void): this {
+	on<K extends N>(event: K, fn: Callback<K, M>): this {
 		return this._addListener(event, fn, false, false);
 	}
 
-	addListener<K extends keyof T>(event: K, fn: (...args: T[K]) => void): this {
+	addListener<K extends N>(event: K, fn: Callback<K, M>): this {
 		return this._addListener(event, fn, false, false);
 	}
 
-	once<K extends keyof T>(event: K, fn: (...args: T[K]) => void): this {
+	once<K extends N>(event: K, fn: Callback<K, M>): this {
 		return this._addListener(event, fn, true, false);
 	}
 
-	prependListener<K extends keyof T>(event: K, fn: (...args: T[K]) => void): this {
+	prependListener<K extends N>(event: K, fn: Callback<K, M>): this {
 		return this._addListener(event, fn, false, true);
 	}
 
-	prependOnceListener<K extends keyof T>(event: K, fn: (...args: T[K]) => void): this {
+	prependOnceListener<K extends N>(event: K, fn: Callback<K, M>): this {
 		return this._addListener(event, fn, true, true);
 	}
 
@@ -183,12 +192,12 @@ export class TypedEventEmitter<T extends EventMap<T>> {
 		}
 	}
 
-	removeListener<K extends keyof T>(event: K, fn: (...args: T[K]) => void): this {
+	removeListener<K extends N>(event: K, fn: Callback<K, M>): this {
 		this._removeListener(event, fn);
 		return this;
 	}
 
-	off<K extends keyof T>(event: K, fn: (...args: T[K]) => void): this {
+	off<K extends N>(event: K, fn: Callback<K, M>): this {
 		this._removeListener(event, fn);
 		return this;
 	}

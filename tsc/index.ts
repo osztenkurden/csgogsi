@@ -1,17 +1,18 @@
 import type {
-	CSGO,
-	CSGORaw,
+	GameState,
+	GameStateRaw,
 	Events,
 	KillEvent,
 	Observer,
 	PlayerExtension,
-	RawKill,
-	Score,
+	KillEventRaw,
+	RoundEndEvent,
 	TeamExtension,
-	RoundInfo
+	RoundResult,
+	EventNames
 } from './interfaces';
-import type { RawHurt } from './mirv';
-import type { DigestMirvType, HurtEvent } from './parsed';
+import type { HurtEventRaw } from './mirv';
+import type { MirvDigestResult, HurtEvent } from './parsed';
 import {
 	getRoundWin,
 	mapSteamIDToPlayer,
@@ -21,10 +22,16 @@ import {
 	parseGrenades
 } from './utils.ts';
 
-import { TypedEventEmitter } from './typedEmitter.ts';
+import { TypedEventEmitter, type ArgumentEvents } from './typedEmitter.ts';
 import { findBombsite, normalizeMapName, type BombsiteResolver, type CSGOGSIOptions } from './bombsites.ts';
 
 type EventArguments = { [K in keyof Events]: Parameters<Events[K]> } & Record<string, any[]>;
+
+type EventCallbacks =
+	| Events
+	| {
+			[K in keyof EventArguments]: K extends keyof Events ? Events[K] : ArgumentEvents<EventArguments>[K];
+	  };
 
 type RoundPlayerDamage = {
 	steamid: string;
@@ -36,7 +43,7 @@ type RoundDamage = {
 	players: RoundPlayerDamage[];
 };
 
-class CSGOGSI extends TypedEventEmitter<EventArguments> {
+class CSGOGSI extends TypedEventEmitter<EventArguments, EventCallbacks, EventNames> {
 	private readonly bombsiteResolvers = new Map<string, BombsiteResolver>();
 	teams: {
 		left: TeamExtension | null;
@@ -46,8 +53,8 @@ class CSGOGSI extends TypedEventEmitter<EventArguments> {
 	players: PlayerExtension[];
 	overtimeMR: number;
 	regulationMR: number;
-	last?: CSGO;
-	current?: CSGO;
+	last?: GameState;
+	current?: GameState;
 
 	constructor(options: CSGOGSIOptions = {}) {
 		super();
@@ -82,7 +89,7 @@ class CSGOGSI extends TypedEventEmitter<EventArguments> {
 		return resolver ? resolver(position) : findBombsite(name, position);
 	}
 
-	digest(raw: CSGORaw): CSGO | null {
+	digest(raw: GameStateRaw): GameState | null {
 		if (!raw.allplayers || !raw.map || !raw.phase_countdowns) {
 			return null;
 		}
@@ -129,7 +136,7 @@ class CSGOGSI extends TypedEventEmitter<EventArguments> {
 			forward: raw.player?.forward.split(', ').map(n => Number(n))
 		};
 
-		const rounds: RoundInfo[] = [];
+		const rounds: RoundResult[] = [];
 
 		if (raw.round && raw.map && raw.map.round_wins) {
 			let currentRound = raw.map.round + 1;
@@ -201,7 +208,7 @@ class CSGOGSI extends TypedEventEmitter<EventArguments> {
 			player.state.adr = Math.floor(adr);
 		}
 
-		const data: CSGO = {
+		const data: GameState = {
 			provider: raw.provider,
 			observer,
 			round: raw.round
@@ -301,7 +308,7 @@ class CSGOGSI extends TypedEventEmitter<EventArguments> {
 				winner.score += 1;
 			}
 
-			const roundScore: Score = {
+			const roundScore: RoundEndEvent = {
 				winner,
 				loser,
 				map: data.map,
@@ -309,9 +316,10 @@ class CSGOGSI extends TypedEventEmitter<EventArguments> {
 			};
 			this.emit('roundEnd', roundScore);
 
-			// Match end
+			// Map end, with the legacy event retained for existing consumers.
 			if (roundScore.mapEnd && last.map.phase !== 'gameover') {
 				this.emit('matchEnd', roundScore);
+				this.emit('mapEnd', roundScore);
 			}
 
 			if (
@@ -409,9 +417,9 @@ class CSGOGSI extends TypedEventEmitter<EventArguments> {
 	}
 
 	/** @deprecated Legacy event ingestion; retained for compatibility. */
-	digestMIRV(raw: RawKill | RawHurt, eventType = 'player_death'): DigestMirvType {
+	digestMIRV(raw: KillEventRaw | HurtEventRaw, eventType = 'player_death'): MirvDigestResult {
 		if (eventType === 'player_death') {
-			const rawKill = raw as RawKill;
+			const rawKill = raw as KillEventRaw;
 
 			if (!this.last) {
 				return null;
@@ -441,7 +449,7 @@ class CSGOGSI extends TypedEventEmitter<EventArguments> {
 			this.emit('kill', kill);
 			return kill;
 		}
-		const rawHurt = raw as RawHurt;
+		const rawHurt = raw as HurtEventRaw;
 
 		if (!this.last) {
 			return null;
@@ -475,13 +483,13 @@ class CSGOGSI extends TypedEventEmitter<EventArguments> {
 export { CSGOGSI, mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound, type RoundDamage };
 
 export type {
-	CSGO,
-	CSGORaw,
+	GameState,
+	GameStateRaw,
 	Side,
 	RoundOutcome,
 	WeaponType,
 	Observer,
-	RawHurt,
+	HurtEventRaw,
 	WeaponRaw,
 	TeamRaw,
 	PlayerRaw,
@@ -493,19 +501,19 @@ export type {
 	MapRaw,
 	RoundRaw,
 	BombRaw,
-	PhaseRaw,
-	Phase,
+	PhaseCountdownRaw,
+	PhaseCountdown,
 	Events,
 	Team,
 	Player,
 	Bomb,
-	Map,
-	Round,
-	Score,
+	MapState,
+	RoundState,
+	RoundEndEvent,
 	KillEvent,
-	RawKill,
+	KillEventRaw,
 	TeamExtension,
-	RoundInfo,
+	RoundResult,
 	PlayerExtension,
 	Orientation,
 	Grenade,
@@ -515,10 +523,27 @@ export type {
 	DecoySmokeGrenadeRaw,
 	InfernoGrenade,
 	InfernoGrenadeRaw,
-	FragOrFireBombOrFlashbandGrenade,
-	FragOrFireBombOrFlashbandGrenadeRaw,
+	FragOrFireBombOrFlashbangGrenade,
+	FragOrFireBombOrFlashbangGrenadeRaw,
 	Weapon,
 	GrenadeRaw
+} from './interfaces';
+
+export type {
+	Score,
+	CSGO,
+	CSGORaw,
+	Phase,
+	PhaseRaw,
+	Map,
+	Round,
+	RoundInfo,
+	RawKill,
+	RawHurt,
+	DigestMirvType,
+	FragOrFireBombOrFlashbandGrenade,
+	FragOrFireBombOrFlashbandGrenadeRaw,
+	MirvDigestResult
 } from './interfaces';
 
 export { normalizeMapName } from './bombsites.ts';
