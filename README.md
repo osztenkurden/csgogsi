@@ -9,7 +9,7 @@
 [![Downloads](https://img.shields.io/npm/dm/csgogsi)](https://www.npmjs.com/package/csgogsi)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-[Quick start](#quick-start) · [API reference](docs/api.md) · [Integration guide](docs/integration.md) · [Changelog](CHANGELOG.md)
+[Quick start](#quick-start) · [API reference](docs/api.md) · [Integration guide](docs/integration.md) · [Migration from 5.3.0](docs/api.md#migration-from-530) · [Changelog](CHANGELOG.md)
 
 </div>
 

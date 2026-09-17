@@ -80,8 +80,6 @@ All registration methods emit `newListener` before adding a listener. Actual rem
 
 `emit` forwards all supplied payload arguments and preserves their count when invoking callbacks. Arrow and explicitly bound callbacks retain their own `this`. Once registrations run at most once even when a callback emits recursively. Bulk removal keeps `removeListener` observers until the other events have been processed.
 
-**Migration from 5.3.0:** `off` removes one duplicate registration per call; `rawListeners` returns callbacks instead of internal descriptors; meta-events cover all registration/removal paths. All instance methods, including `digest`, are prototype methods: bind them when passing them as detached callbacks (for example, `gsi.digest.bind(gsi)`). Max-listener accessors have been removed.
-
 ## Instance state
 
 | Property       | Default                       | Meaning                                                      |
@@ -239,6 +237,10 @@ All variants have `id`, `owner: string`, and numeric `lifetime`. The owner remai
 | `didTeamWinThatRound(team, round, wonBy, currentRound, regulationMR, mr)` | Resolves historical ownership from sides and half numbers          |
 
 `RoundDamage`, `PhaseCountdown`, `Bombsite`, `BombsiteResolver`, `CSGOGSIOptions`, and the domain types listed in the [root exports](../src/index.ts) are available as types. `normalizeMapName(mapName)` is also exported as a runtime helper. `Callback` and `EventNames` remain internal declaration helpers. `parseGrenades` and `getRoundWin` are internal utilities, not root exports.
+
+## Migration from 5.3.0
+
+`off` removes one duplicate registration per call; `rawListeners` returns callbacks instead of internal descriptors; meta-events cover all registration/removal paths. All instance methods, including `digest`, are prototype methods: bind them when passing them as detached callbacks (for example, `gsi.digest.bind(gsi)`). Max-listener accessors have been removed.
 
 ### Deprecated type names
 
