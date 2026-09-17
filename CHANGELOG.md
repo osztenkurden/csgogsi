@@ -1,5 +1,21 @@
 # Changelog
 
+## [6.0.0](https://github.com/osztenkurden/csgogsi/compare/v5.3.0...v6.0.0) (2026-09-17)
+
+
+### ⚠ BREAKING CHANGES
+
+* add round and observer events with custom bombsite resolvers
+
+### Features
+
+* add round and observer events with custom bombsite resolvers ([957c1f8](https://github.com/osztenkurden/csgogsi/commit/957c1f8c3953170c1fb1bd14efccb0fdd4b168fa))
+
+
+### Performance Improvements
+
+* slightly faster callback execution ([18ac4e1](https://github.com/osztenkurden/csgogsi/commit/18ac4e1aa255d02e72d396b68c046f294d4f810f))
+
 ## [5.3.0](https://github.com/osztenkurden/csgogsi/compare/v5.2.0...v5.3.0) (2026-08-26)
 
 
