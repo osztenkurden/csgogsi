@@ -35,16 +35,19 @@ jobs:
       - uses: actions/setup-node@v6
         with:
           node-version: 24
-          cache: npm
           registry-url: https://registry.npmjs.org
 
-      - run: npm ci
-      
-      - run: npm run typecheck
-      
-      - run: npm test
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: package.json
 
-      - run: npm run build
+      - run: bun install --frozen-lockfile
+
+      - run: bun run typecheck
+
+      - run: bun run test
+
+      - run: bun run build
 
       - run: npm publish
         env:

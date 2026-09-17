@@ -21,7 +21,9 @@ jobs:
       uses: actions/setup-node@v6
       with:
         node-version: ${{ matrix.node-version }}
-        cache: npm
-    - run: npm ci
-    - run: npm run typecheck
-    - run: npm test
+    - uses: oven-sh/setup-bun@v2
+      with:
+        bun-version-file: package.json
+    - run: bun install --frozen-lockfile
+    - run: bun run typecheck
+    - run: bun run test

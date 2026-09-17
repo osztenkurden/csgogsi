@@ -148,10 +148,10 @@ Use [custom bombsite resolvers](docs/integration.md#custom-bombsites-and-map-nam
 ## Development
 
 ```sh
-npm ci
-npm run typecheck
-npm test
-npm run build
+bun install --frozen-lockfile
+bun run typecheck
+bun run test
+bun run build
 ```
 
 See [Contributing](CONTRIBUTING.md) for runtime details and checks before opening a PR.
