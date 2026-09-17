@@ -1,4 +1,4 @@
-import * as I from './interfaces';
+import type * as I from './interfaces';
 
 export interface Events {
 	raw: (data: I.GameStateRaw) => void;

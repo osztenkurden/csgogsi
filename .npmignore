@@ -5,7 +5,7 @@
 .prettierrc
 __tests__
 dist.browser
-tsc
+src
 node_modules
 tsconfig.json
 tsconfig.esm.json

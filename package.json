@@ -29,8 +29,8 @@
 	"scripts": {
 		"test": "node --test",
 		"typecheck": "tsc",
-		"build": "tsdown tsc/index.ts",
-		"prettier-format": "prettier --config .prettierrc --write tsc/*.ts",
+		"build": "tsdown src/index.ts",
+		"prettier-format": "prettier --config .prettierrc --write src/*.ts",
 		"format": "bun run prettier-format && bun run test"
 	},
 	"repository": {

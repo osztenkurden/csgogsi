@@ -21,19 +21,19 @@ bun run build
 
 | Path                                       | Responsibility                                                       |
 | :----------------------------------------- | :------------------------------------------------------------------- |
-| [tsc/index.ts](tsc/index.ts)               | Public class, digestion, transition detection, and parser state      |
-| [tsc/typedEmitter.ts](tsc/typedEmitter.ts) | Typed listener storage and dispatch                                  |
-| [tsc/bombsites.ts](tsc/bombsites.ts)       | Built-in site thresholds, map-name normalization, and resolver types |
-| [tsc/utils.ts](tsc/utils.ts)               | Player/team/grenade normalization and round ownership helpers        |
-| [tsc/csgo.d.ts](tsc/csgo.d.ts)             | Raw GSI contracts                                                    |
-| [tsc/parsed.d.ts](tsc/parsed.d.ts)         | Parsed contracts                                                     |
-| [tsc/events.d.ts](tsc/events.d.ts)         | Event callbacks and listener typing                                  |
-| [tsc/interfaces.d.ts](tsc/interfaces.d.ts) | Internal type barrel and metadata extensions                         |
-| [tsc/**tests**](tsc/__tests__)             | Node tests, packet factories, bombsite coordinates                   |
+| [src/index.ts](src/index.ts)               | Public class, digestion, transition detection, and parser state      |
+| [src/typedEmitter.ts](src/typedEmitter.ts) | Typed listener storage and dispatch                                  |
+| [src/bombsites.ts](src/bombsites.ts)       | Built-in site thresholds, map-name normalization, and resolver types |
+| [src/utils.ts](src/utils.ts)               | Player/team/grenade normalization and round ownership helpers        |
+| [src/csgo.ts](src/csgo.ts)             | Raw GSI contracts                                                    |
+| [src/parsed.ts](src/parsed.ts)         | Parsed contracts                                                     |
+| [src/events.ts](src/events.ts)         | Event callbacks and listener typing                                  |
+| [src/interfaces.ts](src/interfaces.ts) | Internal type barrel and metadata extensions                         |
+| [src/**tests**](src/__tests__)             | Node tests, packet factories, bombsite coordinates                   |
 | [.github/workflows](.github/workflows)     | Tests, PR-title validation, releases                                 |
 | [docs](docs)                               | API and integration guides                                           |
 
-The emitter in `tsc/typedEmitter.ts` retains the benchmarked storage and dispatch implementation, with explicit constructor assignments replacing TypeScript parameter properties. Its license attribution ships in `ACKNOWLEDGEMENTS`.
+The emitter in `src/typedEmitter.ts` retains the benchmarked storage and dispatch implementation, with explicit constructor assignments replacing TypeScript parameter properties. Its license attribution ships in `ACKNOWLEDGEMENTS`.
 
 ## Making a change
 
@@ -41,7 +41,7 @@ For event or parsing changes, add a focused regression test to the existing suit
 
 Check public declarations and the package-root exports when changing types. Source imports alone do not prove consumers can import the built package. Keep the API guide's runtime caveats synchronized with fixes.
 
-The existing `bun run prettier-format` formats `tsc/*.ts` except the copied emitter; `bun run format` also runs tests. To format documentation explicitly:
+The existing `bun run prettier-format` formats `src/*.ts`; `bun run format` also runs tests. To format documentation explicitly:
 
 ```sh
 bun run prettier --write README.md CONTRIBUTING.md "docs/*.md"

@@ -2,7 +2,7 @@
 
 [← README](../README.md) · [Integration guide](integration.md)
 
-This reference describes the current source, including changes since 5.3.0. Full declarations: [raw GSI](../tsc/csgo.d.ts), [parsed data](../tsc/parsed.d.ts), [events](../tsc/events.d.ts), and [extensions](../tsc/interfaces.d.ts).
+This reference describes the current source, including changes since 5.3.0. Full declarations: [raw GSI](../src/csgo.ts), [parsed data](../src/parsed.ts), [events](../src/events.ts), and [extensions](../src/interfaces.ts).
 
 ## Contents
 
@@ -238,7 +238,7 @@ All variants have `id`, `owner: string`, and numeric `lifetime`. The owner remai
 | `getHalfFromRound(round, regulationMR, mr)`                               | Returns `1` or `2` within regulation or the current overtime block |
 | `didTeamWinThatRound(team, round, wonBy, currentRound, regulationMR, mr)` | Resolves historical ownership from sides and half numbers          |
 
-`RoundDamage`, `PhaseCountdown`, `Bombsite`, `BombsiteResolver`, `CSGOGSIOptions`, and the domain types listed in the [root exports](../tsc/index.ts) are available as types. `normalizeMapName(mapName)` is also exported as a runtime helper. `Callback` and `EventNames` remain internal declaration helpers. `parseGrenades` and `getRoundWin` are internal utilities, not root exports.
+`RoundDamage`, `PhaseCountdown`, `Bombsite`, `BombsiteResolver`, `CSGOGSIOptions`, and the domain types listed in the [root exports](../src/index.ts) are available as types. `normalizeMapName(mapName)` is also exported as a runtime helper. `Callback` and `EventNames` remain internal declaration helpers. `parseGrenades` and `getRoundWin` are internal utilities, not root exports.
 
 ### Deprecated type names
 
