@@ -1,20 +1,18 @@
 import type {
-	CSGO,
-	CSGORaw,
+	GameState,
+	GameStateRaw,
 	Events,
 	KillEvent,
 	Observer,
 	PlayerExtension,
-	RawKill,
-	Score,
+	KillEventRaw,
+	RoundEndEvent,
 	TeamExtension,
-	RoundInfo,
-	Callback,
-	EventNames,
-	BaseEvents
+	RoundResult,
+	EventNames
 } from './interfaces';
-import type { RawHurt } from './mirv';
-import type { DigestMirvType, HurtEvent } from './parsed';
+import type { HurtEventRaw } from './mirv';
+import type { MirvDigestResult, HurtEvent } from './parsed';
 import {
 	getRoundWin,
 	mapSteamIDToPlayer,
@@ -24,10 +22,16 @@ import {
 	parseGrenades
 } from './utils.ts';
 
-interface EventDescriptor {
-	listener: Events[BaseEvents];
-	once: boolean;
-}
+import { TypedEventEmitter, type ArgumentEvents } from './typedEmitter.ts';
+import { findBombsite, normalizeMapName, type BombsiteResolver, type CSGOGSIOptions } from './bombsites.ts';
+
+type EventArguments = { [K in keyof Events]: Parameters<Events[K]> } & Record<string, any[]>;
+
+type EventCallbacks =
+	| Events
+	| {
+			[K in keyof EventArguments]: K extends keyof Events ? Events[K] : ArgumentEvents<EventArguments>[K];
+	  };
 
 type RoundPlayerDamage = {
 	steamid: string;
@@ -39,21 +43,8 @@ type RoundDamage = {
 	players: RoundPlayerDamage[];
 };
 
-const mapReference: { [mapName: string]: (position: number[]) => 'A' | 'B' } = {
-	de_mirage: position => (position[1]! < -600 ? 'A' : 'B'),
-	de_cache: position => (position[1]! > 0 ? 'A' : 'B'),
-	de_overpass: position => (position[2]! > 400 ? 'A' : 'B'),
-	de_nuke: position => (position[2]! > -500 ? 'A' : 'B'),
-	de_dust2: position => (position[0]! > -500 ? 'A' : 'B'),
-	de_inferno: position => (position[0]! > 1400 ? 'A' : 'B'),
-	de_vertigo: position => (position[0]! > -1400 ? 'A' : 'B'),
-	de_train: position => (position[1]! > -450 ? 'A' : 'B'),
-	de_ancient: position => (position[0]! < -500 ? 'A' : 'B'),
-	de_anubis: position => (position[0]! > 0 ? 'A' : 'B')
-};
-class CSGOGSI {
-	private descriptors: Map<EventNames, EventDescriptor[]>;
-	private maxListeners: number;
+class CSGOGSI extends TypedEventEmitter<EventArguments, EventCallbacks, EventNames> {
+	private readonly bombsiteResolvers = new Map<string, BombsiteResolver>();
 	teams: {
 		left: TeamExtension | null;
 		right: TeamExtension | null;
@@ -62,132 +53,43 @@ class CSGOGSI {
 	players: PlayerExtension[];
 	overtimeMR: number;
 	regulationMR: number;
-	last?: CSGO;
-	current?: CSGO;
+	last?: GameState;
+	current?: GameState;
 
-	constructor() {
-		this.descriptors = new Map();
+	constructor(options: CSGOGSIOptions = {}) {
+		super();
+		for (const [mapName, resolver] of Object.entries(options.bombsiteResolvers ?? {})) {
+			this.setBombsiteResolver(mapName, resolver);
+		}
 		this.teams = {
 			left: null,
 			right: null
 		};
-		this.maxListeners = 10;
 		this.players = [];
 		this.overtimeMR = 3;
 		this.regulationMR = 12;
 		this.damage = [];
 	}
-	eventNames = () => {
-		const listeners = this.descriptors.entries();
-		const nonEmptyEvents: EventNames[] = [];
 
-		for (const entry of listeners) {
-			if (entry[1] && entry[1].length > 0) {
-				nonEmptyEvents.push(entry[0]);
-			}
-		}
-
-		return nonEmptyEvents;
-	};
-	getMaxListeners = () => this.maxListeners;
-
-	listenerCount = (eventName: EventNames) => {
-		const listeners = this.listeners(eventName);
-		return listeners.length;
-	};
-
-	listeners = (eventName: EventNames) => {
-		const descriptors = this.descriptors.get(eventName) || [];
-		return descriptors.map(descriptor => descriptor.listener);
-	};
-
-	removeListener = <K extends EventNames>(eventName: K, listener: Callback<K>) => {
-		return this.off(eventName, listener);
-	};
-
-	off = <K extends EventNames>(eventName: K, listener: Callback<K>) => {
-		const descriptors = this.descriptors.get(eventName) || [];
-
-		this.descriptors.set(
-			eventName,
-			descriptors.filter(descriptor => descriptor.listener !== listener)
-		);
-		this.emit('removeListener', eventName, listener);
+	/** Override site lookup for one map on this parser instance. */
+	setBombsiteResolver(mapName: string, resolver: BombsiteResolver): this {
+		this.bombsiteResolvers.set(normalizeMapName(mapName), resolver);
 		return this;
-	};
+	}
 
-	addListener = <K extends EventNames>(eventName: K, listener: Callback<K>) => {
-		return this.on(eventName, listener);
-	};
-
-	on = <K extends EventNames>(eventName: K, listener: Callback<K>) => {
-		this.emit('newListener', eventName, listener);
-		const listOfListeners = [...(this.descriptors.get(eventName) || [])];
-
-		listOfListeners.push({ listener, once: false });
-		this.descriptors.set(eventName, listOfListeners);
-
+	/** Remove an override and restore built-in lookup for this map. */
+	removeBombsiteResolver(mapName: string): this {
+		this.bombsiteResolvers.delete(normalizeMapName(mapName));
 		return this;
-	};
+	}
 
-	once = <K extends EventNames>(eventName: K, listener: Callback<K>) => {
-		const listOfListeners = [...(this.descriptors.get(eventName) || [])];
+	findSite(mapName: string, position: number[]) {
+		const name = normalizeMapName(mapName);
+		const resolver = this.bombsiteResolvers.get(name);
+		return resolver ? resolver(position) : findBombsite(name, position);
+	}
 
-		listOfListeners.push({ listener, once: true });
-		this.descriptors.set(eventName, listOfListeners);
-
-		return this;
-	};
-
-	prependListener = <K extends EventNames>(eventName: K, listener: Callback<K>) => {
-		const listOfListeners = [...(this.descriptors.get(eventName) || [])];
-
-		listOfListeners.unshift({ listener, once: false });
-		this.descriptors.set(eventName, listOfListeners);
-
-		return this;
-	};
-
-	emit = (eventName: EventNames, arg?: any, arg2?: any) => {
-		const listeners = this.descriptors.get(eventName);
-		if (!listeners || listeners.length === 0) return false;
-
-		listeners.forEach(listener => {
-			if (listener.once) {
-				this.descriptors.set(
-					eventName,
-					listeners.filter(listenerInArray => listenerInArray !== listener)
-				);
-			}
-			listener.listener(arg, arg2);
-		});
-		return true;
-	};
-
-	prependOnceListener = <K extends EventNames>(eventName: K, listener: Callback<K>) => {
-		const listOfListeners = [...(this.descriptors.get(eventName) || [])];
-
-		listOfListeners.unshift({ listener, once: true });
-		this.descriptors.set(eventName, listOfListeners);
-
-		return this;
-	};
-
-	removeAllListeners = (eventName: EventNames) => {
-		this.descriptors.set(eventName, []);
-		return this;
-	};
-
-	setMaxListeners = (n: number) => {
-		this.maxListeners = n;
-		return this;
-	};
-
-	rawListeners = (eventName: EventNames) => {
-		return this.descriptors.get(eventName) || [];
-	};
-
-	digest = (raw: CSGORaw): CSGO | null => {
+	digest(raw: GameStateRaw): GameState | null {
 		if (!raw.allplayers || !raw.map || !raw.phase_countdowns) {
 			return null;
 		}
@@ -234,7 +136,7 @@ class CSGOGSI {
 			forward: raw.player?.forward.split(', ').map(n => Number(n))
 		};
 
-		const rounds: RoundInfo[] = [];
+		const rounds: RoundResult[] = [];
 
 		if (raw.round && raw.map && raw.map.round_wins) {
 			let currentRound = raw.map.round + 1;
@@ -257,7 +159,7 @@ class CSGOGSI {
 			}
 		}
 
-		if (this.last && this.last.map.name !== raw.map.name) {
+		if (this.last && normalizeMapName(this.last.map.name) !== normalizeMapName(raw.map.name)) {
 			this.damage = [];
 		}
 
@@ -306,7 +208,7 @@ class CSGOGSI {
 			player.state.adr = Math.floor(adr);
 		}
 
-		const data: CSGO = {
+		const data: GameState = {
 			provider: raw.provider,
 			observer,
 			round: raw.round
@@ -329,7 +231,7 @@ class CSGOGSI {
 							bomb.state === 'defused' ||
 							bomb.state === 'defusing' ||
 							bomb.state === 'planting'
-								? CSGOGSI.findSite(
+								? this.findSite(
 										raw.map.name,
 										bomb.position.split(', ').map(n => parseFloat(n))
 									)
@@ -380,6 +282,21 @@ class CSGOGSI {
 			this.emit('warmupEnd');
 		}
 
+		if (normalizeMapName(last.map.name) === normalizeMapName(data.map.name)) {
+			if (
+				data.map.phase === 'live' &&
+				last.round &&
+				last.round.phase !== 'live' &&
+				data.round?.phase === 'live'
+			) {
+				this.emit('roundStart');
+			}
+
+			if (last.player?.steamid !== data.player?.steamid) {
+				this.emit('observerTargetChange', last.player, data.player);
+			}
+		}
+
 		// Round end
 		if (last.round && data.round && data.round.win_team && !last.round.win_team) {
 			const winner = data.round.win_team === 'CT' ? data.map.team_ct : data.map.team_t;
@@ -391,7 +308,7 @@ class CSGOGSI {
 				winner.score += 1;
 			}
 
-			const roundScore: Score = {
+			const roundScore: RoundEndEvent = {
 				winner,
 				loser,
 				map: data.map,
@@ -399,9 +316,10 @@ class CSGOGSI {
 			};
 			this.emit('roundEnd', roundScore);
 
-			// Match end
+			// Map end, with the legacy event retained for existing consumers.
 			if (roundScore.mapEnd && last.map.phase !== 'gameover') {
 				this.emit('matchEnd', roundScore);
+				this.emit('mapEnd', roundScore);
 			}
 
 			if (
@@ -496,11 +414,12 @@ class CSGOGSI {
 		this.emit('data', data);
 		this.last = data;
 		return data;
-	};
+	}
 
-	digestMIRV = (raw: RawKill | RawHurt, eventType = 'player_death'): DigestMirvType => {
+	/** @deprecated Legacy event ingestion; retained for compatibility. */
+	digestMIRV(raw: KillEventRaw | HurtEventRaw, eventType = 'player_death'): MirvDigestResult {
 		if (eventType === 'player_death') {
-			const rawKill = raw as RawKill;
+			const rawKill = raw as KillEventRaw;
 
 			if (!this.last) {
 				return null;
@@ -530,7 +449,7 @@ class CSGOGSI {
 			this.emit('kill', kill);
 			return kill;
 		}
-		const rawHurt = raw as RawHurt;
+		const rawHurt = raw as HurtEventRaw;
 
 		if (!this.last) {
 			return null;
@@ -554,27 +473,23 @@ class CSGOGSI {
 		};
 		this.emit('hurt', kill);
 		return kill;
-	};
+	}
 
 	static findSite(mapName: string, position: number[]) {
-		const realMapName = mapName.substring(mapName.lastIndexOf('/') + 1);
-		if (realMapName in mapReference) {
-			return mapReference[realMapName]!(position);
-		}
-		return null;
+		return findBombsite(normalizeMapName(mapName), position);
 	}
 }
 
 export { CSGOGSI, mapSteamIDToPlayer, parseTeam, getHalfFromRound, didTeamWinThatRound, type RoundDamage };
 
 export type {
-	CSGO,
-	CSGORaw,
+	GameState,
+	GameStateRaw,
 	Side,
 	RoundOutcome,
 	WeaponType,
 	Observer,
-	RawHurt,
+	HurtEventRaw,
 	WeaponRaw,
 	TeamRaw,
 	PlayerRaw,
@@ -586,18 +501,19 @@ export type {
 	MapRaw,
 	RoundRaw,
 	BombRaw,
-	PhaseRaw,
+	PhaseCountdownRaw,
+	PhaseCountdown,
 	Events,
 	Team,
 	Player,
 	Bomb,
-	Map,
-	Round,
-	Score,
+	MapState,
+	RoundState,
+	RoundEndEvent,
 	KillEvent,
-	RawKill,
+	KillEventRaw,
 	TeamExtension,
-	RoundInfo,
+	RoundResult,
 	PlayerExtension,
 	Orientation,
 	Grenade,
@@ -607,8 +523,28 @@ export type {
 	DecoySmokeGrenadeRaw,
 	InfernoGrenade,
 	InfernoGrenadeRaw,
-	FragOrFireBombOrFlashbandGrenade,
-	FragOrFireBombOrFlashbandGrenadeRaw,
+	FragOrFireBombOrFlashbangGrenade,
+	FragOrFireBombOrFlashbangGrenadeRaw,
 	Weapon,
 	GrenadeRaw
 } from './interfaces';
+
+export type {
+	Score,
+	CSGO,
+	CSGORaw,
+	Phase,
+	PhaseRaw,
+	Map,
+	Round,
+	RoundInfo,
+	RawKill,
+	RawHurt,
+	DigestMirvType,
+	FragOrFireBombOrFlashbandGrenade,
+	FragOrFireBombOrFlashbandGrenadeRaw,
+	MirvDigestResult
+} from './interfaces';
+
+export { normalizeMapName } from './bombsites.ts';
+export type { Bombsite, BombsiteResolver, CSGOGSIOptions } from './bombsites.ts';

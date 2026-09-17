@@ -1,7 +1,7 @@
-export * from './csgo';
-export * from './events';
-export * from './parsed';
-export * from './mirv';
+export type * from './csgo';
+export type * from './events';
+export type * from './parsed';
+export type * from './mirv';
 
 export interface TeamExtension {
 	id: string;

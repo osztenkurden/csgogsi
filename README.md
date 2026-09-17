@@ -1,256 +1,161 @@
-![CI](https://img.shields.io/github/actions/workflow/status/osztenkurden/csgogsi/.github/workflows/main.yaml?branch=master)
-![Dependencies](https://img.shields.io/librariesio/github/osztenkurden/csgogsi)
-![Downloads](https://img.shields.io/npm/dm/csgogsi)
-![Version](https://img.shields.io/npm/v/csgogsi)
+<div align="center">
 
 # CS2 GSI Digest
 
-## How does it work?
+**Turn Counter-Strike game state into typed snapshots and match events.**
 
-The GSI object takes raw request from CS:GO & CS2 GSI's system, parses this to more comfortable form and calls listeners on certain events. You need to configure GSI file and receiving end yourself.
+[![npm version](https://img.shields.io/npm/v/csgogsi?color=cb6b26)](https://www.npmjs.com/package/csgogsi)
+[![CI](https://github.com/osztenkurden/csgogsi/actions/workflows/main.yaml/badge.svg)](https://github.com/osztenkurden/csgogsi/actions/workflows/main.yaml)
+[![Downloads](https://img.shields.io/npm/dm/csgogsi)](https://www.npmjs.com/package/csgogsi)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
-## Installing
+[Quick start](#quick-start) · [API reference](docs/api.md) · [Integration guide](docs/integration.md) · [Changelog](CHANGELOG.md)
 
-### For Node and React
+</div>
 
-`npm install csgogsi`
+`csgogsi` parses CS:GO / CS2 Game State Integration (GSI) payloads for spectator HUDs, broadcast overlays, and match tooling. Feed it game snapshots; receive normalized players, teams, weapons, grenades, and events such as `roundEnd`, `bombPlant`, and `phaseChange`.
 
-## Example #1
+| Game state                         | Match context                          | Integration                        |
+| :--------------------------------- | :------------------------------------- | :--------------------------------- |
+| Numeric positions and countdowns   | Round history with side swaps          | Round and observer events          |
+| Player, weapon, and grenade arrays | MR12 by default; configurable overtime | Player and team metadata overrides |
+| Bomb carrier and estimated site    | Accumulated damage and ADR             | Custom bombsite resolvers          |
+
+```text
+CS2 spectator ── HTTP JSON ──► your receiver ── digest() ──► snapshots + events
+```
+
+> **Before you start:** the parser needs `allplayers`, `map`, and `phase_countdowns`. Use a spectator/observer feed with the required data enabled. The package supplies the parser; your application supplies the HTTP receiver and game configuration.
+
+## Quick start
+
+### 1. Install
+
+Requires **Node.js 22.12.0 or newer**. Version 5 is **ESM-only** and includes TypeScript declarations.
+
+```sh
+npm install csgogsi express
+```
+
+Express is used only by this example. The library itself has no declared runtime dependencies.
+
+### 2. Receive game state
+
+Save as `server.ts`:
 
 ```javascript
 import express from 'express';
 import { CSGOGSI } from 'csgogsi';
 
 const app = express();
-const GSI = new CSGOGSI();
+const gsi = new CSGOGSI();
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json({ limit: '10Mb' }));
+app.use(express.json({ limit: '1mb' }));
 
-app.post('/', (req, res) => {
-	GSI.digest(req.body);
-	res.sendStatus(200);
+gsi.on('data', data => {
+	const { team_ct: ct, team_t: t } = data.map;
+	console.log(`${ct.name} ${ct.score} : ${t.score} ${t.name}`);
 });
 
-GSI.on('roundEnd', score => {
-	console.log(`Team ${score.winner.name} win!`);
-});
-GSI.on('bombPlant', player => {
-	console.log(`${player.name} planted the bomb`);
+gsi.on('roundEnd', ({ winner }) => {
+	console.log(`${winner.name} won the round`);
 });
 
-app.listen(3000);
+gsi.on('bombPlant', player => {
+	console.log(`${player?.name ?? 'Unknown player'} planted the bomb`);
+});
+
+app.post('/', (req, res, next) => {
+	try {
+		// null means the payload lacks the required spectator sections.
+		gsi.digest(req.body);
+		res.sendStatus(200);
+	} catch (error) {
+		next(error);
+	}
+});
+
+app.listen(3000, '127.0.0.1', () => {
+	console.log('GSI receiver: http://127.0.0.1:3000/');
+});
 ```
 
-## Methods
+```sh
+node server.ts
+```
 
-| Method                                                                                       | Description                                      | Example                                                             | Returned objects       |
-| -------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------- | ---------------------- |
-| `digest(GSIData)`                                                                            | Gets raw GSI data from CSGO and does magic       | `GSI.digest(req.body)`                                              | CSGO Parsed            |
-| `digestMIRV(event: RawKill or RawHurt, eventType: "player_death" (default) or "player_hurt)` | Gets raw kill data from mirv pgl and does magic  | `GSI.digestMIRV(mirv)`                                              | KillEvent or HurtEvent |
-| `on('event', callback)`                                                                      | Sets listener for given event (check them below) | `GSI.on('roundEnd', score => { console.log(score.winner.name); });` |                        |
-| `static findSite(mapName, position)`                                                         | Tries to guess the bombsite of the position      |                                                                     | `A, B, null`           |
+### 3. Connect the game
 
-Beside that, CSGOGSI implements standard Event Emitter interfaces.
+Copy [gamestate_integration_csgogsi.cfg](examples/gamestate_integration_csgogsi.cfg) into your CS2 installation's `game/csgo/cfg` directory, then restart the game and spectate a match. Its receiver URL matches the example above.
 
-## MR system
+See the [integration guide](docs/integration.md) for data requirements, authentication, browser applications, and troubleshooting.
 
-CSGOGSI has two properties describing the MR system of the match. They are used to work out which team won a given round (`map.rounds`, where sides swap at every half) and when to emit the `overtime` event.
+## Work with parsed data
 
-| Property       | Default | Description                                                                         |
-| -------------- | ------- | ----------------------------------------------------------------------------------- |
-| `regulationMR` | `12`    | Rounds per half in regulation - MR12 means the map is won at 13 rounds, OT at 12:12 |
-| `overtimeMR`   | `3`     | Rounds per half in overtime                                                         |
+```typescript
+import { CSGOGSI, type GameStateRaw } from 'csgogsi';
 
-If your server still runs the old MR15 system, set it before feeding any data in:
+const gsi = new CSGOGSI();
+
+function receive(raw: GameStateRaw) {
+	const data = gsi.digest(raw);
+	if (!data) return;
+
+	for (const player of data.players) {
+		const activeWeapon = player.weapons.find(weapon => weapon.state === 'active');
+		console.log(player.name, player.state.health, activeWeapon?.name);
+	}
+
+	console.log(data.bomb?.site); // 'A', 'B', null, or undefined when there is no bomb
+}
+```
+
+Callbacks are synchronous. Treat snapshots as read-only: the parser retains object references for its next comparison. Use one instance per game feed.
+
+## Configure your match
 
 ```javascript
-const GSI = new CSGOGSI();
+const gsi = new CSGOGSI();
 
-GSI.regulationMR = 15;
+gsi.regulationMR = 12; // Rounds per regulation half; default 12
+gsi.overtimeMR = 3; // Rounds per overtime half; default 3
+
+// For an MR15 match, set regulationMR = 15 before the first digest.
 ```
 
-## Events
+These values control round-history attribution and overtime detection; they do not configure the game server. See [metadata overrides](docs/integration.md#player-and-team-metadata).
 
-| Event                                             | Name                | Callback                  |
-| ------------------------------------------------- | ------------------- | ------------------------- |
-| Data incoming                                     | `data`              | (data: CSGO Parsed) => {} |
-| End of the round                                  | `roundEnd`          | (score: Score) => {}      |
-| End of the map                                    | `matchEnd`          | (score: Score) => {}      |
-| Score tied at `regulationMR` (map goes to OT)     | `overtime`          | () => {}                  |
-| Kill                                              | `kill`              | (kill: KillEvent) => {}   |
-| Hurt                                              | `hurt`              | (hurt: HurtEvent) => {}   |
-| Phase change                                      | `phaseChange`       | (from, to) => {}          |
-| Timeout start                                     | `timeoutStart`      | (team: Team) => {}        |
-| Timeout end                                       | `timeoutEnd`        | () => {}                  |
-| Pause start                                       | `pauseStart`        | () => {}                  |
-| Pause end                                         | `pauseEnd`          | () => {}                  |
-| MVP of the round                                  | `mvp`               | (player: Player) => {}    |
-| Warmup start                                      | `warmupStart`       | () => {}                  |
-| Warmup end                                        | `warmupEnd`         | () => {}                  |
-| Freezetime start                                  | `freezetimeStart`   | () => {}                  |
-| Freezetime end                                    | `freezetimeEnd`     | () => {}                  |
-| Intermission start                                | `intermissionStart` | () => {}                  |
-| Intermission end                                  | `intermissionEnd`   | () => {}                  |
-| Defuse started                                    | `defuseStart`       | (player: Player) => {}    |
-| Defuse stopped (but not defused and not exploded) | `defuseStop`        | (player: Player) => {}    |
-| Bomb plant started                                | `bombPlantStart`    | (player: Player) => {}    |
-| Bomb planted                                      | `bombPlant`         | (player: Player) => {}    |
-| Bomb exploded                                     | `bombExplode`       | () => {}                  |
-| Bomb defused                                      | `bombDefuse`        | (player: Player) => {}    |
+## Drive your overlay
 
-### Notes on some events
+```javascript
+gsi.on('roundStart', () => console.log(`Round ${gsi.current.map.round + 1} is live`));
+gsi.on('observerTargetChange', (from, to) => {
+	console.log(`${from?.name ?? 'Free camera'} → ${to?.name ?? 'Free camera'}`);
+});
+```
 
--   `overtime` is emitted together with `roundEnd`, on the round that ties the score at `regulationMR` (12:12 by default) without ending the map. It is not emitted when the map ends at that score instead - which is what happens when overtime is disabled on the server and the map ends in a draw.
--   `warmupStart` and `warmupEnd` follow `map.phase`. `warmupStart` is also emitted for the very first packet you feed in if the game is already in warmup at that point, while `warmupEnd` needs a previous packet to compare against, so it is never emitted for the first one.
--   `pauseStart` and `pauseEnd` follow the `paused` value of `phase_countdowns.phase`. They are transition events, so a previous packet with a known phase is required.
--   `phaseChange` is emitted whenever `phase_countdowns.phase` changes between two known phases. Its callback receives the previous phase as `from` and the current phase as `to`.
+Use [custom bombsite resolvers](docs/integration.md#custom-bombsites-and-map-names) for new maps or your own site boundaries. Built-in map lookup accepts workshop paths, either slash direction, and `.bsp` / `.vpk` names.
 
-## Objects
+## Documentation
 
-#### CSGO Parsed
+| Read                                     | What you will find                                            |
+| :--------------------------------------- | :------------------------------------------------------------ |
+| [API reference](docs/api.md)             | Methods, state, all events, parsed types, and runtime caveats |
+| [Integration guide](docs/integration.md) | GSI setup, metadata, UI integration, and troubleshooting      |
+| [Contributing](CONTRIBUTING.md)          | Local checks, repository layout, and release workflow         |
+| [Changelog](CHANGELOG.md)                | Released changes and migration history                        |
 
-| Property         | Type                       |
-| ---------------- | -------------------------- |
-| provider         | `Provider Object`          |
-| map              | `Map Object`               |
-| round            | `Round Object or null`     |
-| player           | `Player Object or null`    |
-| players          | `Array of Player's Object` |
-| observer         | `Observer Object`          |
-| bomb             | `Bomb Object`              |
-| phase_countdowns | `Phase Object`             |
+## Development
 
-### Phase
+```sh
+bun install --frozen-lockfile
+bun run typecheck
+bun run test
+bun run build
+```
 
-| Property      | Type                                                                                                          |
-| ------------- | ------------------------------------------------------------------------------------------------------------- |
-| phase         | (optional) `'freezetime', 'bomb', 'warmup', 'live', 'over', 'defuse', 'paused', 'timeout_ct'  or 'timeout_t'` |
-| phase_ends_in | `number`                                                                                                      |
-| timeout_team  | (optional) `Team object`                                                                                      |
+See [Contributing](CONTRIBUTING.md) for runtime details and checks before opening a PR.
 
-### Observer
+## License
 
-| Property   | Type                                |
-| ---------- | ----------------------------------- |
-| activity   | `'playing', 'textinput'  or 'menu'` |
-| spectarget | `'free' or SteamID64`               |
-| position   | `number[]`                          |
-| forward    | `number[]`                          |
-
-#### Team Extension
-
-| Property  | Type             |
-| --------- | ---------------- |
-| id        | `string`         |
-| name      | `string`         |
-| country   | `string or null` |
-| logo      | `string or null` |
-| map_score | `number`         |
-
-#### Player Extension
-
-| Property | Type             |
-| -------- | ---------------- |
-| id       | `string`         |
-| name     | `string`         |
-| steramid | `string`         |
-| realName | `string or null` |
-| country  | `string or null` |
-| avatar   | `string or null` |
-
-#### Provider
-
-| Property  | Type                                 |
-| --------- | ------------------------------------ |
-| name      | `'Counter-Strike: Global Offensive'` |
-| appid     | 730                                  |
-| version   | `number`                             |
-| steamid   | `number`                             |
-| timestamp | `number`                             |
-
-#### Map
-
-| Property                  | Type                                                 |
-| ------------------------- | ---------------------------------------------------- |
-| mode                      | `string`                                             |
-| name                      | `string`                                             |
-| phase                     | `"warmup" or "live" or "intermission" or "gameover"` |
-| round                     | `number`                                             |
-| team_ct                   | `Team Object`                                        |
-| team_t                    | `Team Object`                                        |
-| num_matches_to_win_series | `number`                                             |
-| current_spectators        | `number`                                             |
-| souvenirs_total           | `number`                                             |
-| round_wins                | `Object with Round Outcome Object as values`         |
-| rounds                    | `Array of RoundInfo objects`                         |
-
-#### RoundInfo
-
-| Property | Type                                                                                      |
-| -------- | ----------------------------------------------------------------------------------------- |
-| team     | `Team`                                                                                    |
-| round    | `number`                                                                                  |
-| side     | `Side`                                                                                    |
-| outcome  | `'ct_win_elimination', 't_win_elimination', 'ct_win_time', 'ct_win_defuse', 't_win_bomb'` |
-
-#### Round
-
-| Property  | Type                                   |
-| --------- | -------------------------------------- |
-| phase     | `"freezetime" or "live" or "over"`     |
-| bomb?     | `"planted" or "exploded" or "defused"` |
-| win_team? | `Side Object`                          |
-
-#### Player
-
-| Property      | Type                                                                                                                                 |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| steamid       | `string`                                                                                                                             |
-| name          | `string`                                                                                                                             |
-| observer_slot | `number`                                                                                                                             |
-| team          | `Team Object`                                                                                                                        |
-| stats         | `{kills, assists, deaths, mvps, score} all numbers`                                                                                  |
-| state         | `{health, armor, helmet, defusekit?, flashed, smoked, burning, money, round_kills, round_killshs, round_totaldmg, equip_value, adr}` |
-| position      | `Array of numbers`                                                                                                                   |
-| forward       | `number`                                                                                                                             |
-| avatar        | `string or null`                                                                                                                     |
-| country       | `string or null`                                                                                                                     |
-| realName      | `string or null`                                                                                                                     |
-
-#### Bomb
-
-| Property   | Type                                                                                         |
-| ---------- | -------------------------------------------------------------------------------------------- |
-| state      | `"carried" or "planted" or "dropped" or "defused" or "defusing" or "planting" or "exploded"` |
-| countdown? | `string`                                                                                     |
-| player?    | `Player Object`                                                                              |
-| position   | `number[]`                                                                                   |
-
-#### Team
-
-| Property                 | Type             |
-| ------------------------ | ---------------- |
-| score                    | `number`         |
-| consecutive_round_losses | `number`         |
-| timeouts_remaining       | `number`         |
-| matches_won_this_series  | `string`         |
-| name                     | `string`         |
-| country                  | `string or null` |
-| id                       | `string or null` |
-| side                     | `Side Object`    |
-| orientation              | `left or right`  |
-| logo                     | `string`         |
-
-#### Score
-
-| Property | Type      |
-| -------- | --------- |
-| winner   | `Team`    |
-| loser    | `Team`    |
-| map      | `Map`     |
-| mapEnd   | `boolean` |
-
-#### Side
-
-`"CT" or "T"`
+[MIT](LICENSE)

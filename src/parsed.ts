@@ -1,4 +1,4 @@
-import * as I from './interfaces';
+import type * as I from './interfaces';
 
 export type Orientation = 'left' | 'right';
 
@@ -16,7 +16,7 @@ export interface Team {
 	extra: Record<string, string>;
 }
 
-export interface RoundInfo {
+export interface RoundResult {
 	team: Team;
 	round: number;
 	side: I.Side;
@@ -82,7 +82,7 @@ export interface Bomb {
 	position: number[];
 }
 
-export interface Map {
+export interface MapState {
 	mode: string;
 	name: string;
 	phase: 'warmup' | 'live' | 'intermission' | 'gameover';
@@ -93,10 +93,10 @@ export interface Map {
 	current_spectators: number;
 	souvenirs_total: number;
 	round_wins: RoundWins;
-	rounds: I.RoundInfo[];
+	rounds: I.RoundResult[];
 }
 
-export interface Round {
+export interface RoundState {
 	phase: 'freezetime' | 'live' | 'over';
 	bomb?: 'planted' | 'exploded' | 'defused';
 	win_team?: I.Side;
@@ -122,7 +122,7 @@ export interface DecoySmokeGrenade extends GrenadeBase {
 	effecttime: number;
 }
 
-export interface FragOrFireBombOrFlashbandGrenade extends GrenadeBase {
+export interface FragOrFireBombOrFlashbangGrenade extends GrenadeBase {
 	position: number[];
 	type: 'frag' | 'firebomb' | 'flashbang';
 	velocity: number[];
@@ -133,32 +133,32 @@ export interface InfernoGrenade extends GrenadeBase {
 	flames: { id: string; position: number[] }[];
 }
 
-export type Grenade = DecoySmokeGrenade | FragOrFireBombOrFlashbandGrenade | InfernoGrenade;
+export type Grenade = DecoySmokeGrenade | FragOrFireBombOrFlashbangGrenade | InfernoGrenade;
 
-export interface Phase {
+export interface PhaseCountdown {
 	phase?: 'freezetime' | 'bomb' | 'warmup' | 'live' | 'over' | 'defuse' | 'paused' | 'timeout_ct' | 'timeout_t';
 	phase_ends_in: number;
 	timeout_team?: Team;
 }
-export interface CSGO {
+export interface GameState {
 	provider: I.Provider;
-	map: Map;
-	round: Round | null;
+	map: MapState;
+	round: RoundState | null;
 	observer: Observer;
 	player: Player | null;
 	players: Player[];
 	bomb: Bomb | null;
 	grenades: Grenade[];
 	previously?: any;
-	phase_countdowns: I.Phase;
+	phase_countdowns: I.PhaseCountdown;
 	auth?: {
 		token: string;
 	};
 }
-export interface Score {
+export interface RoundEndEvent {
 	winner: I.Team;
 	loser: I.Team;
-	map: Map;
+	map: MapState;
 	mapEnd: boolean;
 }
 
@@ -187,5 +187,28 @@ export interface HurtEvent {
 	hitgroup: number;
 }
 
-//export type DigestMirvType = ((kill: RawKill, eventType: 'player_death') => KillEvent | null) | ((hurt: RawHurt, eventType: 'player_hurt') => HurtEvent | null)
-export type DigestMirvType = KillEvent | HurtEvent | null;
+export type MirvDigestResult = KillEvent | HurtEvent | null;
+
+/** @deprecated Use RoundEndEvent instead. */
+export type Score = RoundEndEvent;
+
+/** @deprecated Use GameState instead. */
+export type CSGO = GameState;
+
+/** @deprecated Use PhaseCountdown instead. */
+export type Phase = PhaseCountdown;
+
+/** @deprecated Use MapState instead. */
+export type Map = MapState;
+
+/** @deprecated Use RoundState instead. */
+export type Round = RoundState;
+
+/** @deprecated Use RoundResult instead. */
+export type RoundInfo = RoundResult;
+
+/** @deprecated Use MirvDigestResult instead. */
+export type DigestMirvType = MirvDigestResult;
+
+/** @deprecated Use FragOrFireBombOrFlashbangGrenade instead. */
+export type FragOrFireBombOrFlashbandGrenade = FragOrFireBombOrFlashbangGrenade;

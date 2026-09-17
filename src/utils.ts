@@ -8,7 +8,7 @@ import type {
 	Orientation,
 	TeamExtension,
 	TeamRaw,
-	RoundInfo,
+	RoundResult,
 	RoundWins
 } from '.';
 import type { GrenadeRaw } from './csgo';
@@ -51,7 +51,7 @@ export const parseTeam = (
 	logo: (extension && extension.logo) || null,
 	consecutive_round_losses: team.consecutive_round_losses,
 	timeouts_remaining: team.timeouts_remaining,
-	matches_won_this_series: (extension && extension.map_score) || team.matches_won_this_series,
+	matches_won_this_series: extension?.map_score ?? team.matches_won_this_series,
 	side,
 	name: (extension && extension.name) || team.name || (side === 'CT' ? 'Counter-Terrorists' : 'Terrorists'),
 	country: (extension && extension.country) || null,
@@ -138,7 +138,7 @@ export const getRoundWin = (
 
 	const winSide = roundOutcome.substr(0, roundOutcome.indexOf('_')).toUpperCase() as Side;
 
-	const result: RoundInfo = {
+	const result: RoundResult = {
 		team: teams.ct,
 		round,
 		side: winSide,
